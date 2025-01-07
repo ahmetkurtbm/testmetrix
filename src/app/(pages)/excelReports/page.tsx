@@ -78,23 +78,23 @@ function calculateStandardDeviation(scores: any) {
 }
 
 // öğrenci puanlarının modları
-function calculateMode(scores: any) {
+function calculateMode(scores: number[]): number[] {
   if (!scores || scores.length === 0) {
-    return null;
+    return []; // Eğer skorlar boşsa, boş dizi döndür
   }
-  const frequency: any = {};
-  scores.forEach((score: any) => {
-    frequency[score] = (frequency[score] || 0) + 1;
+
+  // frequency nesnesinin türünü açıkça belirtiyoruz
+  const frequency: { [key: number]: number } = {}; // Skorların frekanslarını tutmak için nesne
+  scores.forEach((score) => {
+    frequency[score] = (frequency[score] || 0) + 1; // Frekansları sayıyoruz
   });
 
-  const maxFrequency = Math.max(
-    ...Object.values(frequency).map((value) => Number(value))
-  );
+  const maxFrequency = Math.max(...Object.values(frequency)); // En yüksek frekans
   const modes = Object.keys(frequency)
-    .filter((key) => frequency[key] === maxFrequency)
-    .map((key) => Number(key));
+    .filter((key) => frequency[Number(key)] === maxFrequency) // Anahtarları sayıya dönüştürüp kontrol ediyoruz
+    .map((key) => Number(key)); // Sonuçları sayıya dönüştür
 
-  return modes.length === 1 ? modes[0] : modes; // Tek mod varsa sayıyı döndür, birden fazla varsa dizi
+  return modes; // Modları bir dizi olarak döndür
 }
 
 // öğrenci puanlarının medyanı
@@ -551,7 +551,7 @@ function calculateOptionsCount(studentAnswers: any) {
       }
     });
 
-    // Sonucu "Madde" formatında ekle
+    // Sonucu OptionData formatında ekle
     result.push({
       madde: `Madde${i}`,
       A: counts.A,
@@ -563,20 +563,27 @@ function calculateOptionsCount(studentAnswers: any) {
     });
   }
 
-  return result;
+  return result; // OptionData[] türünde bir dizi döndür
 }
-const ExcelReports = ({ data }: ExcelReportsProps) => {
-  const answerKey = data[0].slice(1);
-  const studentAnswers = data.slice(1);
-  const studentNames = data.slice(1).map((row) => row[0]);
+
+interface ExcelReportsProps {
+  data: string[][]; // Assuming data is an array of string arrays
+}
+
+const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
+  const answerKey = data[0].slice(1); // Answer key excluding first column
+  const studentAnswers = data.slice(1); // All students' answers excluding first row
+  const studentNames = data.slice(1).map((row) => row[0]); // Extract student names from first column
   const numberOfQuestions = answerKey.length;
   const numberOfStudents = studentAnswers.length;
 
+  // States for various calculated metrics
   const [scores, setScores] = useState<number[]>([]);
   const [average, setAverage] = useState<number>(0);
-  const [standartDeviation, setStandartDeviation] = useState<number>(0);
+  const [standardDeviation, setStandardDeviation] = useState<number>(0);
   const [variance, setVariance] = useState<number>(0);
   const [maxScore, setMaxScore] = useState<number>(0);
+  const [median, setMedian] = useState<number>(0);
   const [range, setRange] = useState<number>(0);
   const [skewness, setSkewness] = useState<number>(0);
   const [kurtosis, setKurtosis] = useState<number>(0);
@@ -590,10 +597,10 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
   const [percentageMapPerQuestion, setPercentageMapPerQuestion] = useState<
     number[]
   >([]);
-  const [studentAnswers01, setStudentAnswer01] = useState<number[]>([]);
-  const [succesRates, setSuccesRates] = useState<number[]>([]);
-  const [zScore, setZScore] = useState<number[]>([]);
-  const [tScore, setTScore] = useState<number[]>([]);
+  const [studentAnswer01, setStudentAnswer01] = useState<number[]>([]);
+  const [successRates, setSuccessRates] = useState<number[]>([]);
+  const [zScores, setZScores] = useState<number[]>([]);
+  const [tScores, setTScores] = useState<number[]>([]);
   const [ranks, setRanks] = useState<number[]>([]);
   const [variancePerItem, setVariancePerItem] = useState<number[]>([]);
   const [stdDevPerItem, setStdDevPerItem] = useState<number[]>([]);
@@ -602,7 +609,8 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
   const [prbisIndex, setPrbisIndex] = useState<number[]>([]);
   const [discriminationIndex, setDiscriminationIndex] = useState<number[]>([]);
   const [reliabilityIndex, setReliabilityIndex] = useState<number[]>([]);
-  const [optionCounts, setOptionCounts] = useState<number[]>([]);
+  const [optionCounts, setOptionCounts] = useState<string[]>([]);
+  const [correctCount, setCorrectCount] = useState<number[]>([]);
 
   // First effect to calculate the scores
   useEffect(() => {
@@ -610,14 +618,17 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
     setScores(calculatedScores);
   }, [answerKey, studentAnswers]);
 
-  // Second effect to calculate the other metrics based on the scores
+  // Second effect to calculate other metrics based on scores
   useEffect(() => {
     if (scores.length === 0) return;
 
+    // Calculate the various metrics
     const avg = calculateAverage(scores);
     const varianceValue = calculateVariance(scores);
     const stdDev = calculateStandardDeviation(scores);
-    const max = calculateMaxScore(scores);
+    const mode = calculateMode(scores);
+    const median = calculateMedian(scores);
+    const max = calculateMaxScore(scores) ?? 0;
     const rangeValue = calculateRange(scores);
     const skew = calculateSkewness(scores);
     const kurt = calculateKurtosis(scores);
@@ -658,40 +669,47 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
       answerKey
     );
     const optionCount = calculateOptionsCount(studentAnswers);
+    const correctCount = calculateCorrectCount(answerKey, studentAnswers);
 
-    // Set all the state values
+    // Set state values
     setAverage(avg);
     setVariance(varianceValue);
-    setStandartDeviation(stdDev);
+    setStandardDeviation(stdDev);
+    setMode(mode);
     setMaxScore(max);
     setRange(rangeValue);
-    setSkewness(skew);
-    setKurtosis(kurt);
-    setSuccessRate(successRateValue);
-    setKr20(kr20Value);
-    setKr21(kr21Value);
-    setRelativeCoefficientOfVariation(relCoefVariation);
-    setPercentageMapPerQuestion(percMap);
+    setMedian(median);
+    setSkewness(typeof skew === "number" ? skew : 0);
+    setKurtosis(typeof kurt === "number" ? kurt : 0);
+    setSuccessRate(
+      isNaN(Number(successRateValue)) ? 0 : Number(successRateValue)
+    );
+    setKr20(isNaN(Number(kr20Value)) ? 0 : Number(kr20Value));
+    setKr21(isNaN(Number(kr21Value)) ? 0 : Number(kr21Value));
+    setRelativeCoefficientOfVariation(
+      isNaN(Number(relCoefVariation)) ? 0 : Number(relCoefVariation)
+    );
     setStudentAnswer01(studentAns01);
-    setSuccesRates(successRates);
-    setZScore(zScores);
-    setTScore(tScores);
+    setSuccessRates(successRates);
+    setZScores(zScores);
+    setTScores(tScores);
     setRanks(ranksValue);
-    setVariancePerItem(itemVariance);
-    setStdDevPerItem(itemStdDev);
-    setDifficultyIndex(difficultyIndexValue);
-    setRbisIndex(rbis);
-    setPrbisIndex(prbis);
-    setDiscriminationIndex(discrimination);
+    setVariancePerItem(itemVariance.map((item) => Number(item) || 0)); // Converts string to number
+    setStdDevPerItem(itemStdDev.map((item) => Number(item) || 0)); // Converts string to number
+    setDifficultyIndex(difficultyIndexValue.map((item) => Number(item) || 0)); // Converts string to number
+    setRbisIndex(rbis.map((item) => Number(item) || 0)); // Converts string to number
+    setPrbisIndex(prbis.map((item) => Number(item) || 0)); // Converts string to number
+    setDiscriminationIndex(discrimination.map((item) => Number(item) || 0)); // Converts string to number
+    setPercentageMapPerQuestion(percMap.map((item) => Number(item) || 0)); // Converts string to number
+
     setReliabilityIndex(reliability);
     setOptionCounts(optionCount);
+    setCorrectCount(correctCount);
   }, [scores, answerKey, studentAnswers, numberOfQuestions]);
-  const correctCount = calculateCorrectCount(answerKey, studentAnswers);
 
   return (
     <div className="p-6">
       <h2 className="text-3xl font-semibold mb-4">Excel Raporu</h2>
-
       <Button onClick={() => alert("İşlem Başarılı")} className="mb-4">
         Raporu İndir
       </Button>
@@ -704,8 +722,8 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
             studentNames={studentNames}
             scores={scores}
             numberOfQuestions={numberOfQuestions}
-            tScore={tScore}
-            zScore={zScore}
+            tScore={tScores}
+            zScore={zScores}
             succesRates={ranks}
           />
         </div>
@@ -718,11 +736,11 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
             percentageMap={percentageMapPerQuestion}
             itemVariance={variancePerItem}
             itemStd={stdDevPerItem}
-            itemGucluk={difficultyIndex}
+            itemDifficulty={difficultyIndex}
             itemRbis={rbisIndex}
             itemPrbis={prbisIndex}
-            item27={discriminationIndex}
-            itemGüvenirlik={reliabilityIndex}
+            itemDiscrimination={discriminationIndex}
+            itemReliability={reliabilityIndex}
           />
         </div>
       </div>
@@ -736,7 +754,7 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
           median={median}
           mode={mode}
           range={range}
-          stdDeviation={standartDeviation}
+          stdDeviation={standardDeviation}
           variance={variance}
           kr20={kr20}
           kr21={kr21}
@@ -761,7 +779,7 @@ const ExcelReports = ({ data }: ExcelReportsProps) => {
           <strong>Ortalama Puan:</strong> {average.toFixed(2)}
         </p>
         <p>
-          <strong>Standart Sapma:</strong> {standartDeviation.toFixed(2)}
+          <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
         </p>
         <p>
           <strong>Varyans:</strong> {variance.toFixed(2)}
