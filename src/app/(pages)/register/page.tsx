@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Cookies from "js-cookie";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,47 +13,55 @@ import { Input } from "@/components/ui/input";
 
 const roles = ["Admin", "Teacher", "Student", "Guest"];
 
-const Login = () => {
-  const [role, setRole] = useState<string>("Student");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+const Register = () => {
+  const [role, setRole] = useState("Student");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+  const [university, setUniversity] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
+    const userData = {
+      name,
+      surname,
+      email,
+      university,
+      role,
+      password,
+    };
+
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        Cookies.set("token", data.token, { expires: 1 }); // 1 günlüğüne token kaydet
-        console.log("Başarılı giriş, token cookies'e kaydedildi");
-      } else {
-        console.error("Giriş başarısız:", data.error);
+      if (!response.ok) {
+        throw new Error("Kayıt işlemi başarısız");
       }
+
+      const data = await response.json();
+      console.log("Kayıt başarılı:", data);
+      // Başarılı kayıt işleminden sonra yapılacaklar
     } catch (error) {
-      console.error("Giriş sırasında hata oluştu:", error);
+      console.error("Hata:", error);
     }
   };
 
   return (
     <>
       <Head>
-        <title>Login</title>
-        <meta name="description" content="Login Page" />
+        <title>Kayıt Ol</title>
+        <meta name="description" content="Register Page" />
       </Head>
       <div className="flex items-center justify-center h-screen bg-gray-100">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <h1 className="text-2xl font-bold text-center">Giriş Yap</h1>
+            <h1 className="text-2xl font-bold text-center">Kayıt Ol</h1>
           </CardHeader>
           <CardContent>
             <Tabs
@@ -78,6 +85,40 @@ const Login = () => {
             </Tabs>
             <div className="mb-4">
               <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Ad:
+              </label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Ad"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="surname"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Soyad:
+              </label>
+              <Input
+                id="surname"
+                type="text"
+                placeholder="Soyad"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
@@ -89,6 +130,23 @@ const Login = () => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="university"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Üniversite:
+              </label>
+              <Input
+                id="university"
+                type="text"
+                placeholder="Üniversite"
+                value={university}
+                onChange={(e) => setUniversity(e.target.value)}
                 required
                 className="mt-1 w-full"
               />
@@ -113,10 +171,10 @@ const Login = () => {
           </CardContent>
           <CardFooter>
             <Button
-              onClick={handleLogin}
+              onClick={handleRegister}
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
-              Giriş Yap
+              Kayıt Ol
             </Button>
           </CardFooter>
         </Card>
@@ -125,4 +183,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
