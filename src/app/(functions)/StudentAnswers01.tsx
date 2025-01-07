@@ -1,17 +1,18 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 interface StudentAnswers01Props {
   studentNames: string[];
-  studentAnswers: (number | string)[][];
+  studentAnswers01: (number | string)[][];
   answerKey: (number | string)[];
   scores: number[];
 }
 
 const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
   studentNames,
-  studentAnswers,
+  studentAnswers01,
   answerKey,
   scores,
 }) => {
@@ -32,7 +33,7 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
 
     // Veri ekle (isim, skor, yanıtlar)
     for (let i = 0; i < studentNames.length; i++) {
-      worksheet.addRow([studentNames[i], scores[i], ...studentAnswers[i]]);
+      worksheet.addRow([studentNames[i], scores[i], ...studentAnswers01[i]]);
     }
 
     // Stil ayarları
@@ -116,9 +117,9 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
   };
 
   return (
-    <button onClick={handleDownload}>
+    <Button onClick={handleDownload}>
       Öğrenci Cevapları 0-1 Türünden İndir
-    </button>
+    </Button>
   );
 };
 

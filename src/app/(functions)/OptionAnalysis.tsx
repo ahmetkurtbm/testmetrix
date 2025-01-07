@@ -1,6 +1,7 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 // Veri türleri
 interface OptionData {
@@ -115,7 +116,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
 
   return (
     <div>
-      <button onClick={handleDownload}>Madde Analiz Raporunu İndir</button>
+      <Button onClick={handleDownload}>Madde Analiz Raporunu İndir</Button>
     </div>
   );
 };

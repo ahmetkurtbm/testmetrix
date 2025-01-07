@@ -1,6 +1,7 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 type StudentAnalysisProps = {
   studentNames: string[];
@@ -120,7 +121,7 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
     saveAs(blob, "Ogrenci_Istatistikleri.xlsx");
   };
 
-  return <button onClick={handleDownload}>Öğrenci İstatistikleri İndir</button>;
+  return <Button onClick={handleDownload}>Öğrenci İstatistikleri İndir</Button>;
 };
 
 export default StudentAnalysis;

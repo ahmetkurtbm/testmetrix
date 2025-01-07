@@ -5,6 +5,16 @@ interface ExcelReportsProps {
   data: string[][];
 }
 
+type OptionData = {
+  madde: string;
+  A: number;
+  B: number;
+  C: number;
+  D: number;
+  E: number;
+  Boş: number;
+};
+
 import QuestionAnalysis from "../../(functions)/OptionAnalysis";
 import StudentAnswers01 from "../../(functions)/StudentAnswers01";
 import StudentAnswers from "../../(functions)/StudentAnswers";
@@ -597,7 +607,9 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
   const [percentageMapPerQuestion, setPercentageMapPerQuestion] = useState<
     number[]
   >([]);
-  const [studentAnswer01, setStudentAnswer01] = useState<number[]>([]);
+  const [studentAnswer01, setStudentAnswer01] = useState<(string | number)[][]>(
+    []
+  );
   const [successRates, setSuccessRates] = useState<number[]>([]);
   const [zScores, setZScores] = useState<number[]>([]);
   const [tScores, setTScores] = useState<number[]>([]);
@@ -609,14 +621,14 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
   const [prbisIndex, setPrbisIndex] = useState<number[]>([]);
   const [discriminationIndex, setDiscriminationIndex] = useState<number[]>([]);
   const [reliabilityIndex, setReliabilityIndex] = useState<number[]>([]);
-  const [optionCounts, setOptionCounts] = useState<string[]>([]);
+  const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
   const [correctCount, setCorrectCount] = useState<number[]>([]);
 
   // First effect to calculate the scores
   useEffect(() => {
     const calculatedScores = calculateScores(answerKey, studentAnswers);
     setScores(calculatedScores);
-  }, [answerKey, studentAnswers]);
+  }, []);
 
   // Second effect to calculate other metrics based on scores
   useEffect(() => {
@@ -709,15 +721,11 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-semibold mb-4">Excel Raporu</h2>
-      <Button onClick={() => alert("İşlem Başarılı")} className="mb-4">
-        Raporu İndir
-      </Button>
+      <h2 className="text-3xl font-semibold mb-4">Excel Raporları</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Student Analysis */}
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h3 className="text-xl font-medium mb-2">Öğrenci Analizi</h3>
+        <div className="mt-6">
           <StudentAnalysis
             studentNames={studentNames}
             scores={scores}
@@ -729,9 +737,9 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
         </div>
 
         {/* Question Analysis */}
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <h3 className="text-xl font-medium mb-2">Soru Analizi</h3>
-          <QuestionAnalysis
+        <div className="mt-6">
+          <h1>Question Analizi</h1>
+          {/* <QuestionAnalysis
             correctCount={correctCount}
             percentageMap={percentageMapPerQuestion}
             itemVariance={variancePerItem}
@@ -741,7 +749,7 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
             itemPrbis={prbisIndex}
             itemDiscrimination={discriminationIndex}
             itemReliability={reliabilityIndex}
-          />
+          /> */}
         </div>
       </div>
 
@@ -766,6 +774,24 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
 
       <div className="mt-6">
         <OptionAnalysis data={optionCounts} />
+      </div>
+
+      <div className="mt-6">
+        <StudentAnswers
+          studentNames={studentNames}
+          studentAnswers={studentAnswers}
+          answerKey={answerKey}
+          scores={scores}
+        />
+      </div>
+
+      <div className="mt-6">
+        <StudentAnswers01
+          studentNames={studentNames}
+          studentAnswers01={studentAnswer01}
+          answerKey={answerKey}
+          scores={scores}
+        />
       </div>
 
       <div className="mt-6">

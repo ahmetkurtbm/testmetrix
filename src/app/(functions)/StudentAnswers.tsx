@@ -1,6 +1,7 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 interface StudentAnswersProps {
   studentNames: string[];
@@ -117,7 +118,7 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     saveAs(blob, "Ogrenci_Cevaplari.xlsx");
   };
 
-  return <button onClick={handleDownload}>Öğrenci Cevaplarını İndir</button>;
+  return <Button onClick={handleDownload}>Öğrenci Cevaplarını İndir</Button>;
 };
 
 export default StudentAnswers;

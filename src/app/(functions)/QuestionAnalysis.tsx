@@ -1,6 +1,7 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 type QuestionAnalysisProps = {
   correctCount: number[];
@@ -137,7 +138,7 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
     saveAs(blob, "Madde_Istatistikleri.xlsx");
   };
 
-  return <button onClick={handleDownload}>Madde İstatistikleri İndir</button>;
+  return <Button onClick={handleDownload}>Madde İstatistikleri İndir</Button>;
 };
 
 export default QuestionAnalysis;

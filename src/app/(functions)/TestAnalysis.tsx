@@ -1,6 +1,7 @@
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { Button } from "@/components/ui/button";
 
 interface TestAnalysisProps {
   studentCount: number;
@@ -131,7 +132,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     saveAs(blob, "Test_Istatistik_Raporu.xlsx");
   };
 
-  return <button onClick={handleDownload}>Test Analizini İndir</button>;
+  return <Button onClick={handleDownload}>Test Analizini İndir</Button>;
 };
 
 export default TestAnalysis;
