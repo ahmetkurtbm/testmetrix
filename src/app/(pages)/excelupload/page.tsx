@@ -80,10 +80,11 @@ const ExcelUploadPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          arrayData,
-          fileName,
-          folderName,
+          folderName: folderName || "defaultFolder",
+          fileName: fileName || "defaultFile",
+          arrayData: arrayData || [],
         }),
       });
 

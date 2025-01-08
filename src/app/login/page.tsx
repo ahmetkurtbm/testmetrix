@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import Cookies from "js-cookie";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,12 @@ const Login = () => {
   const [role, setRole] = useState<string>("Student");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  useEffect(() => {
+    if (Cookies.get("token")) {
+      window.location.href = "/folders";
+    }
+  }, []);
 
   const handleLogin = async () => {
     try {
