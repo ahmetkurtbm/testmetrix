@@ -1,4 +1,6 @@
 // pages/excel-update.tsx
+"use client";
+
 import Header from "@/app/(components)/header";
 import {
   Select,
@@ -32,8 +34,6 @@ const ExcelUpdate = ({ data }: ExcelUpdateProps) => {
 
   return (
     <div style={{ padding: "20px" }} className="w-3/5 h-3/5">
-      <Header />
-
       <h1 className="text-2xl font-semibold mb-4">Excel Verisi Güncelleme</h1>
       <table className="w-full border-collapse border border-gray-200">
         <thead>

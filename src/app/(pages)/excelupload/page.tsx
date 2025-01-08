@@ -101,7 +101,6 @@ const ExcelUploadPage = () => {
 
   return (
     <>
-      <Header />
       <div className="flex flex-col items-center justify-center p-6 bg-gray-100 min-h-screen">
         <Card className="w-full max-w-xl shadow-md">
           <CardHeader>
