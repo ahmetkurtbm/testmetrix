@@ -11,6 +11,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Header from "@/app/(components)/header";
 
 const ExcelUploadPage = () => {
   const [jsonData, setJsonData] = useState<Record<string, any>>({}); // JSON verisi için state
@@ -99,79 +100,84 @@ const ExcelUploadPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-100 min-h-screen">
-      <Card className="w-full max-w-xl shadow-md">
-        <CardHeader>
-          <h1 className="text-2xl font-bold text-center">Excel Yükle</h1>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <label
-              htmlFor="fileUpload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Excel Dosyası Yükle
-            </label>
-            <Input
-              id="fileUpload"
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleFileUpload}
-              className="w-full"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="folderName"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Klasör Adı
-            </label>
-            <Input
-              id="folderName"
-              type="text"
-              placeholder="Klasör Adı"
-              value={folderName}
-              onChange={(e) => setFolderName(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Yüklenen Dosya: {fileName}
-            </label>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <div className="flex justify-between space-x-4">
-            <Button
-              variant="default"
-              onClick={handleExcelView}
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Görüntüle
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleExcelReport}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              Raporlar
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleSave}
-              className="bg-indigo-600 text-white hover:bg-indigo-700"
-            >
-              Yükle
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+    <>
+      <Header />
+      <div className="flex flex-col items-center justify-center p-6 bg-gray-100 min-h-screen">
+        <Card className="w-full max-w-xl shadow-md">
+          <CardHeader>
+            <h1 className="text-2xl font-bold text-center">Excel Yükle</h1>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <label
+                htmlFor="fileUpload"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Excel Dosyası Yükle
+              </label>
+              <Input
+                id="fileUpload"
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleFileUpload}
+                className="w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="folderName"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Klasör Adı
+              </label>
+              <Input
+                id="folderName"
+                type="text"
+                placeholder="Klasör Adı"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Yüklenen Dosya: {fileName}
+              </label>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="flex justify-between space-x-4">
+              <Button
+                variant="default"
+                onClick={handleExcelView}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Görüntüle
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleExcelReport}
+                className="bg-green-600 text-white hover:bg-green-700"
+              >
+                Raporlar
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleSave}
+                className="bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Yükle
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
 
-      {showExcel && arrayData.length > 0 && <ExcelUpdate data={arrayData} />}
-      {reportExcel && arrayData.length > 0 && <ExcelReports data={arrayData} />}
-    </div>
+        {showExcel && arrayData.length > 0 && <ExcelUpdate data={arrayData} />}
+        {reportExcel && arrayData.length > 0 && (
+          <ExcelReports data={arrayData} />
+        )}
+      </div>
+    </>
   );
 };
 

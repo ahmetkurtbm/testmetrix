@@ -21,6 +21,7 @@ import StudentAnswers from "../../(functions)/StudentAnswers";
 import StudentAnalysis from "../../(functions)/StudentAnalysis";
 import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
+import Header from "@/app/(components)/header";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -721,6 +722,8 @@ const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
 
   return (
     <div className="p-6">
+      <Header />
+
       <h2 className="text-3xl font-semibold mb-4">Excel Raporları</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
