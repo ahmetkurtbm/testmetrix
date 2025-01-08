@@ -2,7 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
 
 // Verilerin tiplerini tanımlayalım
@@ -72,30 +77,33 @@ export default function Home() {
             </p>
           </CardHeader>
           <CardContent>
-            {/* <List className="space-y-2">
+            <ul className="space-y-2">
               {folder.files.map((file) => (
-                <ListItem
-                  key={file.id}
-                  className="flex justify-between items-center"
-                >
+                <li key={file.id} className="flex justify-between items-center">
                   <div>
                     <span className="font-medium">{file.file_name}</span>
                     <span className="text-sm text-gray-400 ml-2">
                       {new Date(file.created_at).toLocaleString()}
                     </span>
                   </div>
-                  <Tooltip content="Edit File" delay={500}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => alert(`Edit file: ${file.file_name}`)}
-                    >
-                      Edit
-                    </Button>
-                  </Tooltip>
-                </ListItem>
+                  {/* content="Edit File" delay={500} */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => alert(`Edit file: ${file.file_name}`)}
+                        >
+                          Edit
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit File</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </li>
               ))}
-            </List> */}
+            </ul>
           </CardContent>
         </Card>
       ))}

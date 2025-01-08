@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
+import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,15 @@ import { Input } from "@/components/ui/input";
 const roles = ["Admin", "Teacher", "Student", "Guest"];
 
 const Login = () => {
+  const router = useRouter();
+
   const [role, setRole] = useState<string>("Student");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
     if (Cookies.get("token")) {
-      window.location.href = "/folders";
+      router.push("/folders");
     }
   }, []);
 
@@ -44,6 +46,7 @@ const Login = () => {
       if (response.ok) {
         Cookies.set("token", data.token, { expires: 1 }); // 1 günlüğüne token kaydet
         console.log("Başarılı giriş, token cookies'e kaydedildi");
+        router.push("/folders");
       } else {
         console.error("Giriş başarısız:", data.error);
       }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -15,12 +16,15 @@ import Cookies from "js-cookie";
 const Header = () => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
+  const router = useRouter();
+
   const handleLogout = async () => {
     try {
       // Cookie'yi sil
       Cookies.remove("token");
 
       // Kullanıcıyı giriş ekranına yönlendirme
+      router.push("/login");
       window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
