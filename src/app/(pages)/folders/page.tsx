@@ -69,37 +69,82 @@ export default function Home() {
   return (
     <div>
       {folders.map((folder) => (
-        <Card key={folder.folder_name} className="mb-4">
+        <Card key={folder.folder_name} className="mb-4 m-3 border-black">
           <CardHeader>
-            <h2 className="text-xl font-semibold">{folder.folder_name}</h2>
-            <p className="text-sm text-gray-500">
-              {new Date(folder.files[0].created_at).toLocaleString()}
-            </p>
+            <div className="flex w-full justify-between items-center text-center gap-1 bg-slate-300 p-1 rounded-md">
+              <h2 className="text-xl font-semibold bg-gray-400 rounded-md py-1 px-2">
+                {folder.folder_name}
+              </h2>
+              <p className="text-sm text-gray-500 ml-auto">
+                {new Date(folder.files[0].created_at).toLocaleString()}
+              </p>
+            </div>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className="space-y-2 m-3">
               {folder.files.map((file) => (
                 <li key={file.id} className="flex justify-between items-center">
                   <div>
-                    <span className="font-medium">{file.file_name}</span>
+                    <span className="font-medium text-blue-700 ">
+                      {file.file_name}
+                    </span>
                     <span className="text-sm text-gray-400 ml-2">
                       {new Date(file.created_at).toLocaleString()}
                     </span>
                   </div>
                   {/* content="Edit File" delay={500} */}
                   <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => alert(`Edit file: ${file.file_name}`)}
-                        >
-                          Edit
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Edit File</TooltipContent>
-                    </Tooltip>
+                    <div className="flex gap-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              alert(`Edit file: ${file.file_name}`)
+                            }
+                          >
+                            Düzenle
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Excel Dosyanızı Düzenleyebilirsiniz
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              alert(`Edit file: ${file.file_name}`)
+                            }
+                          >
+                            Raporlar
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Excel Dosyanızın Raporlarını ve Grafiklerini
+                          Görebilirsiniz
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              alert(`Edit file: ${file.file_name}`)
+                            }
+                          >
+                            Sil
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Excel Dosyanızı Silebilirsiniz
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                   </TooltipProvider>
                 </li>
               ))}

@@ -61,10 +61,12 @@ const Login = () => {
         <title>Login</title>
         <meta name="description" content="Login Page" />
       </Head>
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-blue-200">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <h1 className="text-2xl font-bold text-center">Giriş Yap</h1>
+            <h1 className="text-2xl font-bold text-center bg-gray-300 rounded-md p-1">
+              Giriş Yap
+            </h1>
           </CardHeader>
           <CardContent>
             <Tabs
@@ -72,14 +74,14 @@ const Login = () => {
               onValueChange={(value) => setRole(value)}
               className="mb-4"
             >
-              <TabsList>
+              <TabsList className="w-full bg-green-200">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={
-                      role === r ? "font-bold text-blue-600" : "text-gray-500"
-                    }
+                    className={`font-bold
+                ${role === r ? " text-blue-600" : "text-gray-500"}
+              `}
                   >
                     {r}
                   </TabsTrigger>

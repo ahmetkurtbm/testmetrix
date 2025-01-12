@@ -1,7 +1,5 @@
-// pages/excel-update.tsx
 "use client";
 
-import Header from "@/app/(components)/header";
 import {
   Select,
   SelectContent,
@@ -9,13 +7,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface ExcelUpdateProps {
   data: string[][];
 }
 
 const ExcelUpdate = ({ data }: ExcelUpdateProps) => {
+  const params = useSearchParams();
+
+  // useEffect(() => {
+  //   const fileName = params.get("file");
+
+  //   if (fileName !== "" && fileName !== null && fileName !== undefined) {
+
+  //   }
+  // }, []);
+
   const options = ["A", "B", "C", "D", "E"];
 
   const [selectedValues, setSelectedValues] = useState(

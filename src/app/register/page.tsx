@@ -58,7 +58,7 @@ const Register = () => {
         <title>Kayıt Ol</title>
         <meta name="description" content="Register Page" />
       </Head>
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-blue-200">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
             <h1 className="text-2xl font-bold text-center">Kayıt Ol</h1>
@@ -67,16 +67,16 @@ const Register = () => {
             <Tabs
               value={role}
               onValueChange={(value) => setRole(value)}
-              className="mb-4"
+              className="mb-4 "
             >
-              <TabsList>
+              <TabsList className="w-full bg-green-200">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={
-                      role === r ? "font-bold text-blue-600" : "text-gray-500"
-                    }
+                    className={`font-bold w-full
+                ${role === r ? " text-blue-600" : "text-gray-500"}
+              `}
                   >
                     {r}
                   </TabsTrigger>

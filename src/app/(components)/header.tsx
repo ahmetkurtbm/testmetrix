@@ -14,8 +14,6 @@ import { Avatar } from "@/components/ui/avatar";
 import Cookies from "js-cookie";
 
 const Header = () => {
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -32,47 +30,47 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center justify-between px-2 py-2 bg-gray-200 shadow-md">
-      <nav className="flex space-x-6">
+    <header className="flex items-center justify-between px-2 py-2 bg-gray-400 shadow-md">
+      <nav className="flex space-x-3">
+        <Avatar className="bg-green-400"></Avatar>
         <Link
           href="/folders"
-          className="bg-gray-300 p-2 hover:shadow-md hover:bg-gray-400 rounded-md"
+          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
         >
-          <span className="text-gray-700 hover:text-gray-900 font-medium">
-            Folders
-          </span>
+          <span className="">Folders</span>
         </Link>
         <Link
           href="/excelupload"
-          className="bg-gray-300 p-2 hover:shadow-md hover:bg-gray-400 rounded-md"
+          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
         >
-          <p className="text-gray-700 hover:text-gray-900 font-medium">
-            Excel Upload
-          </p>
+          <p className="">Excel Upload</p>
         </Link>
 
-        <Link
+        {/* <Link
           href="/excel-reports"
-          className="bg-gray-300 p-2 hover:shadow-md hover:bg-gray-400 rounded-md"
+          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
         >
-          <span className="text-gray-700 hover:text-gray-900 font-medium">
-            Excel Reports
-          </span>
-        </Link>
+          <span className="">Excel Reports</span>
+        </Link> */}
       </nav>
 
       <div className="relative">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2">
-              <Avatar className="w-8 h-8 bg-blue-500 text-white">Avatar</Avatar>
+            <Button
+              variant="ghost"
+              className="flex items-center space-x-2 bg-slate-300 "
+            >
+              <Avatar className="w-8 h-8 bg-blue-500 text-white"></Avatar>
               <span className="hidden sm:block">Profile</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 mt-2">
             <DropdownMenuItem>
-              <Link href="/profile">
-                <p className="block w-full text-left">Profili Görüntüle</p>
+              <Link href="/profile" className=" w-full ">
+                <p className="block w-full text-left bg-blue-300 p-3 rounded-md hover:bg-blue-500">
+                  Profili Görüntüle
+                </p>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>

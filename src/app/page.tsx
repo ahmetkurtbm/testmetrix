@@ -1,6 +1,3 @@
-import Image from "next/image";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-
 export default function Home() {
   return <div></div>;
 }
