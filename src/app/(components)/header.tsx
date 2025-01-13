@@ -32,7 +32,9 @@ const Header = () => {
   return (
     <header className="flex items-center justify-between px-2 py-2 bg-gray-400 shadow-md">
       <nav className="flex space-x-3">
-        <Avatar className="bg-green-400"></Avatar>
+        <Avatar className="bg-green-400">
+          <img src="excelLogo.webp" />
+        </Avatar>
         <Link
           href="/folders"
           className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
@@ -40,7 +42,7 @@ const Header = () => {
           <span className="">Folders</span>
         </Link>
         <Link
-          href="/excelupload"
+          href="/excel-upload"
           className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
         >
           <p className="">Excel Upload</p>

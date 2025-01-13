@@ -74,12 +74,12 @@ const Login = () => {
               onValueChange={(value) => setRole(value)}
               className="mb-4"
             >
-              <TabsList className="w-full bg-green-200">
+              <TabsList className="w-full border bg-slate-200 gap-1">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={`font-bold
+                    className={`font-bold bg-slate-100 w-full
                 ${role === r ? " text-blue-600" : "text-gray-500"}
               `}
                   >

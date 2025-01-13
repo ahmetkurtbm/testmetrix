@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
 
-// Verilerin tiplerini tanımlayalım
 interface File {
   id: number;
   folder_name: string;
@@ -24,12 +24,13 @@ interface FolderProps {
 }
 
 export default function Home() {
+  const router = useRouter();
+
   const [folders, setFolders] = useState<FolderProps[]>([]);
 
   useEffect(() => {
     async function fetchFolders() {
       try {
-        console.log("geldim");
         const response = await fetch("http://localhost:5000/folders", {
           method: "GET",
           headers: {
@@ -40,9 +41,6 @@ export default function Home() {
 
         const data: File[] = await response.json();
 
-        console.log(data);
-
-        // Folder'ları gruplayalım
         const groupedFolders: FolderProps[] = data.reduce((acc, file) => {
           const folderIndex = acc.findIndex(
             (folder) => folder.folder_name === file.folder_name
@@ -65,6 +63,32 @@ export default function Home() {
 
     fetchFolders();
   }, []);
+
+  const handleDelete = async (fileId: any) => {
+    try {
+      const response = await fetch("http://localhost:5000/excel-delete", {
+        method: "DELETE",
+        body: JSON.stringify({ fileId }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Excel Deleted Successful");
+      } else {
+        console.error("Delete failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Error deleting Excel:", error);
+    }
+  };
+
+  const handleUpdate = async (fileId: any) => {
+    router.push(`/excel-update?file-id=${encodeURIComponent(fileId)}`);
+  };
 
   return (
     <div>
@@ -100,9 +124,8 @@ export default function Home() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              alert(`Edit file: ${file.file_name}`)
-                            }
+                            className="bg-blue-500 text-white"
+                            onClick={() => handleUpdate(file.id)}
                           >
                             Düzenle
                           </Button>
@@ -116,6 +139,7 @@ export default function Home() {
                           <Button
                             variant="outline"
                             size="sm"
+                            className="bg-green-500 text-white"
                             onClick={() =>
                               alert(`Edit file: ${file.file_name}`)
                             }
@@ -133,9 +157,8 @@ export default function Home() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              alert(`Edit file: ${file.file_name}`)
-                            }
+                            className="bg-red-500 text-white"
+                            onClick={() => handleDelete(file.id)}
                           >
                             Sil
                           </Button>
