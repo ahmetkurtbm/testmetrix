@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const roles = ["Admin", "Teacher", "Student", "Guest"];
 
@@ -53,6 +55,10 @@ const Login = () => {
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
     }
+  };
+
+  const navigateRegister = () => {
+    router.push("/register");
   };
 
   return (
@@ -123,12 +129,21 @@ const Login = () => {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-1 ">
             <Button
               onClick={handleLogin}
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               Giriş Yap
+            </Button>
+            <label className="block text-sm font-medium text-gray-700">
+              Hesabınız yok mu ?
+            </label>
+            <Button
+              onClick={navigateRegister}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Kayıt Ol
             </Button>
           </CardFooter>
         </Card>

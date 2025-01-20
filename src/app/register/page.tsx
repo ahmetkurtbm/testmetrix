@@ -10,10 +10,15 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
 
 const roles = ["Admin", "Teacher", "Student", "Guest"];
 
 const Register = () => {
+  const router = useRouter();
+
   const [role, setRole] = useState("Student");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -52,6 +57,10 @@ const Register = () => {
     }
   };
 
+  const navigateLogin = () => {
+    router.push("/login");
+  };
+
   return (
     <>
       <Head>
@@ -69,7 +78,7 @@ const Register = () => {
               onValueChange={(value) => setRole(value)}
               className="mb-4 "
             >
-              <TabsList className="w-full bg-green-200">
+              <TabsList className="w-full bg-blue-200">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
@@ -169,12 +178,34 @@ const Register = () => {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="gap-1 flex-col">
+            <label className="text-sm font-medium text-gray-700 align-middle gap-1 flex">
+              <Checkbox></Checkbox>
+              <Link href="kvkk-" className="underline font-bold">
+                {" "}
+                KVKK{" "}
+              </Link>
+              ve
+              <Link href="ayditlatma-metni-" className="underline font-bold">
+                {" "}
+                Aydınlatma Metni'ni{" "}
+              </Link>{" "}
+              okudum, onaylıyorum.
+            </label>
             <Button
               onClick={handleRegister}
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               Kayıt Ol
+            </Button>
+            <label className="block text-sm font-medium text-gray-700">
+              Zaten Hesabınız var mı ?
+            </label>
+            <Button
+              onClick={navigateLogin}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Login
             </Button>
           </CardFooter>
         </Card>
