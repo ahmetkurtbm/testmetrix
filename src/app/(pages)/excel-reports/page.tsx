@@ -3,10 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
-interface ExcelReportsProps {
-  data: string[][];
-}
-
 type OptionData = {
   madde: string;
   A: number;
@@ -23,7 +19,7 @@ import StudentAnswers from "../../(functions)/StudentAnswers";
 import StudentAnalysis from "../../(functions)/StudentAnalysis";
 import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
-import Header from "@/app/(components)/header";
+import { useSearchParams } from "next/navigation";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -579,14 +575,67 @@ function calculateOptionsCount(studentAnswers: any) {
   return result; // OptionData[] türünde bir dizi döndür
 }
 
-interface ExcelReportsProps {
-  data: string[][]; // Assuming data is an array of string arrays
+interface ExcelUpdateProps {
+  folder_name: string;
+  file_name: string;
+  created_at: string;
+  file_data: string[][];
 }
 
-const ExcelReports: React.FC<ExcelReportsProps> = ({ data }) => {
-  const answerKey = data[0].slice(1); // Answer key excluding first column
-  const studentAnswers = data.slice(1); // All students' answers excluding first row
-  const studentNames = data.slice(1).map((row) => row[0]); // Extract student names from first column
+interface File {
+  id: number;
+  folder_name: string;
+  file_name: string;
+  created_at: string;
+  file_data: string[][];
+}
+
+const ExcelReports = () => {
+  const params = useSearchParams();
+  const [data, setData] = useState<ExcelUpdateProps | null>(null);
+
+  useEffect(() => {
+    const getExcel = async () => {
+      const fileId = params.get("file-id");
+
+      if (fileId) {
+        try {
+          const response = await fetch("http://localhost:5000/excel", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ fileId }),
+          });
+
+          if (response.ok) {
+            const fetchedData: File[] = await response.json();
+
+            const file_name = fetchedData[0].file_name;
+            const folder_name = fetchedData[0].folder_name;
+            const created_at = fetchedData[0].created_at;
+            const file_data = fetchedData[0].file_data;
+
+            setData({ file_name, folder_name, created_at, file_data });
+          } else {
+            console.error("Failed to fetch data:", await response.json());
+          }
+        } catch (error) {
+          console.error("Error fetching Excel data:", error);
+        }
+      }
+    };
+
+    getExcel();
+  }, [params]);
+
+  if (!data || data.file_data.length === 0) {
+    return <div>Loading data...</div>;
+  }
+
+  const answerKey = data.file_data[0].slice(1); // Answer key excluding first column
+  const studentAnswers = data.file_data.slice(1); // All students' answers excluding first row
+  const studentNames = data.file_data.slice(1).map((row) => row[0]); // Extract student names from first column
   const numberOfQuestions = answerKey.length;
   const numberOfStudents = studentAnswers.length;
 

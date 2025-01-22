@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 
 interface File {
   id: number;
@@ -23,10 +24,16 @@ interface FolderProps {
   files: File[];
 }
 
+interface FolderName {
+  value: string;
+  label: string;
+}
+
 export default function Home() {
   const router = useRouter();
 
   const [folders, setFolders] = useState<FolderProps[]>([]);
+  const [folderNames, setFolderNames] = useState<FolderName[]>([]);
 
   useEffect(() => {
     async function fetchFolders() {
@@ -40,6 +47,22 @@ export default function Home() {
         });
 
         const data: File[] = await response.json();
+
+        interface FolderName {
+          value: string;
+          label: string;
+        }
+
+        const uniqueFolderNames: FolderName[] = Array.from(
+          new Map(
+            data.map((item) => [
+              item.folder_name,
+              { value: item.folder_name, label: item.folder_name },
+            ])
+          ).values()
+        );
+
+        setFolderNames(uniqueFolderNames);
 
         const groupedFolders: FolderProps[] = data.reduce((acc, file) => {
           const folderIndex = acc.findIndex(
@@ -88,6 +111,10 @@ export default function Home() {
 
   const handleUpdate = async (fileId: any) => {
     router.push(`/excel-update?file-id=${encodeURIComponent(fileId)}`);
+  };
+
+  const handleRaports = async (fileId: any) => {
+    router.push(`/excel-reports?file-id=${encodeURIComponent(fileId)}`);
   };
 
   return (
@@ -140,9 +167,7 @@ export default function Home() {
                             variant="outline"
                             size="sm"
                             className="bg-green-500 text-white"
-                            onClick={() =>
-                              alert(`Edit file: ${file.file_name}`)
-                            }
+                            onClick={() => handleRaports(file.id)}
                           >
                             Raporlar
                           </Button>
@@ -150,6 +175,14 @@ export default function Home() {
                         <TooltipContent>
                           Excel Dosyanızın Raporlarını ve Grafiklerini
                           Görebilirsiniz
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <ComboboxDemo folderNames={folderNames} />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Excel Raporunuzu İstediğiniz Klasöre Taşıyabilirsiniz
                         </TooltipContent>
                       </Tooltip>
                       <Tooltip>

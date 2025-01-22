@@ -27,7 +27,7 @@ interface File {
   folder_name: string;
   file_name: string;
   created_at: string;
-  file_data: Array<[string, string[]]>;
+  file_data: string[][];
 }
 
 const ExcelUpdate = () => {
@@ -36,6 +36,8 @@ const ExcelUpdate = () => {
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [fileName, setFileName] = useState<string>();
   const [folderName, setFolderName] = useState<string>();
+
+  const [tempData, setTempData] = useState<string[][]>([]);
 
   useEffect(() => {
     const getExcel = async () => {
@@ -59,7 +61,11 @@ const ExcelUpdate = () => {
             const created_at = fetchedData[0].created_at;
 
             const headers = fetchedData[0].file_data.map((item) => item[0]);
-            const rows = fetchedData[0].file_data.map((item) => item[1]);
+            const rows = fetchedData[0].file_data.map((subArray) =>
+              subArray.slice(1)
+            );
+
+            setTempData(fetchedData[0].file_data);
 
             // Veriyi set ediyoruz
             setData({
@@ -75,7 +81,7 @@ const ExcelUpdate = () => {
 
             // SelectedValues dizisini file_data'dan gelen verilere göre başlatıyoruz
             setSelectedValues(
-              rows.map((row) => row.slice(1)) // Başlangıçtaki 1. sütunu atarak seçilen değerleri alıyoruz
+              rows.map((row: any) => row.slice(1)) // Başlangıçtaki 1. sütunu atarak seçilen değerleri alıyoruz
             );
           } else {
             console.error("Failed to fetch data:", await response.json());
@@ -168,9 +174,9 @@ const ExcelUpdate = () => {
         </div>
 
         <table className="border-collapse border border-gray-200">
-          {/* <thead>
+          <thead>
             <tr className="bg-gray-100">
-              {rows[0].map((row, index) => (
+              {tempData[0].map((row, index) => (
                 <th
                   key={index}
                   className="p-4 text-left font-medium text-gray-700"
@@ -179,9 +185,9 @@ const ExcelUpdate = () => {
                 </th>
               ))}
             </tr>
-          </thead> */}
+          </thead>
           <tbody>
-            {rows.map((row, rowIndex) => (
+            {tempData.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t">
                 {row.map((cell, cellIndex) => (
                   <td key={cellIndex} className="p-4">
