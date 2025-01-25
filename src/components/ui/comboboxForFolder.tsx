@@ -24,32 +24,39 @@ interface FolderName {
   label: string;
 }
 
-// const propFolderNames = [
-//   {
-//     value: "next.js",
-//     label: "Next.js",
-//   },
-//   {
-//     value: "sveltekit",
-//     label: "SvelteKit",
-//   },
-//   {
-//     value: "nuxt.js",
-//     label: "Nuxt.js",
-//   },
-//   {
-//     value: "remix",
-//     label: "Remix",
-//   },
-//   {
-//     value: "astro",
-//     label: "Astro",
-//   },
-// ];
-
-export function ComboboxDemo({ folderNames }: { folderNames: FolderName[] }) {
+export function ComboboxDemo({
+  folderNames,
+  id,
+}: {
+  folderNames: FolderName[];
+  id: any;
+}) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+
+  const handleChange = async (folderName: any) => {
+    console.log(id, folderName);
+    try {
+      const response = await fetch(
+        "http://localhost:5000/excel-update-folder-name",
+        {
+          method: "POST",
+          body: JSON.stringify({ id: id, folderName: folderName }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Excel Updated Successful");
+      } else {
+        console.error("Update failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Error updating Excel:", error);
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -80,6 +87,7 @@ export function ComboboxDemo({ folderNames }: { folderNames: FolderName[] }) {
                   value={folderName.value}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue);
+                    handleChange(currentValue);
                     setOpen(false);
                   }}
                 >

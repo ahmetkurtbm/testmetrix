@@ -594,6 +594,48 @@ const ExcelReports = () => {
   const params = useSearchParams();
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
 
+  const [answerKey, setAnswerKey] = useState<string[]>([]);
+  const [studentAnswers, setStudentAnswers] = useState<string[][]>([]);
+  const [studentNames, setStudentNames] = useState<string[]>([]);
+  const [numberOfQuestions, setNumberOfQuestions] = useState<number>(0);
+  const [numberOfStudents, setNumberOfStudents] = useState<number>(0);
+
+  // States for various calculated metrics
+  const [scores, setScores] = useState<number[]>([]);
+  const [average, setAverage] = useState<number>(0);
+  const [standardDeviation, setStandardDeviation] = useState<number>(0);
+  const [variance, setVariance] = useState<number>(0);
+  const [maxScore, setMaxScore] = useState<number>(0);
+  const [median, setMedian] = useState<number>(0);
+  const [range, setRange] = useState<number>(0);
+  const [skewness, setSkewness] = useState<number>(0);
+  const [kurtosis, setKurtosis] = useState<number>(0);
+  const [successRate, setSuccessRate] = useState<number>(0);
+  const [kr20, setKr20] = useState<number>(0);
+  const [kr21, setKr21] = useState<number>(0);
+  const [relativeCoefficientOfVariation, setRelativeCoefficientOfVariation] =
+    useState<number>(0);
+  const [mode, setMode] = useState<number[]>([]);
+  const [percentageMapPerQuestion, setPercentageMapPerQuestion] = useState<
+    number[]
+  >([]);
+  const [studentAnswer01, setStudentAnswer01] = useState<(string | number)[][]>(
+    []
+  );
+  const [successRates, setSuccessRates] = useState<number[]>([]);
+  const [zScores, setZScores] = useState<number[]>([]);
+  const [tScores, setTScores] = useState<number[]>([]);
+  const [ranks, setRanks] = useState<number[]>([]);
+  const [variancePerItem, setVariancePerItem] = useState<number[]>([]);
+  const [stdDevPerItem, setStdDevPerItem] = useState<number[]>([]);
+  const [difficultyIndex, setDifficultyIndex] = useState<number[]>([]);
+  const [rbisIndex, setRbisIndex] = useState<number[]>([]);
+  const [prbisIndex, setPrbisIndex] = useState<number[]>([]);
+  const [discriminationIndex, setDiscriminationIndex] = useState<number[]>([]);
+  const [reliabilityIndex, setReliabilityIndex] = useState<number[]>([]);
+  const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
+  const [correctCount, setCorrectCount] = useState<number[]>([]);
+
   useEffect(() => {
     const getExcel = async () => {
       const fileId = params.get("file-id");
@@ -630,51 +672,22 @@ const ExcelReports = () => {
   }, [params]);
 
   if (!data || data.file_data.length === 0) {
-    return <div>Loading data...</div>;
+    console.log("girdi");
   }
 
-  const answerKey = data.file_data[0].slice(1); // Answer key excluding first column
-  const studentAnswers = data.file_data.slice(1); // All students' answers excluding first row
-  const studentNames = data.file_data.slice(1).map((row) => row[0]); // Extract student names from first column
-  const numberOfQuestions = answerKey.length;
-  const numberOfStudents = studentAnswers.length;
+  useEffect(() => {
+    if (data?.file_data) {
+      const key = data.file_data[0].slice(1); // Answer key excluding first column
+      const answers = data.file_data.slice(1); // All students' answers excluding first row
+      const names = data.file_data.slice(1).map((row) => row[0]); // Extract student names from first column
 
-  // States for various calculated metrics
-  const [scores, setScores] = useState<number[]>([]);
-  const [average, setAverage] = useState<number>(0);
-  const [standardDeviation, setStandardDeviation] = useState<number>(0);
-  const [variance, setVariance] = useState<number>(0);
-  const [maxScore, setMaxScore] = useState<number>(0);
-  const [median, setMedian] = useState<number>(0);
-  const [range, setRange] = useState<number>(0);
-  const [skewness, setSkewness] = useState<number>(0);
-  const [kurtosis, setKurtosis] = useState<number>(0);
-  const [successRate, setSuccessRate] = useState<number>(0);
-  const [kr20, setKr20] = useState<number>(0);
-  const [kr21, setKr21] = useState<number>(0);
-  const [relativeCoefficientOfVariation, setRelativeCoefficientOfVariation] =
-    useState<number>(0);
-
-  const [mode, setMode] = useState<number[]>([]);
-  const [percentageMapPerQuestion, setPercentageMapPerQuestion] = useState<
-    number[]
-  >([]);
-  const [studentAnswer01, setStudentAnswer01] = useState<(string | number)[][]>(
-    []
-  );
-  const [successRates, setSuccessRates] = useState<number[]>([]);
-  const [zScores, setZScores] = useState<number[]>([]);
-  const [tScores, setTScores] = useState<number[]>([]);
-  const [ranks, setRanks] = useState<number[]>([]);
-  const [variancePerItem, setVariancePerItem] = useState<number[]>([]);
-  const [stdDevPerItem, setStdDevPerItem] = useState<number[]>([]);
-  const [difficultyIndex, setDifficultyIndex] = useState<number[]>([]);
-  const [rbisIndex, setRbisIndex] = useState<number[]>([]);
-  const [prbisIndex, setPrbisIndex] = useState<number[]>([]);
-  const [discriminationIndex, setDiscriminationIndex] = useState<number[]>([]);
-  const [reliabilityIndex, setReliabilityIndex] = useState<number[]>([]);
-  const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
-  const [correctCount, setCorrectCount] = useState<number[]>([]);
+      setAnswerKey(key);
+      setStudentAnswers(answers);
+      setStudentNames(names);
+      setNumberOfQuestions(key.length);
+      setNumberOfStudents(answers.length);
+    }
+  }, [data]);
 
   // First effect to calculate the scores
   useEffect(() => {
@@ -779,9 +792,9 @@ const ExcelReports = () => {
         {/* Student Analysis */}
         <div className="mt-6">
           <StudentAnalysis
-            studentNames={studentNames}
+            studentNames={studentNames!}
             scores={scores}
-            numberOfQuestions={numberOfQuestions}
+            numberOfQuestions={numberOfQuestions!}
             tScore={tScores}
             zScore={zScores}
             succesRates={ranks}
@@ -807,8 +820,8 @@ const ExcelReports = () => {
 
       <div className="mt-6">
         <TestAnalysis
-          studentCount={numberOfStudents}
-          questionCount={numberOfQuestions}
+          studentCount={numberOfStudents!}
+          questionCount={numberOfQuestions!}
           scores={scores}
           mean={average}
           median={median}
@@ -830,18 +843,18 @@ const ExcelReports = () => {
 
       <div className="mt-6">
         <StudentAnswers
-          studentNames={studentNames}
-          studentAnswers={studentAnswers}
-          answerKey={answerKey}
+          studentNames={studentNames!}
+          studentAnswers={studentAnswers!}
+          answerKey={answerKey!}
           scores={scores}
         />
       </div>
 
       <div className="mt-6">
         <StudentAnswers01
-          studentNames={studentNames}
+          studentNames={studentNames!}
           studentAnswers01={studentAnswer01}
-          answerKey={answerKey}
+          answerKey={answerKey!}
           scores={scores}
         />
       </div>

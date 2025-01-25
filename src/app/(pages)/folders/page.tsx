@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import Cookies from "js-cookie";
 
 interface File {
   id: number;
@@ -34,6 +35,12 @@ export default function Home() {
 
   const [folders, setFolders] = useState<FolderProps[]>([]);
   const [folderNames, setFolderNames] = useState<FolderName[]>([]);
+
+  useEffect(() => {
+    if (!Cookies.get("token")) {
+      router.push("/login");
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchFolders() {
@@ -179,7 +186,10 @@ export default function Home() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <ComboboxDemo folderNames={folderNames} />
+                          <ComboboxDemo
+                            folderNames={folderNames}
+                            id={file.id}
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
                           Excel Raporunuzu İstediğiniz Klasöre Taşıyabilirsiniz

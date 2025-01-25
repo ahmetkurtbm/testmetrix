@@ -142,7 +142,7 @@ const ExcelUpdate = () => {
     <div style={{ padding: "16px" }} className="gap-4 flex-col">
       <div
         style={{ padding: "20px" }}
-        className="overflow-x-auto max-w-full max-h-96 overflow-y-auto bg-slate-300"
+        className="overflow-x-auto max-w-full max-h-[40rem] overflow-y-auto bg-slate-300"
       >
         <div className="w-full flex  justify-between">
           <div>

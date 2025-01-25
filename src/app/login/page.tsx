@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const roles = ["Admin", "Teacher", "Student", "Guest"];
 
