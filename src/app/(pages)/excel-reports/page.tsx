@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import Plot from "react-plotly.js";
 
 type OptionData = {
   madde: string;
@@ -20,6 +21,7 @@ import StudentAnalysis from "../../(functions)/StudentAnalysis";
 import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
 import { useSearchParams } from "next/navigation";
+import { ComboboxDemo } from "@/components/ui/comboboxForGrafics";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -636,6 +638,9 @@ const ExcelReports = () => {
   const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
   const [correctCount, setCorrectCount] = useState<number[]>([]);
 
+  const [selectedGrafics, setSelectedGrafics] = useState("");
+
+  // first useEffect
   useEffect(() => {
     const getExcel = async () => {
       const fileId = params.get("file-id");
@@ -673,6 +678,8 @@ const ExcelReports = () => {
 
   if (!data || data.file_data.length === 0) {
     console.log("girdi");
+  } else {
+    console.log(data);
   }
 
   useEffect(() => {
@@ -681,6 +688,9 @@ const ExcelReports = () => {
       const answers = data.file_data.slice(1); // All students' answers excluding first row
       const names = data.file_data.slice(1).map((row) => row[0]); // Extract student names from first column
 
+      const calculatedScores = calculateScores(key, answers);
+
+      setScores(calculatedScores);
       setAnswerKey(key);
       setStudentAnswers(answers);
       setStudentNames(names);
@@ -688,12 +698,6 @@ const ExcelReports = () => {
       setNumberOfStudents(answers.length);
     }
   }, [data]);
-
-  // First effect to calculate the scores
-  useEffect(() => {
-    const calculatedScores = calculateScores(answerKey, studentAnswers);
-    setScores(calculatedScores);
-  }, []);
 
   // Second effect to calculate other metrics based on scores
   useEffect(() => {
@@ -748,6 +752,45 @@ const ExcelReports = () => {
     const optionCount = calculateOptionsCount(studentAnswers);
     const correctCount = calculateCorrectCount(answerKey, studentAnswers);
 
+    // Hesaplanan değerleri consola yazdırma
+    console.log("Average (Ortalama):", avg);
+    console.log("Variance (Varyans):", varianceValue);
+    console.log("Standard Deviation (Standart Sapma):", stdDev);
+    console.log("Mode (Mod):", mode);
+    console.log("Median (Medyan):", median);
+    console.log("Max Score (Maksimum Puan):", max);
+    console.log("Range (Aralık):", rangeValue);
+    console.log("Skewness (Çarpıklık):", skew);
+    console.log("Kurtosis (Basıklık):", kurt);
+    console.log("Success Rate (Başarı Oranı):", successRateValue);
+    console.log("KR-20 Value:", kr20Value);
+    console.log("KR-21 Value:", kr21Value);
+    console.log(
+      "Relative Coefficient of Variation (Bağıl Varyasyon Katsayısı):",
+      relCoefVariation
+    );
+    console.log("Percentage Map Per Question (Yüzde Haritası):", percMap);
+    console.log("Student Answers 01 Format:", studentAns01);
+    console.log("Success Rates (Başarı Oranları):", successRates);
+    console.log("Z-Scores:", zScores);
+    console.log("T-Scores:", tScores);
+    console.log("Ranks (Sıralamalar):", ranksValue);
+    console.log("Item Variance (Madde Varyansı):", itemVariance);
+    console.log(
+      "Item Standard Deviation (Madde Standart Sapması):",
+      itemStdDev
+    );
+    console.log("Difficulty Index (Zorluk İndeksi):", difficultyIndexValue);
+    console.log("Rbis Index:", rbis);
+    console.log("Prbis Index:", prbis);
+    console.log(
+      "Discrimination Index (Ayırt Edicilik İndeksi):",
+      discrimination
+    );
+    console.log("Reliability Index (Güvenirlik İndeksi):", reliability);
+    console.log("Option Count (Seçenek Sayısı):", optionCount);
+    console.log("Correct Count (Doğru Sayısı):", correctCount);
+
     // Set state values
     setAverage(avg);
     setVariance(varianceValue);
@@ -756,8 +799,8 @@ const ExcelReports = () => {
     setMaxScore(max);
     setRange(rangeValue);
     setMedian(median);
-    setSkewness(typeof skew === "number" ? skew : 0);
-    setKurtosis(typeof kurt === "number" ? kurt : 0);
+    setSkewness(Number(skew));
+    setKurtosis(Number(kurt));
     setSuccessRate(
       isNaN(Number(successRateValue)) ? 0 : Number(successRateValue)
     );
@@ -782,130 +825,156 @@ const ExcelReports = () => {
     setReliabilityIndex(reliability);
     setOptionCounts(optionCount);
     setCorrectCount(correctCount);
-  }, [scores, answerKey, studentAnswers, numberOfQuestions]);
+  }, [scores]);
+
+  const xValues = studentNames;
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-semibold mb-4">Excel Raporları</h2>
+    <div>
+      <h2 className="text-3xl font-semibold text-center p-1 text-green-500">
+        Excel Raporları
+      </h2>
+      <div className="p-1 flex gap-1">
+        <div className="flex-col gap-1 mt-6 p-1 bg-slate-500 rounded-md h-screen max-h-screen w-72">
+          {/* Student Analysis */}
+          <div className="mt-6">
+            <StudentAnalysis
+              studentNames={studentNames!}
+              scores={scores}
+              numberOfQuestions={numberOfQuestions!}
+              tScore={tScores}
+              zScore={zScores}
+              succesRates={ranks}
+            />
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Student Analysis */}
-        <div className="mt-6">
-          <StudentAnalysis
-            studentNames={studentNames!}
-            scores={scores}
-            numberOfQuestions={numberOfQuestions!}
-            tScore={tScores}
-            zScore={zScores}
-            succesRates={ranks}
+          {/* Question Analysis */}
+          {/* <div className="mt-6">
+            <h1>Question Analizi</h1>
+            <QuestionAnalysis
+              correctCount={correctCount}
+              percentageMap={percentageMapPerQuestion}
+              itemVariance={variancePerItem}
+              itemStd={stdDevPerItem}
+              itemDifficulty={difficultyIndex}
+              itemRbis={rbisIndex}
+              itemPrbis={prbisIndex}
+              itemDiscrimination={discriminationIndex}
+              itemReliability={reliabilityIndex}
+            />
+          </div> */}
+
+          <div className="mt-6">
+            <TestAnalysis
+              studentCount={numberOfStudents!}
+              questionCount={numberOfQuestions!}
+              scores={scores}
+              mean={average}
+              median={median}
+              mode={mode}
+              range={range}
+              stdDeviation={standardDeviation}
+              variance={variance}
+              kr20={kr20}
+              kr21={kr21}
+              skewness={skewness}
+              kurtosis={kurtosis}
+              coefficientVariation={relativeCoefficientOfVariation}
+            />
+          </div>
+
+          <div className="mt-6">
+            <OptionAnalysis data={optionCounts} />
+          </div>
+
+          <div className="mt-6">
+            <StudentAnswers
+              studentNames={studentNames!}
+              studentAnswers={studentAnswers!}
+              answerKey={answerKey!}
+              scores={scores}
+            />
+          </div>
+
+          <div className="mt-6">
+            <StudentAnswers01
+              studentNames={studentNames!}
+              studentAnswers01={studentAnswer01}
+              answerKey={answerKey!}
+              scores={scores}
+            />
+          </div>
+        </div>
+
+        <div className="flex-col mt-6 p-2 bg-black rounded-md h-screen max-h-screen w-full">
+          <p className="text-white text-center p-2">Grafikler</p>
+          <ComboboxDemo value={selectedGrafics} setValue={setSelectedGrafics} />
+          <Plot
+            data={[
+              {
+                x: xValues, // X ekseni: Öğrenci numarası veya soru numaraları
+                y: scores, // Y ekseni: Skorlar
+                type: "scatter", // Çizgi grafiği
+                mode: "lines+markers", // Hem çizgi hem de işaretçi (marker) göster
+                marker: { color: "blue" }, // Nokta rengi
+              },
+            ]}
+            layout={{
+              title: "Öğrenci Başarıları",
+              xaxis: { title: "" },
+              yaxis: { title: "Skorlar" },
+            }}
           />
         </div>
 
-        {/* Question Analysis */}
-        <div className="mt-6">
-          <h1>Question Analizi</h1>
-          {/* <QuestionAnalysis
-            correctCount={correctCount}
-            percentageMap={percentageMapPerQuestion}
-            itemVariance={variancePerItem}
-            itemStd={stdDevPerItem}
-            itemDifficulty={difficultyIndex}
-            itemRbis={rbisIndex}
-            itemPrbis={prbisIndex}
-            itemDiscrimination={discriminationIndex}
-            itemReliability={reliabilityIndex}
-          /> */}
+        <div className="flex-col gap-1 mt-6 p-1 rounded-md bg-slate-400 h-screen max-h-screen w-[35rem]">
+          <p className="text-white w-full">
+            <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
+          </p>
+          <p>
+            <strong>Soru Sayısı:</strong> {numberOfQuestions}
+          </p>
+          <p>
+            <strong>Ortalama Puan:</strong> {average.toFixed(2)}
+          </p>
+          <p className="text-white">
+            <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
+          </p>
+          <p>
+            <strong>Varyans:</strong> {variance.toFixed(2)}
+          </p>
+          <p>
+            <strong>Ortanca (Median):</strong> {median}
+          </p>
+          <p>
+            <strong>Mod:</strong> {mode}
+          </p>
+          <p>
+            <strong>Maksimum Puan:</strong> {maxScore}
+          </p>
+          <p>
+            <strong>Ranj (Range):</strong> {range}
+          </p>
+          <p>
+            <strong>Çarpıklık Katsayısı (Skewness):</strong> {skewness}
+          </p>
+          <p>
+            <strong>Basıklık Katsayısı (Kurtosis):</strong> {kurtosis}
+          </p>
+          <p>
+            <strong>Test Puanlarının Başarı Yüzdesi:</strong> {successRate}%
+          </p>
+          <p>
+            <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20}
+          </p>
+          <p>
+            <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21}
+          </p>
+          <p>
+            <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
+            {relativeCoefficientOfVariation}
+          </p>
         </div>
-      </div>
-
-      <div className="mt-6">
-        <TestAnalysis
-          studentCount={numberOfStudents!}
-          questionCount={numberOfQuestions!}
-          scores={scores}
-          mean={average}
-          median={median}
-          mode={mode}
-          range={range}
-          stdDeviation={standardDeviation}
-          variance={variance}
-          kr20={kr20}
-          kr21={kr21}
-          skewness={skewness}
-          kurtosis={kurtosis}
-          coefficientVariation={relativeCoefficientOfVariation}
-        />
-      </div>
-
-      <div className="mt-6">
-        <OptionAnalysis data={optionCounts} />
-      </div>
-
-      <div className="mt-6">
-        <StudentAnswers
-          studentNames={studentNames!}
-          studentAnswers={studentAnswers!}
-          answerKey={answerKey!}
-          scores={scores}
-        />
-      </div>
-
-      <div className="mt-6">
-        <StudentAnswers01
-          studentNames={studentNames!}
-          studentAnswers01={studentAnswer01}
-          answerKey={answerKey!}
-          scores={scores}
-        />
-      </div>
-
-      <div className="mt-6">
-        <p>
-          <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
-        </p>
-        <p>
-          <strong>Soru Sayısı:</strong> {numberOfQuestions}
-        </p>
-        <p>
-          <strong>Ortalama Puan:</strong> {average.toFixed(2)}
-        </p>
-        <p>
-          <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
-        </p>
-        <p>
-          <strong>Varyans:</strong> {variance.toFixed(2)}
-        </p>
-        <p>
-          <strong>Ortanca (Median):</strong> {median}
-        </p>
-        <p>
-          <strong>Mod:</strong> {mode}
-        </p>
-        <p>
-          <strong>Maksimum Puan:</strong> {maxScore}
-        </p>
-        <p>
-          <strong>Ranj (Range):</strong> {range}
-        </p>
-        <p>
-          <strong>Çarpıklık Katsayısı (Skewness):</strong> {skewness}
-        </p>
-        <p>
-          <strong>Basıklık Katsayısı (Kurtosis):</strong> {kurtosis}
-        </p>
-        <p>
-          <strong>Test Puanlarının Başarı Yüzdesi:</strong> {successRate}%
-        </p>
-        <p>
-          <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20}
-        </p>
-        <p>
-          <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21}
-        </p>
-        <p>
-          <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
-          {relativeCoefficientOfVariation}
-        </p>
       </div>
     </div>
   );

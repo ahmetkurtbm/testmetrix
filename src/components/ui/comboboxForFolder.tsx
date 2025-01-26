@@ -53,6 +53,8 @@ export function ComboboxDemo({
       } else {
         console.error("Update failed:", data.error);
       }
+
+      window.location.reload();
     } catch (error) {
       console.error("Error updating Excel:", error);
     }
