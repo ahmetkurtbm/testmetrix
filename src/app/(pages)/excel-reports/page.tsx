@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
+import { PlotType } from "plotly.js";
 
 type OptionData = {
   madde: string;
@@ -21,7 +22,8 @@ import StudentAnalysis from "../../(functions)/StudentAnalysis";
 import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
 import { useSearchParams } from "next/navigation";
-import { ComboboxDemo } from "@/components/ui/comboboxForGrafics";
+import { ComboboxForData } from "@/components/ui/comboboxForGraficData";
+import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -194,6 +196,10 @@ function calculateKR20(variance: any, totalQuestions: any, percentageMap: any) {
     pValues.push(p);
     qValues.push(q);
   }
+
+  console.log(variance);
+  console.log(totalQuestions);
+  console.log(percentageMap);
 
   const numerator = pValues.reduce(
     (sum, p, index) => sum + p * qValues[index],
@@ -638,7 +644,8 @@ const ExcelReports = () => {
   const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
   const [correctCount, setCorrectCount] = useState<number[]>([]);
 
-  const [selectedGrafics, setSelectedGrafics] = useState("");
+  const [selectedGraficsData, setSelectedGraficsData] = useState("scores");
+  const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("pie");
 
   // first useEffect
   useEffect(() => {
@@ -677,9 +684,9 @@ const ExcelReports = () => {
   }, [params]);
 
   if (!data || data.file_data.length === 0) {
-    console.log("girdi");
+    console.log("Dosya yükleniyor...");
   } else {
-    console.log(data);
+    //console.log(data);
   }
 
   useEffect(() => {
@@ -714,20 +721,18 @@ const ExcelReports = () => {
     const skew = calculateSkewness(scores);
     const kurt = calculateKurtosis(scores);
     const successRateValue = calculateSuccessRate(scores);
-    const kr20Value = calculateKR20(
-      varianceValue,
-      numberOfQuestions,
-      percentageMapPerQuestion
+    const percMap = calculatePercentageMapPerQuestion(
+      answerKey,
+      studentAnswers
     );
+    const kr20Value = calculateKR20(varianceValue, numberOfQuestions, percMap);
+    console.log(kr20Value);
     const kr21Value = calculateKR21(avg, varianceValue, numberOfQuestions);
     const relCoefVariation = calculateRelativeCoefficientOfVariation(
       stdDev,
       avg
     );
-    const percMap = calculatePercentageMapPerQuestion(
-      answerKey,
-      studentAnswers
-    );
+
     const studentAns01 = calculateStudentAnswers01(studentAnswers, answerKey);
     const successRates = calculateSuccessRates(scores, numberOfQuestions);
     const zScores = calculateZScores(scores, avg, stdDev);
@@ -751,45 +756,6 @@ const ExcelReports = () => {
     );
     const optionCount = calculateOptionsCount(studentAnswers);
     const correctCount = calculateCorrectCount(answerKey, studentAnswers);
-
-    // Hesaplanan değerleri consola yazdırma
-    console.log("Average (Ortalama):", avg);
-    console.log("Variance (Varyans):", varianceValue);
-    console.log("Standard Deviation (Standart Sapma):", stdDev);
-    console.log("Mode (Mod):", mode);
-    console.log("Median (Medyan):", median);
-    console.log("Max Score (Maksimum Puan):", max);
-    console.log("Range (Aralık):", rangeValue);
-    console.log("Skewness (Çarpıklık):", skew);
-    console.log("Kurtosis (Basıklık):", kurt);
-    console.log("Success Rate (Başarı Oranı):", successRateValue);
-    console.log("KR-20 Value:", kr20Value);
-    console.log("KR-21 Value:", kr21Value);
-    console.log(
-      "Relative Coefficient of Variation (Bağıl Varyasyon Katsayısı):",
-      relCoefVariation
-    );
-    console.log("Percentage Map Per Question (Yüzde Haritası):", percMap);
-    console.log("Student Answers 01 Format:", studentAns01);
-    console.log("Success Rates (Başarı Oranları):", successRates);
-    console.log("Z-Scores:", zScores);
-    console.log("T-Scores:", tScores);
-    console.log("Ranks (Sıralamalar):", ranksValue);
-    console.log("Item Variance (Madde Varyansı):", itemVariance);
-    console.log(
-      "Item Standard Deviation (Madde Standart Sapması):",
-      itemStdDev
-    );
-    console.log("Difficulty Index (Zorluk İndeksi):", difficultyIndexValue);
-    console.log("Rbis Index:", rbis);
-    console.log("Prbis Index:", prbis);
-    console.log(
-      "Discrimination Index (Ayırt Edicilik İndeksi):",
-      discrimination
-    );
-    console.log("Reliability Index (Güvenirlik İndeksi):", reliability);
-    console.log("Option Count (Seçenek Sayısı):", optionCount);
-    console.log("Correct Count (Doğru Sayısı):", correctCount);
 
     // Set state values
     setAverage(avg);
@@ -834,8 +800,8 @@ const ExcelReports = () => {
       <h2 className="text-3xl font-semibold text-center p-1 text-green-500">
         Excel Raporları
       </h2>
-      <div className="p-1 flex gap-1">
-        <div className="flex-col gap-1 mt-6 p-1 bg-slate-500 rounded-md h-screen max-h-screen w-72">
+      <div className="p-1 flex gap-1 justify-center">
+        <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md h-screen max-h-screen w-72">
           {/* Student Analysis */}
           <div className="mt-6">
             <StudentAnalysis
@@ -906,71 +872,85 @@ const ExcelReports = () => {
           </div>
         </div>
 
-        <div className="flex-col mt-6 p-2 bg-black rounded-md h-screen max-h-screen w-full">
+        <div className="flex-col gap-1 p-2 bg-black rounded-md h-screen max-h-screen w-full">
           <p className="text-white text-center p-2">Grafikler</p>
-          <ComboboxDemo value={selectedGrafics} setValue={setSelectedGrafics} />
-          <Plot
-            data={[
-              {
-                x: xValues, // X ekseni: Öğrenci numarası veya soru numaraları
-                y: scores, // Y ekseni: Skorlar
-                type: "scatter", // Çizgi grafiği
-                mode: "lines+markers", // Hem çizgi hem de işaretçi (marker) göster
-                marker: { color: "blue" }, // Nokta rengi
-              },
-            ]}
-            layout={{
-              title: "Öğrenci Başarıları",
-              xaxis: { title: "" },
-              yaxis: { title: "Skorlar" },
-            }}
-          />
+          <div className="flex gap-1">
+            <ComboboxForData
+              value={selectedGraficsData}
+              setValue={setSelectedGraficsData}
+            />
+            <ComboboxForGrafic
+              value={selectedGrafic}
+              setValue={setSelectedGrafic}
+            />
+          </div>
+
+          <div className="flex justify-center rounded-md mt-6">
+            <Plot
+              data={[
+                {
+                  labels: xValues,
+                  values: scores,
+                  x: xValues,
+                  y: scores,
+                  type: selectedGrafic,
+                  mode: "lines+markers",
+                  marker: { color: "blue" },
+                },
+              ]}
+              layout={{
+                title: "Öğrenci Başarıları",
+                xaxis: { title: "" },
+                yaxis: { title: "Skorlar" },
+              }}
+            />
+          </div>
         </div>
 
-        <div className="flex-col gap-1 mt-6 p-1 rounded-md bg-slate-400 h-screen max-h-screen w-[35rem]">
-          <p className="text-white w-full">
+        <div className="flex flex-col gap-4 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl max-h-screen w-[35rem] overflow-auto">
+          <p className="text-white text-lg font-semibold">
             <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Soru Sayısı:</strong> {numberOfQuestions}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Ortalama Puan:</strong> {average.toFixed(2)}
           </p>
-          <p className="text-white">
+          <p className="text-white text-lg">
             <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Varyans:</strong> {variance.toFixed(2)}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Ortanca (Median):</strong> {median}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Mod:</strong> {mode}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Maksimum Puan:</strong> {maxScore}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Ranj (Range):</strong> {range}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Çarpıklık Katsayısı (Skewness):</strong> {skewness}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Basıklık Katsayısı (Kurtosis):</strong> {kurtosis}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Test Puanlarının Başarı Yüzdesi:</strong> {successRate}%
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21}
           </p>
-          <p>
+          <p className="text-white text-lg">
             <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
             {relativeCoefficientOfVariation}
           </p>

@@ -21,23 +21,27 @@ import {
 
 const frameworks = [
   {
-    value: "perc_map",
+    value: "scores",
+    label: "Öğrencilerin Puanları",
+  },
+  {
+    value: "percentageMapPerQuestion",
     label: "Percentage Map Per Question (Soru Başına Yüzde Haritası)",
   },
   {
-    value: "student_ans_01",
+    value: "studentAnswer01",
     label: "Student Answers 0/1 Format (Öğrenci Yanıtları 0/1 Formatı)",
   },
   {
-    value: "success_rates",
+    value: "successRates",
     label: "Success Rates (Başarı Oranları)",
   },
   {
-    value: "z_scores",
+    value: "zScores",
     label: "Z-Scores (Z Puanları)",
   },
   {
-    value: "t_scores",
+    value: "tScores",
     label: "T-Scores (T Puanları)",
   },
   {
@@ -45,44 +49,44 @@ const frameworks = [
     label: "Ranks (Sıralamalar)",
   },
   {
-    value: "item_variance",
+    value: "variancePerItem",
     label: "Item Variance (Soru Bazında Varyans)",
   },
   {
-    value: "item_std_dev",
+    value: "stdDevPerItem",
     label: "Item Standard Deviation (Soru Bazında Standart Sapma)",
   },
   {
-    value: "difficulty_index",
+    value: "difficultyIndex",
     label: "Item Difficulty Index (Soru Zorluk İndeksi)",
   },
   {
-    value: "rbis",
+    value: "rbisIndex",
     label: "RBis (Madde Toplam Korelasyon Katsayısı)",
   },
   {
-    value: "prbis",
+    value: "prbisIndex",
     label: "pRBis (Düzeltilmiş RBis)",
   },
   {
-    value: "discrimination",
+    value: "discriminationIndex",
     label: "Discrimination Index (Ayırt Edicilik İndeksi)",
   },
   {
-    value: "reliability",
+    value: "reliabilityIndex",
     label: "Reliability Index (Güvenirlik İndeksi)",
   },
   {
-    value: "option_count",
+    value: "optionCounts",
     label: "Option Count (Seçenek Sayısı)",
   },
   {
-    value: "correct_count",
+    value: "correctCount",
     label: "Correct Count (Doğru Sayısı)",
   },
 ];
 
-export function ComboboxDemo({
+export function ComboboxForData({
   value,
   setValue,
 }: {
