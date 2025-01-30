@@ -12,6 +12,14 @@ import {
 import React, { useState, useEffect } from "react";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 import Cookies from "js-cookie";
+import { Avatar } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface File {
   id: number;
@@ -35,6 +43,7 @@ export default function Home() {
 
   const [folders, setFolders] = useState<FolderProps[]>([]);
   const [folderNames, setFolderNames] = useState<FolderName[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!Cookies.get("token")) {
@@ -136,6 +145,89 @@ export default function Home() {
               <p className="text-sm text-gray-500 ml-auto">
                 {new Date(folder.files[0].created_at).toLocaleString()}
               </p>
+              {/* <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <img src="threeDots.svg" alt="Ayarlar" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="p-2 bg-white shadow-md rounded-md flex flex-col gap-1">
+                    {isEditing ? (
+                      <div className="flex items-center gap-1">
+                        <Input
+                          value={folder.folder_name}
+                          onChange={(e) => console.log(e.target.value)}
+                          className="h-8 text-sm w-[10rem]"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            //onRename(folder.id, folderName);
+                            setIsEditing(false);
+                          }}
+                        >
+                          Kaydet
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button size="sm" onClick={() => setIsEditing(true)}>
+                        İsmi Düzenle
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      //onClick={() => onDelete(folder.id)}
+                    >
+                      Klasörü Sil
+                    </Button>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider> */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <img src="threeDots.svg" alt="Menü" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="p-2 w-48">
+                  {/* İsim Değiştirme Alanı */}
+                  {isEditing ? (
+                    <div className="flex items-center gap-2 p-2">
+                      <Input
+                        value={folder.folder_name}
+                        onChange={(e) => console.log(e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          //onRename(folder.id, folderName);
+                          setIsEditing(false);
+                        }}
+                      >
+                        Kaydet
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation(); // Menü kapanmasını engeller
+                        setIsEditing(true);
+                      }}
+                    >
+                      İsmi Düzenle
+                    </div>
+                  )}
+                  <DropdownMenuItem
+                    //onClick={() => onDelete(folder.id)}
+                    className="text-red-500"
+                  >
+                    Klasörü Sil
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </CardHeader>
           <CardContent>

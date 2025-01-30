@@ -140,39 +140,39 @@ const ExcelUpdate = () => {
 
   return (
     <div style={{ padding: "16px" }} className="gap-4 flex-col">
-      <div
-        style={{ padding: "20px" }}
-        className="overflow-x-auto max-w-full max-h-[40rem] overflow-y-auto bg-slate-300"
-      >
-        <div className="w-full flex  justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold mb-4">{data.file_name}</h1>
-            <h4 className="text-sm font-semibold mb-4 text-gray-400">
-              {data.created_at}
-            </h4>
-          </div>
-
-          <div className="flex gap-3">
-            <div>
-              <Label>Klasor Ismi</Label>
-              <Input
-                defaultValue={data.folder_name}
-                onChange={(e) => setFolderName(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label>Dosya Ismi</Label>
-              <Input
-                defaultValue={data.file_name}
-                onChange={(e) => setFileName(e.target.value)}
-              />
-            </div>
-
-            <Button onClick={handleUpdate}>Değişikleri Kaydet</Button>
-          </div>
+      <div className="w-full flex  justify-between bg-slate-300 p-3">
+        <div>
+          <h1 className="text-2xl font-semibold mb-4">{data.file_name}</h1>
+          <h4 className="text-sm font-semibold mb-4 text-gray-400">
+            {data.created_at}
+          </h4>
         </div>
 
+        <div className="flex gap-3">
+          <div>
+            <Label>Klasor Ismi</Label>
+            <Input
+              defaultValue={data.folder_name}
+              onChange={(e) => setFolderName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label>Dosya Ismi</Label>
+            <Input
+              defaultValue={data.file_name}
+              onChange={(e) => setFileName(e.target.value)}
+            />
+          </div>
+
+          <Button onClick={handleUpdate}>Değişikleri Kaydet</Button>
+        </div>
+      </div>
+
+      <div
+        style={{ padding: "20px" }}
+        className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300"
+      >
         <table className="border-collapse border border-gray-200">
           <thead>
             <tr className="bg-gray-100">
@@ -181,7 +181,11 @@ const ExcelUpdate = () => {
                   key={index}
                   className="p-4 text-left font-medium text-gray-700"
                 >
-                  {index}
+                  {index === 0 ? (
+                    <p></p>
+                  ) : (
+                    <p className="flex-row">Soru{index}</p>
+                  )}
                 </th>
               ))}
             </tr>
