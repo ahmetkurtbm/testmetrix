@@ -29,10 +29,6 @@ const frameworks = [
     label: "Percentage Map Per Question (Soru Başına Yüzde Haritası)",
   },
   {
-    value: "studentAnswer01",
-    label: "Student Answers 0/1 Format (Öğrenci Yanıtları 0/1 Formatı)",
-  },
-  {
     value: "successRates",
     label: "Success Rates (Başarı Oranları)",
   },
@@ -75,14 +71,6 @@ const frameworks = [
   {
     value: "reliabilityIndex",
     label: "Reliability Index (Güvenirlik İndeksi)",
-  },
-  {
-    value: "optionCounts",
-    label: "Option Count (Seçenek Sayısı)",
-  },
-  {
-    value: "correctCount",
-    label: "Correct Count (Doğru Sayısı)",
   },
 ];
 

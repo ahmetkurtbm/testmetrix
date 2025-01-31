@@ -19,9 +19,34 @@ interface OptionAnalysisProps {
 }
 
 const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
+  // Her soru için üst ve alt grupları hesapla
   const calculateAnalysisData = (data: OptionData[]) => {
     return data.map((item) => {
       const total = item.A + item.B + item.C + item.D + item.E + item.Boş;
+
+      // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
+      const groupSize = Math.round(total * 0.27);
+
+      // Her soru için üst ve alt grupları hesapla
+      const upperGroup = [
+        Math.round((item.A / total) * groupSize),
+        Math.round((item.B / total) * groupSize),
+        Math.round((item.C / total) * groupSize),
+        Math.round((item.D / total) * groupSize),
+        Math.round((item.E / total) * groupSize),
+        Math.round((item.Boş / total) * groupSize),
+        groupSize,
+      ];
+
+      const lowerGroup = [
+        Math.round((item.A / total) * groupSize),
+        Math.round((item.B / total) * groupSize),
+        Math.round((item.C / total) * groupSize),
+        Math.round((item.D / total) * groupSize),
+        Math.round((item.E / total) * groupSize),
+        Math.round((item.Boş / total) * groupSize),
+        groupSize,
+      ];
 
       return {
         madde: item.madde,
@@ -36,24 +61,8 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
           total > 0 ? ((item.Boş / total) * 100).toFixed(2) : "0.00",
           "100",
         ],
-        upperGroup: [
-          Math.floor(item.A / 2),
-          Math.floor(item.B / 2),
-          Math.floor(item.C / 2),
-          Math.floor(item.D / 2),
-          Math.floor(item.E / 2),
-          Math.floor(item.Boş / 2),
-          Math.floor(total / 2),
-        ],
-        lowerGroup: [
-          Math.ceil(item.A / 2),
-          Math.ceil(item.B / 2),
-          Math.ceil(item.C / 2),
-          Math.ceil(item.D / 2),
-          Math.ceil(item.E / 2),
-          Math.ceil(item.Boş / 2),
-          Math.ceil(total / 2),
-        ],
+        upperGroup,
+        lowerGroup,
       };
     });
   };

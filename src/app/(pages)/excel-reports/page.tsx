@@ -15,7 +15,7 @@ type OptionData = {
   Boş: number;
 };
 
-import QuestionAnalysis from "../../(functions)/OptionAnalysis";
+import QuestionAnalysis from "../../(functions)/QuestionAnalysis";
 import StudentAnswers01 from "../../(functions)/StudentAnswers01";
 import StudentAnswers from "../../(functions)/StudentAnswers";
 import StudentAnalysis from "../../(functions)/StudentAnalysis";
@@ -196,10 +196,6 @@ function calculateKR20(variance: any, totalQuestions: any, percentageMap: any) {
     pValues.push(p);
     qValues.push(q);
   }
-
-  console.log(variance);
-  console.log(totalQuestions);
-  console.log(percentageMap);
 
   const numerator = pValues.reduce(
     (sum, p, index) => sum + p * qValues[index],
@@ -546,7 +542,6 @@ function calculateReliabilityIndexForAll(studentAnswers: any, answerKey: any) {
   const reliabilityIndexes = itemVariances.map((variance: any, index: any) =>
     (Math.sqrt(variance) * itemStdDevs[index]).toFixed(2)
   );
-
   return reliabilityIndexes;
 }
 
@@ -645,7 +640,7 @@ const ExcelReports = () => {
   const [correctCount, setCorrectCount] = useState<number[]>([]);
 
   const [selectedGraficsData, setSelectedGraficsData] = useState("scores");
-  const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("pie");
+  const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
 
   // first useEffect
   useEffect(() => {
@@ -689,6 +684,7 @@ const ExcelReports = () => {
     //console.log(data);
   }
 
+  // just
   useEffect(() => {
     if (data?.file_data) {
       const key = data.file_data[0].slice(1); // Answer key excluding first column
@@ -706,7 +702,7 @@ const ExcelReports = () => {
     }
   }, [data]);
 
-  // Second effect to calculate other metrics based on scores
+  // all data
   useEffect(() => {
     if (scores.length === 0) return;
 
@@ -726,7 +722,6 @@ const ExcelReports = () => {
       studentAnswers
     );
     const kr20Value = calculateKR20(varianceValue, numberOfQuestions, percMap);
-    console.log(kr20Value);
     const kr21Value = calculateKR21(avg, varianceValue, numberOfQuestions);
     const relCoefVariation = calculateRelativeCoefficientOfVariation(
       stdDev,
@@ -788,12 +783,89 @@ const ExcelReports = () => {
     setDiscriminationIndex(discrimination.map((item) => Number(item) || 0)); // Converts string to number
     setPercentageMapPerQuestion(percMap.map((item) => Number(item) || 0)); // Converts string to number
 
-    setReliabilityIndex(reliability);
+    setReliabilityIndex(reliability.map((item: number) => Number(item) || 0));
     setOptionCounts(optionCount);
     setCorrectCount(correctCount);
   }, [scores]);
 
-  const xValues = studentNames;
+  // console.log("Answer Key:", answerKey);
+  // console.log("Student Answers:", studentAnswers);
+  // console.log("Student Names:", studentNames);
+  // console.log("Number of Questions:", numberOfQuestions);
+  // console.log("Number of Students:", numberOfStudents);
+
+  // console.log("Scores:", scores);
+  // console.log("Average:", average);
+  // console.log("Standard Deviation:", standardDeviation);
+  // console.log("Variance:", variance);
+  // console.log("Max Score:", maxScore);
+  // console.log("Median:", median);
+  // console.log("Range:", range);
+  // console.log("Skewness:", skewness);
+  // console.log("Kurtosis:", kurtosis);
+  // console.log("Success Rate:", successRate);
+  // console.log("KR-20:", kr20);
+  // console.log("KR-21:", kr21);
+  // console.log(
+  //   "Relative Coefficient of Variation:",
+  //   relativeCoefficientOfVariation
+  // );
+  // console.log("Mode:", mode);
+  // console.log("Percentage Map Per Question:", percentageMapPerQuestion);
+  // console.log("Student Answer 0/1:", studentAnswer01);
+  // console.log("Success Rates:", successRates);
+  // console.log("Z-Scores:", zScores);
+  // console.log("T-Scores:", tScores);
+  // console.log("Ranks:", ranks);
+  // console.log("Variance Per Item:", variancePerItem);
+  // console.log("Standard Deviation Per Item:", stdDevPerItem);
+  // console.log("Difficulty Index:", difficultyIndex);
+  // console.log("RBIS Index:", rbisIndex);
+  // console.log("PRBIS Index:", prbisIndex);
+  // console.log("Discrimination Index:", discriminationIndex);
+  // console.log("Reliability Index:", reliabilityIndex);
+  // console.log("Option Counts:", optionCounts);
+  // console.log("Correct Count:", correctCount);
+
+  const getDataForPlot = () => {
+    switch (selectedGraficsData) {
+      case "scores":
+        return scores;
+      case "percentageMapPerQuestion":
+        return percentageMapPerQuestion;
+      case "successRates":
+        return successRates;
+      case "zScores":
+        return zScores;
+      case "tScores":
+        return tScores;
+      case "ranks":
+        return ranks;
+      case "variancePerItem":
+        return variancePerItem;
+      case "stdDevPerItem":
+        return stdDevPerItem;
+      case "difficultyIndex":
+        return difficultyIndex;
+      case "rbisIndex":
+        return rbisIndex;
+      case "prbisIndex":
+        return prbisIndex;
+      case "discriminationIndex":
+        return discriminationIndex;
+      case "reliabilityIndex":
+        return reliabilityIndex;
+      default:
+        return [];
+    }
+  };
+
+  const xValues = Array.from(
+    { length: getDataForPlot().length },
+    (_, i) => i + 1
+  );
+
+  const yValues = getDataForPlot();
 
   return (
     <div>
@@ -815,8 +887,7 @@ const ExcelReports = () => {
           </div>
 
           {/* Question Analysis */}
-          {/* <div className="mt-6">
-            <h1>Question Analizi</h1>
+          <div className="mt-6">
             <QuestionAnalysis
               correctCount={correctCount}
               percentageMap={percentageMapPerQuestion}
@@ -825,10 +896,10 @@ const ExcelReports = () => {
               itemDifficulty={difficultyIndex}
               itemRbis={rbisIndex}
               itemPrbis={prbisIndex}
-              itemDiscrimination={discriminationIndex}
+              item27={discriminationIndex}
               itemReliability={reliabilityIndex}
             />
-          </div> */}
+          </div>
 
           <div className="mt-6">
             <TestAnalysis
@@ -890,18 +961,18 @@ const ExcelReports = () => {
               data={[
                 {
                   labels: xValues,
-                  values: scores,
+                  values: yValues,
                   x: xValues,
-                  y: scores,
+                  y: yValues,
                   type: selectedGrafic,
                   mode: "lines+markers",
                   marker: { color: "blue" },
                 },
               ]}
               layout={{
-                title: "Öğrenci Başarıları",
+                title: selectedGraficsData,
                 xaxis: { title: "" },
-                yaxis: { title: "Skorlar" },
+                yaxis: { title: "Değerler" },
               }}
             />
           </div>

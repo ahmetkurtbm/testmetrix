@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TableContainer from "@/app/(components)/TableContainer";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 
 const ExcelUploadPage = () => {
   const router = useRouter();
@@ -151,6 +152,11 @@ const ExcelUploadPage = () => {
                 >
                   Klasör Adı
                 </label>
+                {/* <ComboboxDemo
+                  folderNames={folderNames}
+                  folderName={folderName}
+                  setFolderName={setFolderName}
+                ></ComboboxDemo> */}
                 <Input
                   id="folderName"
                   type="text"

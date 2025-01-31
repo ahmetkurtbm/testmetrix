@@ -145,46 +145,6 @@ export default function Home() {
               <p className="text-sm text-gray-500 ml-auto">
                 {new Date(folder.files[0].created_at).toLocaleString()}
               </p>
-              {/* <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <img src="threeDots.svg" alt="Ayarlar" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="p-2 bg-white shadow-md rounded-md flex flex-col gap-1">
-                    {isEditing ? (
-                      <div className="flex items-center gap-1">
-                        <Input
-                          value={folder.folder_name}
-                          onChange={(e) => console.log(e.target.value)}
-                          className="h-8 text-sm w-[10rem]"
-                        />
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            //onRename(folder.id, folderName);
-                            setIsEditing(false);
-                          }}
-                        >
-                          Kaydet
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button size="sm" onClick={() => setIsEditing(true)}>
-                        İsmi Düzenle
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      //onClick={() => onDelete(folder.id)}
-                    >
-                      Klasörü Sil
-                    </Button>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -212,6 +172,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <div
+                      className=" hover:bg-green-500 hover:text-white bg-slate-300 m-1 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-green-500"
                       onClick={(e) => {
                         e.stopPropagation(); // Menü kapanmasını engeller
                         setIsEditing(true);
@@ -222,7 +183,7 @@ export default function Home() {
                   )}
                   <DropdownMenuItem
                     //onClick={() => onDelete(folder.id)}
-                    className="text-red-500"
+                    className="text-red-500 hover:bg-red-500 hover:text-white bg-slate-300 m-1"
                   >
                     Klasörü Sil
                   </DropdownMenuItem>

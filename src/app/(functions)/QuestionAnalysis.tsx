@@ -8,11 +8,11 @@ type QuestionAnalysisProps = {
   percentageMap: number[];
   itemVariance: number[];
   itemStd: number[];
-  itemGucluk: number[];
+  itemDifficulty: number[];
   itemRbis: number[];
   itemPrbis: number[];
   item27: number[];
-  itemGüvenirlik: number[];
+  itemReliability: number[];
 };
 
 const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
@@ -20,11 +20,11 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
   percentageMap,
   itemVariance,
   itemStd,
-  itemGucluk,
+  itemDifficulty,
   itemRbis,
   itemPrbis,
   item27,
-  itemGüvenirlik,
+  itemReliability,
 }) => {
   const handleDownload = async () => {
     const percentageInverted = percentageMap.map((value) => 100 - value);
@@ -56,11 +56,11 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
         percentageInverted[i],
         itemVariance[i],
         itemStd[i],
-        itemGucluk[i],
+        itemDifficulty[i],
         itemRbis[i],
         itemPrbis[i],
         item27[i],
-        itemGüvenirlik[i],
+        itemReliability[i],
       ]);
     }
 
