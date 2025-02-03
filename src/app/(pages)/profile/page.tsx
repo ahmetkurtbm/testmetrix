@@ -1,37 +1,47 @@
 "use client";
 
-import { Avatar } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
+import Head from "next/head";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import React, { useState, useEffect } from "react";
 
-type FormData = Record<string, string>;
-
-export default function Page() {
-  const [formData, setFormData] = useState<FormData>({});
-  const [tokenData, setTokenData] = useState<Record<string, any>>({});
+const Profile = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    university: "",
+    currentPassword: "",
+    newPassword: "",
+  });
 
   useEffect(() => {
-    // Cookie'den dinamik olarak tüm verileri çek
-    const cookies = document.cookie
-      .split(";")
-      .reduce((acc: FormData, cookie) => {
-        const [key, value] = cookie.split("=");
-        acc[key.trim()] = decodeURIComponent(value);
-        return acc;
-      }, {});
+    async function fetchUser() {
+      const response = await fetch("http://localhost:5000/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
-    setFormData(cookies);
+      const userData = await response.json();
 
-    // Token çözme işlemi
-    if (cookies.token) {
-      try {
-        const decodedToken = JSON.parse(atob(cookies.token.split(".")[1]));
-        setTokenData(decodedToken);
-      } catch (error) {
-        console.error("Token çözme işlemi başarısız:", error);
-      }
+      setFormData({
+        ...formData,
+        name: userData.name || "",
+        surname: userData.surname || "",
+        email: userData.email || "",
+        university: userData.university || "",
+      });
     }
+    fetchUser();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,53 +49,157 @@ export default function Page() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSaveProfile = async () => {
+    if (!formData.currentPassword) {
+      alert("Lütfen güncelleme işlemi için şifrenizi giriniz.");
+      return;
+    }
+
     try {
-      const response = await fetch("/api/save-profile", {
-        method: "POST",
+      const response = await fetch("http://localhost:5000/user", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save data");
+        throw new Error("Profil kaydedilemedi.");
       }
 
-      alert("Profile updated successfully!");
+      alert("Profil güncellendi.");
     } catch (error: any) {
-      alert("Error saving profile: " + error.message);
+      alert("Hata: " + error.message);
     }
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6 p-6">
-      {/* Avatar Bölümü */}
-      <div className="flex items-center justify-center w-24 h-24 bg-gray-200 rounded-full">
-        <Avatar className="w-20 h-20">A</Avatar>
+    <>
+      <Head>
+        <title>Profil</title>
+        <meta name="description" content="Profile Page" />
+      </Head>
+      <div className="flex items-center justify-center h-screen">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <h1 className="text-2xl font-bold text-center">Profil Düzenle</h1>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                İsim:
+              </label>
+              <Input
+                id="name"
+                type="text"
+                value={formData.name}
+                name="name"
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="surname"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Soyisim:
+              </label>
+              <Input
+                id="surname"
+                type="text"
+                value={formData.surname}
+                name="surname"
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email:
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                name="email"
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="university"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Kurum:
+              </label>
+              <Input
+                id="university"
+                type="text"
+                value={formData.university}
+                name="university"
+                onChange={handleInputChange}
+                required
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="currentPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Mevcut Şifre:
+              </label>
+              <Input
+                id="currentPassword"
+                type="password"
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleInputChange}
+                className="mt-1 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Yeni Şifre:
+              </label>
+              <Input
+                id="newPassword"
+                type="password"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                className="mt-1 w-full"
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="gap-1 flex-col">
+            <Button
+              onClick={handleSaveProfile}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Profili Güncelle
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
-
-      {/* Dinamik Input Alanları */}
-      <div className="w-full max-w-md space-y-4">
-        {Object.entries(tokenData).map(([key, value]) => (
-          <>
-            <p>{key}</p>
-            <Input
-              key={key}
-              name={key}
-              value={value}
-              onChange={handleInputChange}
-              placeholder={`Enter your ${key}`}
-            />
-          </>
-        ))}
-      </div>
-
-      {/* Kaydet Düğmesi */}
-      <Button onClick={handleSave} className="w-full max-w-md">
-        Save Changes
-      </Button>
-    </div>
+    </>
   );
-}
+};
+
+export default Profile;

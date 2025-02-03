@@ -282,12 +282,14 @@ function calculateSuccessRates(scores: any, totalQuestions: any) {
 
 // Z-skoru (her öğrenci için)
 function calculateZScores(scores: any, average: any, standardDeviation: any) {
-  return scores.map((score: any) => (score - average) / standardDeviation);
+  return scores.map((score: any) =>
+    parseFloat(((score - average) / standardDeviation).toFixed(3))
+  );
 }
 
 // T-skoru (her öğrenci için)
 function calculateTScores(zScores: any) {
-  return zScores.map((z: any) => 50 + 10 * z);
+  return zScores.map((z: any) => parseFloat((50 + 10 * z).toFixed(3)));
 }
 
 // öğrencilerin başarı sırasını hesaplar

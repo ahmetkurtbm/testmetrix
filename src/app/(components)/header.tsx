@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,11 +17,10 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      // Cookie'yi sil
       Cookies.remove("token");
 
-      // Kullanıcıyı giriş ekranına yönlendirme
       router.push("/login");
+
       window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
@@ -39,21 +37,14 @@ const Header = () => {
           href="/folders"
           className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
         >
-          <span className="">Folders</span>
+          <span className="">Klasörler</span>
         </Link>
         <Link
           href="/excel-upload"
           className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
         >
-          <p className="">Excel Upload</p>
+          <p className="">Dosya Yükle</p>
         </Link>
-
-        {/* <Link
-          href="/excel-reports"
-          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
-        >
-          <span className="">Excel Reports</span>
-        </Link> */}
       </nav>
 
       <div className="relative">
@@ -64,7 +55,7 @@ const Header = () => {
               className="flex items-center space-x-2 bg-slate-300 "
             >
               <Avatar className="w-8 h-8 bg-blue-500 text-white"></Avatar>
-              <span className="hidden sm:block">Profile</span>
+              <span className="hidden sm:block">Profil</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 mt-2">
@@ -80,7 +71,7 @@ const Header = () => {
                 className="block w-full text-left bg-red-600"
                 onClick={handleLogout}
               >
-                Logout
+                Çıkış Yap
               </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>

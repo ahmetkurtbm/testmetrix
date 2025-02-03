@@ -26,19 +26,19 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
 
     // Başlıkları ekle
     worksheet.addRow([
-      "Öğrenci İsmi",
+      "Öğrenci Adı-Soyadı",
       "Doğru Yanıt Sayısı",
       "Yanlış Yanıt Sayısı",
       "Puanı",
       "Başarı Yüzdesi %",
-      "Z Skorları",
-      "T Skorları",
+      "Z Puanı",
+      "T Puanı",
       "Başarı Sırası",
     ]);
 
     // Veri ekle
     for (let i = 0; i < studentNames.length; i++) {
-      worksheet.addRow([
+      let row = worksheet.addRow([
         studentNames[i],
         scores[i],
         numberOfQuestions - scores[i],
@@ -48,6 +48,10 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
         tScore[i],
         succesRates[i],
       ]);
+
+      row.eachCell((cell) => {
+        cell.alignment = { horizontal: "right" };
+      });
     }
 
     // Stil ayarları

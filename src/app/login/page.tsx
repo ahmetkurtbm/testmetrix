@@ -10,15 +10,15 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
-const roles = ["Admin", "Teacher", "Student", "Guest"];
+const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Login = () => {
   const router = useRouter();
 
-  const [role, setRole] = useState<string>("Student");
+  const [role, setRole] = useState<string>("Öğrenci");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -44,7 +44,7 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        Cookies.set("token", data.token, { expires: 1 }); // 1 günlüğüne token kaydet
+        Cookies.set("token", data.token, { expires: 1 / 24 });
         console.log("Başarılı giriş, token cookies'e kaydedildi");
         router.push("/folders");
       } else {
@@ -62,14 +62,18 @@ const Login = () => {
   return (
     <>
       <Head>
-        <title>Login</title>
+        <title>Giriş Ekranı</title>
         <meta name="description" content="Login Page" />
       </Head>
-      <div className="flex items-center justify-center h-screen bg-blue-200">
+      <div className="flex items-center justify-center h-screen">
+        <img
+          className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
+          src="login-teacher-student.webp"
+        />
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
             <h1 className="text-2xl font-bold text-center bg-gray-300 rounded-md p-1">
-              Giriş Yap
+              Giriş Ekranı
             </h1>
           </CardHeader>
           <CardContent>

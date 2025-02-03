@@ -8,23 +8,29 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 
-const roles = ["Admin", "Teacher", "Student", "Guest"];
+const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Register = () => {
   const router = useRouter();
 
-  const [role, setRole] = useState("Student");
+  const [role, setRole] = useState("Öğrenci");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [university, setUniversity] = useState("");
   const [password, setPassword] = useState("");
+  const [KVKK, setKVKK] = useState(false);
+
+  const handleKVKK = (event: any) => {
+    setKVKK(event);
+    console.log("Checkbox Durumu:", event);
+  };
 
   const handleRegister = async () => {
     const userData = {
@@ -33,6 +39,7 @@ const Register = () => {
       email,
       university,
       role,
+      KVKK,
       password,
     };
 
@@ -51,7 +58,7 @@ const Register = () => {
 
       const data = await response.json();
       console.log("Kayıt başarılı:", data);
-      // Başarılı kayıt işleminden sonra yapılacaklar
+      navigateLogin();
     } catch (error) {
       console.error("Hata:", error);
     }
@@ -64,13 +71,17 @@ const Register = () => {
   return (
     <>
       <Head>
-        <title>Kayıt Ol</title>
+        <title>Kayıt Ekranı</title>
         <meta name="description" content="Register Page" />
       </Head>
-      <div className="flex items-center justify-center h-screen bg-blue-200">
+      <div className="flex items-center justify-center h-screen">
+        <img
+          className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
+          src="login-teacher-student.webp"
+        />
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <h1 className="text-2xl font-bold text-center">Kayıt Ol</h1>
+            <h1 className="text-2xl font-bold text-center">Kayıt Ekranı</h1>
           </CardHeader>
           <CardContent>
             <Tabs
@@ -97,12 +108,12 @@ const Register = () => {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700"
               >
-                Ad:
+                isim:
               </label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Ad"
+                placeholder="İsim"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -114,12 +125,12 @@ const Register = () => {
                 htmlFor="surname"
                 className="block text-sm font-medium text-gray-700"
               >
-                Soyad:
+                Soyisim:
               </label>
               <Input
                 id="surname"
                 type="text"
-                placeholder="Soyad"
+                placeholder="Soyisim"
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
                 required
@@ -148,12 +159,12 @@ const Register = () => {
                 htmlFor="university"
                 className="block text-sm font-medium text-gray-700"
               >
-                Üniversite:
+                Kurum:
               </label>
               <Input
                 id="university"
                 type="text"
-                placeholder="Üniversite"
+                placeholder="Kurum"
                 value={university}
                 onChange={(e) => setUniversity(e.target.value)}
                 required
@@ -180,7 +191,7 @@ const Register = () => {
           </CardContent>
           <CardFooter className="gap-1 flex-col">
             <label className="text-sm font-medium text-gray-700 align-middle gap-1 flex">
-              <Checkbox></Checkbox>
+              <Checkbox checked={KVKK} onCheckedChange={handleKVKK} />
               <Link href="kvkk-" className="underline font-bold">
                 {" "}
                 KVKK{" "}
@@ -205,7 +216,7 @@ const Register = () => {
               onClick={navigateLogin}
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
-              Login
+              Giriş Yap
             </Button>
           </CardFooter>
         </Card>

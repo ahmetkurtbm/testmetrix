@@ -21,12 +21,12 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
     const worksheet = workbook.addWorksheet("Öğrenci Cevapları 0-1");
 
     // Cevap Anahtarı Ekle (ilk satır)
-    worksheet.addRow(["Cevap Anahtarı", "", ...answerKey]);
+    worksheet.addRow(["Yanıt Anahtarı", "", ...answerKey]);
 
     // Başlıkları ekle (ikinci satır)
     const headers = [
-      "Öğrenci İsmi",
-      "Öğrenci Puanları",
+      "Öğrenci Adı-Soyadı",
+      "Puan",
       ...answerKey.map((_, index) => `S${index + 1}`),
     ];
     worksheet.addRow(headers);
@@ -37,19 +37,6 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
     }
 
     // Stil ayarları
-    worksheet.getRow(1).eachCell((cell) => {
-      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "4F81BD" },
-      };
-      cell.alignment = {
-        vertical: "middle",
-        horizontal: "center",
-        wrapText: true, // Uzun yazıları hücre içinde alt alta yazdırır
-      };
-    });
 
     const headerRow = worksheet.getRow(2);
     headerRow.eachCell((cell) => {
@@ -98,6 +85,21 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
       maddeCell.alignment = {
         vertical: "middle",
         horizontal: "center",
+      };
+    });
+
+    // Cevap Anahtarı Satırı
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "3F8D3F" },
+      };
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: "center",
+        wrapText: true, // Uzun yazıları hücre içinde alt alta yazdırır
       };
     });
 
