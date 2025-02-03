@@ -599,7 +599,7 @@ const ExcelReports = () => {
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
 
   const [answerKey, setAnswerKey] = useState<string[]>([]);
-  const [studentAnswers, setStudentAnswers] = useState<string[][]>([]);
+  const [studentAnswers, setStudentAnswers] = useState<string[][]>([[]]);
   const [studentNames, setStudentNames] = useState<string[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(0);
   const [numberOfStudents, setNumberOfStudents] = useState<number>(0);
@@ -642,6 +642,8 @@ const ExcelReports = () => {
 
   const [selectedGraficsData, setSelectedGraficsData] = useState("scores");
   const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
+  const [xValues, setXValues] = useState<any>();
+  const [yValues, setYValues] = useState<any>();
 
   // first useEffect
   useEffect(() => {
@@ -680,12 +682,6 @@ const ExcelReports = () => {
 
     getExcel();
   }, []);
-
-  if (!data || data.file_data.length === 0) {
-    console.log("Dosya yükleniyor...");
-  } else {
-    //console.log(data);
-  }
 
   // just
   useEffect(() => {
@@ -863,12 +859,12 @@ const ExcelReports = () => {
     }
   };
 
-  const xValues = Array.from(
-    { length: getDataForPlot().length },
-    (_, i) => i + 1
-  );
-
-  const yValues = getDataForPlot();
+  useEffect(() => {
+    setXValues(
+      Array.from({ length: getDataForPlot().length }, (_, i) => i + 1)
+    );
+    setYValues(getDataForPlot());
+  }, [scores]);
 
   return (
     <div>
@@ -960,24 +956,26 @@ const ExcelReports = () => {
           </div>
 
           <div className="flex justify-center rounded-md mt-6">
-            <Plot
-              data={[
-                {
-                  labels: xValues,
-                  values: yValues,
-                  x: xValues,
-                  y: yValues,
-                  type: selectedGrafic,
-                  mode: "lines+markers",
-                  marker: { color: "blue" },
-                },
-              ]}
-              layout={{
-                title: selectedGraficsData,
-                xaxis: { title: "" },
-                yaxis: { title: "Değerler" },
-              }}
-            />
+            {xValues !== undefined && yValues !== undefined && (
+              <Plot
+                data={[
+                  {
+                    labels: xValues,
+                    values: yValues,
+                    x: xValues,
+                    y: yValues,
+                    type: selectedGrafic,
+                    mode: "lines+markers",
+                    marker: { color: "blue" },
+                  },
+                ]}
+                layout={{
+                  title: selectedGraficsData,
+                  xaxis: { title: "" },
+                  yaxis: { title: "Değerler" },
+                }}
+              />
+            )}
           </div>
         </div>
 
