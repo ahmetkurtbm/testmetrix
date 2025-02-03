@@ -17,6 +17,8 @@ import Link from "next/link";
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Register = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const router = useRouter();
 
   const [role, setRole] = useState("Öğrenci");
@@ -44,7 +46,7 @@ const Register = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/register", {
+      const response = await fetch(`${BACKEND_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

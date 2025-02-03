@@ -12,6 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 const Profile = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -23,7 +25,7 @@ const Profile = () => {
 
   useEffect(() => {
     async function fetchUser() {
-      const response = await fetch("http://localhost:5000/user", {
+      const response = await fetch(`${BACKEND_URL}/user`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +58,7 @@ const Profile = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/user", {
+      const response = await fetch(`${BACKEND_URL}/user`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

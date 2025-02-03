@@ -31,22 +31,21 @@ export function ComboboxDemo({
   folderNames: FolderName[];
   id: any;
 }) {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
   const handleChange = async (folderName: any) => {
     console.log(id, folderName);
     try {
-      const response = await fetch(
-        "http://localhost:5000/excel-update-folder-name",
-        {
-          method: "POST",
-          body: JSON.stringify({ id: id, folderName: folderName }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/excel-update-folder-name`, {
+        method: "POST",
+        body: JSON.stringify({ id: id, folderName: folderName }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const data = await response.json();
       if (response.ok) {
         console.log("Excel Updated Successful");

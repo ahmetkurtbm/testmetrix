@@ -23,6 +23,8 @@ import TableContainer from "@/app/(components)/TableContainer";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 
 const ExcelUploadPage = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const router = useRouter();
 
   const [jsonData, setJsonData] = useState<Record<string, any>>({}); // JSON verisi için state
@@ -86,7 +88,7 @@ const ExcelUploadPage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch("http://localhost:5000/excel-upload", {
+      const response = await fetch(`${BACKEND_URL}/excel-upload`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

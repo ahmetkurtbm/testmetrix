@@ -596,6 +596,8 @@ interface File {
 }
 
 const ExcelReports = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const params = useSearchParams();
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
 
@@ -651,7 +653,7 @@ const ExcelReports = () => {
 
       if (fileId) {
         try {
-          const response = await fetch("http://localhost:5000/excel", {
+          const response = await fetch(`${BACKEND_URL}/excel`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

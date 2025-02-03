@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Login = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const router = useRouter();
 
   const [role, setRole] = useState<string>("Öğrenci");
@@ -30,7 +32,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

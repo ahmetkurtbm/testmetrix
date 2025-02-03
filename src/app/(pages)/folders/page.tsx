@@ -39,6 +39,8 @@ interface FolderName {
 }
 
 export default function Home() {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+
   const router = useRouter();
 
   const [folders, setFolders] = useState<FolderProps[]>([]);
@@ -54,7 +56,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchFolders() {
       try {
-        const response = await fetch("http://localhost:5000/folders", {
+        const response = await fetch(`${BACKEND_URL}/folders`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -105,7 +107,7 @@ export default function Home() {
 
   const handleDelete = async (fileId: any) => {
     try {
-      const response = await fetch("http://localhost:5000/excel-delete", {
+      const response = await fetch(`${BACKEND_URL}/excel-delete`, {
         method: "DELETE",
         body: JSON.stringify({ fileId }),
         headers: {
