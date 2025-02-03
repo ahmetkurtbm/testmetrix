@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 import { PlotType } from "plotly.js";
@@ -21,7 +20,6 @@ import StudentAnswers from "../../(functions)/StudentAnswers";
 import StudentAnalysis from "../../(functions)/StudentAnalysis";
 import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
-import { useSearchParams } from "next/navigation";
 import { ComboboxForData } from "@/components/ui/comboboxForGraficData";
 import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
 
@@ -598,7 +596,6 @@ interface File {
 const ExcelReports = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
-  const params = useSearchParams();
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
 
   const [answerKey, setAnswerKey] = useState<string[]>([]);
@@ -649,7 +646,9 @@ const ExcelReports = () => {
   // first useEffect
   useEffect(() => {
     const getExcel = async () => {
-      const fileId = params.get("file-id");
+      //const fileId = params.get("file-id");
+      const searchParams = new URLSearchParams(window.location.search);
+      const fileId = searchParams.get("file-id");
 
       if (fileId) {
         try {
@@ -680,7 +679,7 @@ const ExcelReports = () => {
     };
 
     getExcel();
-  }, [params]);
+  }, []);
 
   if (!data || data.file_data.length === 0) {
     console.log("Dosya yükleniyor...");
@@ -697,6 +696,8 @@ const ExcelReports = () => {
 
       const calculatedScores = calculateScores(key, answers);
 
+      console.log("girdii");
+
       setScores(calculatedScores);
       setAnswerKey(key);
       setStudentAnswers(answers);
@@ -708,8 +709,6 @@ const ExcelReports = () => {
 
   // all data
   useEffect(() => {
-    if (scores.length === 0) return;
-
     // Calculate the various metrics
     const avg = calculateAverage(scores);
     const varianceValue = calculateVariance(scores);

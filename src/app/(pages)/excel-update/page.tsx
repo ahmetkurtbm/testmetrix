@@ -10,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Concert_One } from "next/font/google";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface ExcelUpdateProps {
@@ -33,17 +31,24 @@ interface File {
 const ExcelUpdate = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
-  const params = useSearchParams();
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [fileName, setFileName] = useState<string>();
   const [folderName, setFolderName] = useState<string>();
+  const [tempData, setTempData] = useState<string[][]>([[]]);
+  // const [headers, setHeaders] = useState<string[]>([]);
+  // const [rows, setRows] = useState<string[][]>([]);
 
-  const [tempData, setTempData] = useState<string[][]>([]);
+  // useEffect(() => {
+  //   setHeaders(data!.headers);
+  //   setRows(data!.rows);
+  // }, [data]);
 
   useEffect(() => {
     const getExcel = async () => {
-      const fileId = params.get("file-id");
+      //const fileId = params.get("file-id");
+      const searchParams = new URLSearchParams(window.location.search);
+      const fileId = searchParams.get("file-id");
 
       if (fileId) {
         try {
@@ -95,7 +100,7 @@ const ExcelUpdate = () => {
     };
 
     getExcel();
-  }, [params]);
+  }, []);
 
   const handleSelectChange = (
     rowIndex: number,
@@ -108,45 +113,43 @@ const ExcelUpdate = () => {
   };
 
   const handleUpdate = async () => {
-    const fileId = params.get("file-id");
+    //const fileId = params.get("file-id");
+    const searchParams = new URLSearchParams(window.location.search);
+    const fileId = searchParams.get("file-id");
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/excel-update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: fileId,
-          folderName: folderName || "defaultFolder",
-          fileName: fileName || "defaultFile",
-          arrayData: selectedValues || [],
-        }),
-      });
+    if (fileId) {
+      try {
+        const response = await fetch(`${BACKEND_URL}/excel-update`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: fileId,
+            folderName: folderName || "defaultFolder",
+            fileName: fileName || "defaultFile",
+            arrayData: selectedValues || [],
+          }),
+        });
 
-      if (response.ok) {
-        console.log("Excel Update Successful");
-      } else {
-        console.error("Update failed:", Error);
+        if (response.ok) {
+          console.log("Excel Update Successful");
+        } else {
+          console.error("Update failed:", Error);
+        }
+      } catch (error) {
+        console.error("Error Updating Excel:", error);
       }
-    } catch (error) {
-      console.error("Error Updating Excel:", error);
     }
   };
-
-  if (!data) {
-    return <div>Loading...</div>;
-  }
-
-  const { headers, rows } = data;
 
   return (
     <div style={{ padding: "16px" }} className="gap-4 flex-col">
       <div className="w-full flex  justify-between bg-slate-300 p-3">
         <div>
-          <h1 className="text-2xl font-semibold mb-4">{data.file_name}</h1>
+          <h1 className="text-2xl font-semibold mb-4">{data?.file_name}</h1>
           <h4 className="text-sm font-semibold mb-4 text-gray-400">
-            {data.created_at}
+            {data?.created_at}
           </h4>
         </div>
 
@@ -154,7 +157,7 @@ const ExcelUpdate = () => {
           <div>
             <Label>Klasor Ismi</Label>
             <Input
-              defaultValue={data.folder_name}
+              defaultValue={data?.folder_name}
               onChange={(e) => setFolderName(e.target.value)}
             />
           </div>
@@ -162,7 +165,7 @@ const ExcelUpdate = () => {
           <div>
             <Label>Dosya Ismi</Label>
             <Input
-              defaultValue={data.file_name}
+              defaultValue={data?.file_name}
               onChange={(e) => setFileName(e.target.value)}
             />
           </div>
@@ -178,18 +181,20 @@ const ExcelUpdate = () => {
         <table className="border-collapse border border-gray-200">
           <thead>
             <tr className="bg-gray-100">
-              {tempData[0].map((row, index) => (
-                <th
-                  key={index}
-                  className="p-4 text-left font-medium text-gray-700"
-                >
-                  {index === 0 ? (
-                    <p></p>
-                  ) : (
-                    <p className="flex-row">Soru{index}</p>
-                  )}
-                </th>
-              ))}
+              {tempData !== undefined &&
+                tempData !== null &&
+                tempData[0].map((row, index) => (
+                  <th
+                    key={index}
+                    className="p-4 text-left font-medium text-gray-700"
+                  >
+                    {index === 0 ? (
+                      <p></p>
+                    ) : (
+                      <p className="flex-row">Soru{index}</p>
+                    )}
+                  </th>
+                ))}
             </tr>
           </thead>
           <tbody>
