@@ -43,24 +43,27 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     // İstatistiksel Özetleri Ekle
     const summaryData = [
       ["Öğrenci Sayısı", studentCount],
-      ["Soru Sayısı", questionCount],
-      ["Alınabilecek En Yüksek Puan", Number(questionCount.toFixed(2))],
-      ["En Düşük Puan", Number(Math.min(...scores).toFixed(2))],
-      ["En Yüksek Puan", Number(Math.max(...scores).toFixed(2))],
-      ["Aritmetik Ortalama", Number(mean.toFixed(2))],
-      ["Ortanca", Number(median.toFixed(2))],
+      ["Madde Sayısı", questionCount],
+      ["Alınabilecek En Yüksek Puan", questionCount.toFixed(2)],
+      ["En Düşük Puan", Math.min(...scores).toFixed(2)],
+      ["En Yüksek Puan", Math.max(...scores).toFixed(2)],
+      ["Aritmetik Ortalama", mean.toFixed(2)],
+      ["Ortanca", median.toFixed(2)],
       ["Mod", mode],
-      ["Ranj", Number(range.toFixed(2))],
-      ["Standart Sapma", Number(stdDeviation.toFixed(2))],
-      ["Varyans", Number(variance.toFixed(2))],
-      ["Çarpıklık Katsayısı", Number(skewness.toFixed(2))],
-      ["Basıklık Katsayısı", Number(kurtosis.toFixed(2))],
-      ["Bağıl Değişkenlik Katsayısı", Number(coefficientVariation.toFixed(2))],
-      ["KR-20 Güvenirlik Katsayısı", Number(kr20.toFixed(2))],
-      ["KR-21 Güvenirlik Katsayısı", Number(kr21.toFixed(2))],
+      ["Ranj", range.toFixed(2)],
+      ["Standart Sapma", stdDeviation.toFixed(2)],
+      ["Varyans", variance.toFixed(2)],
+      ["Çarpıklık Katsayısı", skewness.toFixed(2)],
+      ["Basıklık Katsayısı", kurtosis.toFixed(2)],
+      ["Bağıl Değişkenlik Katsayısı", coefficientVariation.toFixed(2)],
+      ["KR-20 Güvenirlik Katsayısı", kr20.toFixed(2)],
+      ["KR-21 Güvenirlik Katsayısı", kr21.toFixed(2)],
     ];
 
-    summaryData.forEach((row) => worksheet.addRow(row));
+    summaryData.forEach((row) => {
+      const sumData = worksheet.addRow(row);
+      sumData.getCell(2).alignment = { horizontal: "right" };
+    });
 
     // Frekans Tablosu Hesapla
     const frequencyMap: Record<number, number> = scores.reduce(
@@ -75,7 +78,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
       ([score, count]) => [
         parseInt(score, 10),
         count,
-        Number(((count / totalScores) * 100).toFixed(2)),
+        ((count / totalScores) * 100).toFixed(2),
       ]
     );
 

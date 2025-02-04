@@ -19,7 +19,7 @@ interface OptionAnalysisProps {
 }
 
 const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
-  // Her soru için üst ve alt grupları hesapla
+  // Her madde için üst ve alt grupları hesapla
   const calculateAnalysisData = (data: OptionData[]) => {
     return data.map((item) => {
       const total = item.A + item.B + item.C + item.D + item.E + item.Bos;
@@ -27,7 +27,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
       // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
       const groupSize = Math.round(total * 0.27);
 
-      // Her soru için üst ve alt grupları hesapla
+      // Her madde için üst ve alt grupları hesapla
       const upperGroup = [
         Math.round((item.A / total) * groupSize),
         Math.round((item.B / total) * groupSize),

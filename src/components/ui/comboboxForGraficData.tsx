@@ -29,8 +29,8 @@ const frameworks = [
     label: "Öğrenci Puanlarının Frekansları",
   },
   {
-    value: "Soru Başına Yüzde Haritası (Percentage Map Per Question)",
-    label: "Soru Başına Yüzde Haritası (Percentage Map Per Question)",
+    value: "Madde Başına Yüzde Haritası (Percentage Map Per Question)",
+    label: "Madde Başına Yüzde Haritası (Percentage Map Per Question)",
   },
   {
     value: "Başarı Oranları (Success Rates)",
@@ -49,16 +49,16 @@ const frameworks = [
     label: "Sıralamalar (Ranks)",
   },
   {
-    value: "Soru Bazında Varyans (Item Variance)",
-    label: "Soru Bazında Varyans (Item Variance)",
+    value: "Madde Bazında Varyans (Item Variance)",
+    label: "Madde Bazında Varyans (Item Variance)",
   },
   {
-    value: "Soru Bazında Standart Sapma (Item Standard Deviation)",
-    label: "Soru Bazında Standart Sapma (Item Standard Deviation)",
+    value: "Madde Bazında Standart Sapma (Item Standard Deviation)",
+    label: "Madde Bazında Standart Sapma (Item Standard Deviation)",
   },
   {
-    value: "Soru Zorluk İndeksi (Item Difficulty Index)",
-    label: "Soru Zorluk İndeksi (Item Difficulty Index)",
+    value: "Madde Zorluk İndeksi (Item Difficulty Index)",
+    label: "Madde Zorluk İndeksi (Item Difficulty Index)",
   },
   {
     value: "Madde Toplam Korelasyon Katsayısı (RBis)",

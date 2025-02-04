@@ -305,7 +305,7 @@ function calculateRanks(scores: any) {
   return ranks;
 }
 
-// Her soru için madde varyansını hesaplar
+// Her madde için madde varyansını hesaplar
 function calculateItemVarianceForAll(studentAnswers: any, answerKey: any) {
   const studentScores = calculateStudentAnswers01(studentAnswers, answerKey);
 
@@ -811,7 +811,7 @@ const ExcelReports = () => {
         return scores;
       case "Öğrenci Puanlarının Frekansları":
         return frekansTable;
-      case "Soru Başına Yüzde Haritası (Percentage Map Per Question)":
+      case "Madde Başına Yüzde Haritası (Percentage Map Per Question)":
         return percentageMapPerQuestion;
       case "Başarı Oranları (Success Rates)":
         return successRates;
@@ -821,11 +821,11 @@ const ExcelReports = () => {
         return tScores;
       case "Sıralamalar (Ranks)":
         return ranks;
-      case "Soru Bazında Varyans (Item Variance)":
+      case "Madde Bazında Varyans (Item Variance)":
         return variancePerItem;
-      case "Soru Bazında Standart Sapma (Item Standard Deviation)":
+      case "Madde Bazında Standart Sapma (Item Standard Deviation)":
         return stdDevPerItem;
-      case "Soru Zorluk İndeksi (Item Difficulty Index)":
+      case "Madde Zorluk İndeksi (Item Difficulty Index)":
         return difficultyIndex;
       case "Madde Toplam Korelasyon Katsayısı (RBis)":
         return rbisIndex;
@@ -974,7 +974,7 @@ const ExcelReports = () => {
             <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Soru Sayısı:</strong> {numberOfQuestions}
+            <strong>Madde Sayısı:</strong> {numberOfQuestions}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Ortalama Puan:</strong> {average.toFixed(2)}
