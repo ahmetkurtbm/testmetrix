@@ -113,6 +113,12 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
         vertical: "middle",
         horizontal: "center",
       };
+
+      row.eachCell((cell, colIndex) => {
+        if (rowIndex > 1 && colIndex > 1) {
+          cell.alignment = { vertical: "middle", horizontal: "right" };
+        }
+      });
     });
 
     // Sütun genişlikleri ayarla
