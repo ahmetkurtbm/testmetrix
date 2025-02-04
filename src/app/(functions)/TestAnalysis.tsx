@@ -44,20 +44,20 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     const summaryData = [
       ["Öğrenci Sayısı", studentCount],
       ["Soru Sayısı", questionCount],
-      ["Alınabilecek En Yüksek Puan", questionCount],
-      ["En Düşük Puan", Math.min(...scores)],
-      ["En Yüksek Puan", Math.max(...scores)],
-      ["Aritmetik Ortalama", mean],
-      ["Ortanca", median],
+      ["Alınabilecek En Yüksek Puan", Number(questionCount.toFixed(2))],
+      ["En Düşük Puan", Number(Math.min(...scores).toFixed(2))],
+      ["En Yüksek Puan", Number(Math.max(...scores).toFixed(2))],
+      ["Aritmetik Ortalama", Number(mean.toFixed(2))],
+      ["Ortanca", Number(median.toFixed(2))],
       ["Mod", mode],
-      ["Ranj", range],
-      ["Standart Sapma", stdDeviation],
-      ["Varyans", variance],
-      ["Çarpıklık Katsayısı", skewness],
-      ["Basıklık Katsayısı", kurtosis],
-      ["Bağıl Değişkenlik Katsayısı", coefficientVariation],
-      ["KR-20 Güvenirlik Katsayısı", kr20],
-      ["KR-21 Güvenirlik Katsayısı", kr21],
+      ["Ranj", Number(range.toFixed(2))],
+      ["Standart Sapma", Number(stdDeviation.toFixed(2))],
+      ["Varyans", Number(variance.toFixed(2))],
+      ["Çarpıklık Katsayısı", Number(skewness.toFixed(2))],
+      ["Basıklık Katsayısı", Number(kurtosis.toFixed(2))],
+      ["Bağıl Değişkenlik Katsayısı", Number(coefficientVariation.toFixed(2))],
+      ["KR-20 Güvenirlik Katsayısı", Number(kr20.toFixed(2))],
+      ["KR-21 Güvenirlik Katsayısı", Number(kr21.toFixed(2))],
     ];
 
     summaryData.forEach((row) => worksheet.addRow(row));
@@ -75,7 +75,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
       ([score, count]) => [
         parseInt(score, 10),
         count,
-        ((count / totalScores) * 100).toFixed(1),
+        Number(((count / totalScores) * 100).toFixed(2)),
       ]
     );
 
@@ -83,7 +83,16 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     worksheet.addRow([]);
     worksheet.addRow(["Frekans Tablosu"]);
     worksheet.addRow(["Puan", "f", "%"]);
-    frequencyTable.forEach((row) => worksheet.addRow(row));
+    frequencyTable.forEach((row) => {
+      const dataRow = worksheet.addRow(row);
+
+      // İlk sütun (Puan) sola yaslanacak
+      dataRow.getCell(1).alignment = { horizontal: "left" };
+
+      // Diğer sütunlar sağa yaslanacak
+      dataRow.getCell(2).alignment = { horizontal: "right" };
+      dataRow.getCell(3).alignment = { horizontal: "right" };
+    });
 
     // Histogram için başka bir sayfa ekle
     const chartSheet = workbook.addWorksheet("Histogram");
@@ -111,7 +120,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
       });
 
       // Başlık satırlarını stilize et
-      if (rowIndex === 1 || rowIndex === summaryData.length + 3) {
+      if (rowIndex === summaryData.length + 3) {
         row.eachCell((cell) => {
           cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
           cell.fill = {
@@ -132,7 +141,11 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     saveAs(blob, "Test_Istatistik_Raporu.xlsx");
   };
 
-  return <Button onClick={handleDownload}>Test Analizini İndir</Button>;
+  return (
+    <Button className="w-full" onClick={handleDownload}>
+      Test Analizini İndir <img src="download-icon.svg" />
+    </Button>
+  );
 };
 
 export default TestAnalysis;

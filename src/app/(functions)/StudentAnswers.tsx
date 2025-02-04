@@ -18,15 +18,15 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
 }) => {
   const handleDownload = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Öğrenci Cevapları 0-1");
+    const worksheet = workbook.addWorksheet("Öğrenci Cevapları");
 
     // Cevap Anahtarını Ekle (ilk satır)
-    worksheet.addRow(["Cevap Anahtarı", "", ...answerKey]);
+    worksheet.addRow(["Yanıt Anahtarı", "", ...answerKey]);
 
     // Başlıkları ekle (ikinci satır)
     const headers = [
-      "Öğrenci İsmi",
-      "Öğrenci Puanları",
+      "Öğrenci Adı-Soyadı",
+      "Puan",
       ...answerKey.map((_, index) => `S${index + 1}`),
     ];
     worksheet.addRow(headers);
@@ -39,20 +39,6 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     }
 
     // Stil ayarları
-    worksheet.getRow(1).eachCell((cell) => {
-      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "4F81BD" },
-      };
-      cell.alignment = {
-        vertical: "middle",
-        horizontal: "center",
-        wrapText: true, // Uzun yazıları hücre içinde alt alta yazdırır
-      };
-    });
-
     const headerRow = worksheet.getRow(2);
     headerRow.eachCell((cell) => {
       cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
@@ -103,6 +89,21 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
       };
     });
 
+    // Cevap Anahtarı Satırı
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "3F8D3F" },
+      };
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: "center",
+        wrapText: true, // Uzun yazıları hücre içinde alt alta yazdırır
+      };
+    });
+
     // Sütun genişlikleri ayarla
     worksheet.columns = [
       { width: 20 }, // Öğrenci İsmi sütunu
@@ -118,7 +119,11 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     saveAs(blob, "Ogrenci_Cevaplari.xlsx");
   };
 
-  return <Button onClick={handleDownload}>Öğrenci Cevaplarını İndir</Button>;
+  return (
+    <Button className="w-full" onClick={handleDownload}>
+      Öğrenci Cevaplarını İndir <img src="download-icon.svg" />
+    </Button>
+  );
 };
 
 export default StudentAnswers;

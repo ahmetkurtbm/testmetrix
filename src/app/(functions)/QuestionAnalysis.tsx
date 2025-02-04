@@ -9,8 +9,8 @@ type QuestionAnalysisProps = {
   itemVariance: number[];
   itemStd: number[];
   itemDifficulty: number[];
-  itemRbis: number[];
-  itemPrbis: number[];
+  // itemRbis: number[];
+  // itemPrbis: number[];
   item27: number[];
   itemReliability: number[];
 };
@@ -21,8 +21,8 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
   itemVariance,
   itemStd,
   itemDifficulty,
-  itemRbis,
-  itemPrbis,
+  // itemRbis,
+  // itemPrbis,
   item27,
   itemReliability,
 }) => {
@@ -41,8 +41,8 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
       "Madde Varyansı",
       "Madde Standart Sapması",
       "Madde Güçlük İndeksi",
-      "Madde Ayırt Edicilik İndeksi (RBİS)",
-      "Madde Ayırt Edicilik İndeksi (PRBİS)",
+      // "Madde Ayırt Edicilik İndeksi (BİS)",
+      // "Madde Ayırt Edicilik İndeksi (PBİS)",
       "Madde Ayırt Edicilik İndeksi (%27)",
       "Madde Güvenirlik İndeksi",
     ]);
@@ -51,16 +51,16 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
     for (let i = 0; i < percentageMap.length; i++) {
       worksheet.addRow([
         `Madde ${i + 1}`,
-        correctCount[i],
-        percentageMap[i],
-        percentageInverted[i],
-        itemVariance[i],
-        itemStd[i],
-        itemDifficulty[i],
-        itemRbis[i],
-        itemPrbis[i],
-        item27[i],
-        itemReliability[i],
+        correctCount[i].toFixed(2),
+        (percentageMap[i] / 100).toFixed(2),
+        (percentageInverted[i] / 100).toFixed(2),
+        itemVariance[i].toFixed(2),
+        itemStd[i].toFixed(2),
+        itemDifficulty[i].toFixed(2),
+        // itemRbis[i].toFixed(2),
+        // itemPrbis[i].toFixed(2),
+        item27[i].toFixed(2),
+        itemReliability[i].toFixed(2),
       ]);
     }
 
@@ -138,7 +138,11 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
     saveAs(blob, "Madde_Istatistikleri.xlsx");
   };
 
-  return <Button onClick={handleDownload}>Madde İstatistikleri İndir</Button>;
+  return (
+    <Button className="w-full" onClick={handleDownload}>
+      Madde İstatistikleri İndir <img src="download-icon.svg" />
+    </Button>
+  );
 };
 
 export default QuestionAnalysis;

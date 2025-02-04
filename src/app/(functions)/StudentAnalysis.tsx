@@ -125,7 +125,11 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
     saveAs(blob, "Ogrenci_Istatistikleri.xlsx");
   };
 
-  return <Button onClick={handleDownload}>Öğrenci İstatistikleri İndir</Button>;
+  return (
+    <Button className="w-full" onClick={handleDownload}>
+      Öğrenci İstatistikleri İndir <img src="download-icon.svg" />
+    </Button>
+  );
 };
 
 export default StudentAnalysis;

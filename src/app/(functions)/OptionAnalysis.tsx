@@ -11,7 +11,7 @@ interface OptionData {
   C: number;
   D: number;
   E: number;
-  Boş: number;
+  Bos: number;
 }
 
 interface OptionAnalysisProps {
@@ -22,7 +22,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
   // Her soru için üst ve alt grupları hesapla
   const calculateAnalysisData = (data: OptionData[]) => {
     return data.map((item) => {
-      const total = item.A + item.B + item.C + item.D + item.E + item.Boş;
+      const total = item.A + item.B + item.C + item.D + item.E + item.Bos;
 
       // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
       const groupSize = Math.round(total * 0.27);
@@ -34,7 +34,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
         Math.round((item.C / total) * groupSize),
         Math.round((item.D / total) * groupSize),
         Math.round((item.E / total) * groupSize),
-        Math.round((item.Boş / total) * groupSize),
+        Math.round((item.Bos / total) * groupSize),
         groupSize,
       ];
 
@@ -44,22 +44,22 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
         Math.round((item.C / total) * groupSize),
         Math.round((item.D / total) * groupSize),
         Math.round((item.E / total) * groupSize),
-        Math.round((item.Boş / total) * groupSize),
+        Math.round((item.Bos / total) * groupSize),
         groupSize,
       ];
 
       return {
         madde: item.madde,
-        options: ["A", "B", "C", "D", "E", "Boş", "Toplam"],
-        n: [item.A, item.B, item.C, item.D, item.E, item.Boş, total],
+        options: ["A", "B", "C", "D", "E", "Bos", "Toplam"],
+        n: [item.A, item.B, item.C, item.D, item.E, item.Bos, total],
         percent: [
           total > 0 ? ((item.A / total) * 100).toFixed(2) : "0.00",
           total > 0 ? ((item.B / total) * 100).toFixed(2) : "0.00",
           total > 0 ? ((item.C / total) * 100).toFixed(2) : "0.00",
           total > 0 ? ((item.D / total) * 100).toFixed(2) : "0.00",
           total > 0 ? ((item.E / total) * 100).toFixed(2) : "0.00",
-          total > 0 ? ((item.Boş / total) * 100).toFixed(2) : "0.00",
-          "100",
+          total > 0 ? ((item.Bos / total) * 100).toFixed(2) : "0.00",
+          "100.00",
         ],
         upperGroup,
         lowerGroup,
@@ -107,10 +107,31 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
         };
       });
 
-      if (rowIndex === 1 || row.values[0]?.toString().startsWith("Madde")) {
+      if (rowIndex === 1 || row.values[1]?.toString().startsWith("Madde")) {
         row.eachCell((cell: any) => {
           cell.font = { bold: true };
           cell.alignment = { horizontal: "center" };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "4F81BD" },
+          };
+        });
+      }
+
+      if (rowIndex % 7 === 4) {
+        row.eachCell((cell: any, colNumber: number) => {
+          cell.alignment = { horizontal: colNumber === 1 ? "left" : "right" };
+        });
+      }
+
+      if (rowIndex % 7 === 2) {
+        row.eachCell((cell: any, colNumber: number) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "4F81BD" },
+          };
         });
       }
     });
@@ -125,7 +146,9 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
 
   return (
     <div>
-      <Button onClick={handleDownload}>Madde Analiz Raporunu İndir</Button>
+      <Button className="w-full" onClick={handleDownload}>
+        Madde Analiz Raporunu İndir <img src="download-icon.svg" />
+      </Button>
     </div>
   );
 };

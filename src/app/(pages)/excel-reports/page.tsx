@@ -11,7 +11,7 @@ type OptionData = {
   C: number;
   D: number;
   E: number;
-  Boş: number;
+  Bos: number;
 };
 
 import QuestionAnalysis from "../../(functions)/QuestionAnalysis";
@@ -91,7 +91,7 @@ function calculateStandardDeviation(scores: any) {
 // öğrenci puanlarının modları
 function calculateMode(scores: number[]): number[] {
   if (!scores || scores.length === 0) {
-    return []; // Eğer skorlar boşsa, boş dizi döndür
+    return []; // Eğer skorlar boşsa, Bos dizi döndür
   }
 
   // frequency nesnesinin türünü açıkça belirtiyoruz
@@ -374,114 +374,110 @@ function calculateItemDifficultyIndexForAll(
   return itemDifficulties;
 }
 
-// Madde Ayırt Edicilik İndeksi (RBIS) Hesaplama
-function calculateRbisIndexForAll(studentAnswers: any, answerKey: any) {
-  const studentScores = calculateStudentAnswers01(studentAnswers, answerKey);
+///RBIS DEĞERLERİ BURADAAA
+// function calculateRpbIndexForAll(
+//   studentAnswers: string[][],
+//   answerKey: string[],
+//   stdDevPerItem: any
+// ): number[] {
+//   const numQuestions = answerKey.length;
+//   const itemRpb: number[] = [];
 
-  const itemRbis = [];
+//   for (let i = 0; i < numQuestions; i++) {
+//     const itemScores = studentAnswers.map((studentAnswer) =>
+//       studentAnswer[i] === answerKey[i] ? 1 : 0
+//     );
 
-  const numQuestions = answerKey.length;
+//     const totalScores = studentAnswers.map((answers) =>
+//       answers.reduce(
+//         (sum, answer, index) => sum + (answer === answerKey[index] ? 1 : 0),
+//         0
+//       )
+//     );
 
-  for (let i = 0; i < numQuestions; i++) {
-    const itemScores = studentScores.map(
-      (studentAnswer: any) => studentAnswer[i]
-    );
+//     const meanItem =
+//       itemScores.reduce((sum, score) => sum + score, 0) / itemScores.length;
+//     const meanTotal =
+//       totalScores.reduce((sum, score) => sum + score, 0) / totalScores.length;
 
-    const meanItem =
-      itemScores.reduce((sum: any, score: any) => sum + score, 0) /
-      itemScores.length;
+//     // Doğru ve yanlış yanıt sayılarını hesapla
+//     const correctCount = itemScores.filter((score) => score === 1).length;
+//     const incorrectCount = itemScores.length - correctCount;
 
-    const totalScores = studentScores.map((answers: any) =>
-      answers.reduce((sum: any, score: any) => sum + score, 0)
-    );
+//     // Kök içerisinde (doğru / yanlış) oranını hesapla
+//     const ratio = correctCount / incorrectCount;
+//     const sqrtRatio = Math.sqrt(ratio);
 
-    const meanTotal =
-      totalScores.reduce((sum: any, score: any) => sum + score, 0) /
-      totalScores.length;
+//     // RPB'yi hesapla ve kök içerisindeki oran ile çarp
+//     const rpb =
+//       parseFloat((covariance / Math.sqrt(varianceTotal)).toFixed(2)) *
+//       sqrtRatio;
+//     itemRpb.push(rpb);
+//   }
 
-    const covariance =
-      itemScores.reduce(
-        (sum: any, score: any, index: any) =>
-          sum + (score - meanItem) * (totalScores[index] - meanTotal),
-        0
-      ) / itemScores.length;
+//   return itemRpb;
+// }
 
-    const varianceTotal =
-      totalScores.reduce(
-        (sum: any, score: any) => sum + Math.pow(score - meanTotal, 2),
-        0
-      ) / totalScores.length;
+// function calculateRbIndexForAll(
+//   studentAnswers: string[][],
+//   answerKey: string[]
+// ): number[] {
+//   const numQuestions = answerKey.length;
+//   const itemRb: number[] = [];
 
-    const rbis = (covariance / Math.sqrt(varianceTotal)).toFixed(2);
+//   for (let i = 0; i < numQuestions; i++) {
+//     const itemScores = studentAnswers.map((studentAnswer) =>
+//       studentAnswer[i] === answerKey[i] ? 1 : 0
+//     );
 
-    itemRbis.push(rbis);
-  }
+//     const totalScores = studentAnswers.map((answers) =>
+//       answers.reduce(
+//         (sum, answer, index) => sum + (answer === answerKey[index] ? 1 : 0),
+//         0
+//       )
+//     );
 
-  return itemRbis;
-}
+//     const meanItem =
+//       itemScores.reduce((sum, score) => sum + score, 0) / itemScores.length;
+//     const meanTotal =
+//       totalScores.reduce((sum, score) => sum + score, 0) / totalScores.length;
 
-// Madde Ayırt Edicilik İndeksi (PRBIS) Hesaplama Düzeltilecek
-function calculatePrbisIndexForAll(studentAnswers: any, answerKey: any) {
-  const studentScores = calculateStudentAnswers01(studentAnswers, answerKey); // Öğrencilerin 0-1 formatındaki cevapları
-  const totalScores = studentAnswers.map((answers: any) =>
-    answers.reduce(
-      (sum: any, answer: any, index: any) =>
-        sum + (answer === answerKey[index] ? 1 : 0),
-      0
-    )
-  );
+//     const covariance = itemScores.reduce(
+//       (sum, score, index) =>
+//         sum + (score - meanItem) * (totalScores[index] - meanTotal),
+//       0
+//     );
 
-  const prbisIndices = [];
-  const numQuestions = answerKey.length;
+//     const questionVariance =
+//       itemScores.reduce(
+//         (sum, score) => sum + Math.pow(score - meanItem, 2),
+//         0
+//       ) / itemScores.length;
 
-  // Her bir soru için PRBIS hesaplıyoruz
-  for (let i = 0; i < numQuestions; i++) {
-    // Her bir soruya ait yanıtları alıyoruz
-    const itemScores = studentScores.map(
-      (studentAnswer: any) => studentAnswer[i]
-    );
+//     const totalVariance =
+//       totalScores.reduce(
+//         (sum, score) => sum + Math.pow(score - meanTotal, 2),
+//         0
+//       ) / totalScores.length;
 
-    // Soru puanlarının ortalamasını hesaplıyoruz
-    const questionMean =
-      itemScores.reduce((sum: any, score: any) => sum + score, 0) /
-      itemScores.length;
+//     // Doğru ve yanlış yanıt sayılarını hesapla
+//     const correctCount = itemScores.filter((score) => score === 1).length;
+//     const incorrectCount = itemScores.length - correctCount;
 
-    // Toplam puanların ortalamasını hesaplıyoruz
-    const totalMean =
-      totalScores.reduce((sum: any, score: any) => sum + score, 0) /
-      totalScores.length;
+//     // Kök içerisinde (doğru / yanlış) oranını hesapla
+//     const ratio = correctCount / incorrectCount;
+//     const sqrtRatio = Math.sqrt(ratio);
 
-    // Kovaryans hesaplaması
-    const covariance = itemScores.reduce(
-      (sum: any, score: any, studentIndex: any) =>
-        sum + (score - questionMean) * (totalScores[studentIndex] - totalMean),
-      0
-    );
+//     // RB'yi hesapla ve kök içerisindeki oran ile çarp
+//     const rb =
+//       parseFloat(
+//         (covariance / Math.sqrt(questionVariance * totalVariance)).toFixed(2)
+//       ) * sqrtRatio;
+//     itemRb.push(rb);
+//   }
 
-    // Soru varyansı
-    const questionVariance =
-      itemScores.reduce(
-        (sum: any, score: any) => sum + Math.pow(score - questionMean, 2),
-        0
-      ) / itemScores.length;
-
-    // Toplam varyans
-    const totalVariance =
-      totalScores.reduce(
-        (sum: any, score: any) => sum + Math.pow(score - totalMean, 2),
-        0
-      ) / totalScores.length;
-
-    // PRBIS Hesaplaması
-    const prbis = (
-      covariance / Math.sqrt(questionVariance * totalVariance)
-    ).toFixed(2);
-
-    prbisIndices.push(prbis); // Sonuçları diziye ekliyoruz
-  }
-
-  return prbisIndices; // Her soru için PRBIS değerlerini döndürüyoruz
-}
+//   return itemRb;
+// }
 
 // Madde Ayırt Edicilik İndeksi (%27) Hesaplama
 function calculateDiscriminationIndexForAll(
@@ -551,27 +547,27 @@ function calculateOptionsCount(studentAnswers: any) {
   const result = [];
 
   for (let i = 1; i <= questionCount; i++) {
-    const counts: any = { A: 0, B: 0, C: 0, D: 0, E: 0, Boş: 0 };
+    const counts: any = { A: 0, B: 0, C: 0, D: 0, E: 0, Bos: 0 };
 
     // Tüm katılımcıların yanıtlarını işle
     studentAnswers.forEach((response: any) => {
-      const answer = response[i]?.trim().toUpperCase() || "Boş"; // Yanıtları normalize et
+      const answer = response[i]?.trim().toUpperCase() || "Bos"; // Yanıtları normalize et
       if (counts.hasOwnProperty(answer)) {
         counts[answer]++;
       } else {
-        counts["Boş"]++;
+        counts["Bos"]++;
       }
     });
 
     // Sonucu OptionData formatında ekle
     result.push({
-      madde: `Madde${i}`,
+      madde: `Madde ${i}`,
       A: counts.A,
       B: counts.B,
       C: counts.C,
       D: counts.D,
       E: counts.E,
-      Boş: counts.Boş,
+      Bos: counts.Bos,
     });
   }
 
@@ -692,8 +688,6 @@ const ExcelReports = () => {
 
       const calculatedScores = calculateScores(key, answers);
 
-      console.log("girdii");
-
       setScores(calculatedScores);
       setAnswerKey(key);
       setStudentAnswers(answers);
@@ -738,8 +732,8 @@ const ExcelReports = () => {
       studentAnswers,
       answerKey
     );
-    const rbis = calculateRbisIndexForAll(studentAnswers, answerKey);
-    const prbis = calculatePrbisIndexForAll(studentAnswers, answerKey);
+    // const rbis = calculateRbIndexForAll(studentAnswers, answerKey);
+    // const prbis = calculateRpbIndexForAll(studentAnswers, answerKey);
     const discrimination = calculateDiscriminationIndexForAll(
       studentAnswers,
       answerKey
@@ -777,8 +771,8 @@ const ExcelReports = () => {
     setVariancePerItem(itemVariance.map((item) => Number(item) || 0)); // Converts string to number
     setStdDevPerItem(itemStdDev.map((item) => Number(item) || 0)); // Converts string to number
     setDifficultyIndex(difficultyIndexValue.map((item) => Number(item) || 0)); // Converts string to number
-    setRbisIndex(rbis.map((item) => Number(item) || 0)); // Converts string to number
-    setPrbisIndex(prbis.map((item) => Number(item) || 0)); // Converts string to number
+    // setRbisIndex(rbis.map((item) => Number(item) || 0)); // Converts string to number
+    // setPrbisIndex(prbis.map((item) => Number(item) || 0)); // Converts string to number
     setDiscriminationIndex(discrimination.map((item) => Number(item) || 0)); // Converts string to number
     setPercentageMapPerQuestion(percMap.map((item) => Number(item) || 0)); // Converts string to number
 
@@ -868,13 +862,13 @@ const ExcelReports = () => {
 
   return (
     <div>
-      <h2 className="text-3xl font-semibold text-center p-1 text-green-500">
-        Excel Raporları
+      <h2 className="text-3xl font-semibold text-center p-1 m-2 text-green-500">
+        Veri Raporları
       </h2>
       <div className="p-1 flex gap-1 justify-center">
-        <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md h-screen max-h-screen w-72">
+        <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md w-1/4">
           {/* Student Analysis */}
-          <div className="mt-6">
+          <div className="m-3">
             <StudentAnalysis
               studentNames={studentNames!}
               scores={scores}
@@ -886,21 +880,21 @@ const ExcelReports = () => {
           </div>
 
           {/* Question Analysis */}
-          <div className="mt-6">
+          <div className="m-3">
             <QuestionAnalysis
               correctCount={correctCount}
               percentageMap={percentageMapPerQuestion}
               itemVariance={variancePerItem}
               itemStd={stdDevPerItem}
               itemDifficulty={difficultyIndex}
-              itemRbis={rbisIndex}
-              itemPrbis={prbisIndex}
+              // itemRbis={rbisIndex}
+              // itemPrbis={prbisIndex}
               item27={discriminationIndex}
               itemReliability={reliabilityIndex}
             />
           </div>
 
-          <div className="mt-6">
+          <div className="m-3">
             <TestAnalysis
               studentCount={numberOfStudents!}
               questionCount={numberOfQuestions!}
@@ -919,11 +913,11 @@ const ExcelReports = () => {
             />
           </div>
 
-          <div className="mt-6">
+          <div className="m-3">
             <OptionAnalysis data={optionCounts} />
           </div>
 
-          <div className="mt-6">
+          <div className="m-3">
             <StudentAnswers
               studentNames={studentNames!}
               studentAnswers={studentAnswers!}
@@ -932,7 +926,7 @@ const ExcelReports = () => {
             />
           </div>
 
-          <div className="mt-6">
+          <div className="m-3">
             <StudentAnswers01
               studentNames={studentNames!}
               studentAnswers01={studentAnswer01}
@@ -942,7 +936,7 @@ const ExcelReports = () => {
           </div>
         </div>
 
-        <div className="flex-col gap-1 p-2 bg-black rounded-md h-screen max-h-screen w-full">
+        <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
           <div className="flex gap-1">
             <ComboboxForData
@@ -979,50 +973,50 @@ const ExcelReports = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl max-h-screen w-[35rem] overflow-auto">
-          <p className="text-white text-lg font-semibold">
+        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
+          <p className="text-white text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Soru Sayısı:</strong> {numberOfQuestions}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Ortalama Puan:</strong> {average.toFixed(2)}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Varyans:</strong> {variance.toFixed(2)}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Ortanca (Median):</strong> {median}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Mod:</strong> {mode}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Maksimum Puan:</strong> {maxScore}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Ranj (Range):</strong> {range}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Çarpıklık Katsayısı (Skewness):</strong> {skewness}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Basıklık Katsayısı (Kurtosis):</strong> {kurtosis}
           </p>
-          <p className="text-white text-lg">
-            <strong>Test Puanlarının Başarı Yüzdesi:</strong> {successRate}%
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
+            <strong>Puanların Başarı Yüzdesi:</strong> {successRate}%
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21}
           </p>
-          <p className="text-white text-lg">
+          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
             {relativeCoefficientOfVariation}
           </p>
