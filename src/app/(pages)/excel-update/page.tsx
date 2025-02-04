@@ -12,14 +12,6 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 
-interface ExcelUpdateProps {
-  folder_name: string;
-  file_name: string;
-  created_at: string;
-  headers: string[];
-  rows: string[][];
-}
-
 interface File {
   id: number;
   folder_name: string;
@@ -31,22 +23,13 @@ interface File {
 const ExcelUpdate = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
-  const [data, setData] = useState<ExcelUpdateProps | null>(null);
+  const [data, setData] = useState<File | null>(null);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
-  const [fileName, setFileName] = useState<string>();
-  const [folderName, setFolderName] = useState<string>();
-  const [tempData, setTempData] = useState<string[][]>([[]]);
-  // const [headers, setHeaders] = useState<string[]>([]);
-  // const [rows, setRows] = useState<string[][]>([]);
-
-  // useEffect(() => {
-  //   setHeaders(data!.headers);
-  //   setRows(data!.rows);
-  // }, [data]);
+  const [fileName, setFileName] = useState<string>("");
+  const [folderName, setFolderName] = useState<string>("");
 
   useEffect(() => {
     const getExcel = async () => {
-      //const fileId = params.get("file-id");
       const searchParams = new URLSearchParams(window.location.search);
       const fileId = searchParams.get("file-id");
 
@@ -54,42 +37,16 @@ const ExcelUpdate = () => {
         try {
           const response = await fetch(`${BACKEND_URL}/excel`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fileId }),
           });
 
           if (response.ok) {
-            const fetchedData: File[] = await response.json();
-
-            const file_name = fetchedData[0].file_name;
-            const folder_name = fetchedData[0].folder_name;
-            const created_at = fetchedData[0].created_at;
-
-            const headers = fetchedData[0].file_data.map((item) => item[0]);
-            const rows = fetchedData[0].file_data.map((subArray) =>
-              subArray.slice(1)
-            );
-
-            setTempData(fetchedData[0].file_data);
-
-            // Veriyi set ediyoruz
-            setData({
-              file_name,
-              folder_name,
-              created_at,
-              headers,
-              rows,
-            });
-
-            setFileName(file_name);
-            setFolderName(folder_name);
-
-            // SelectedValues dizisini file_data'dan gelen verilere göre başlatıyoruz
-            setSelectedValues(
-              rows.map((row: any) => row.slice(1)) // Başlangıçtaki 1. sütunu atarak seçilen değerleri alıyoruz
-            );
+            const fetchedData: File = (await response.json())[0];
+            setData(fetchedData);
+            setFileName(fetchedData.file_name);
+            setFolderName(fetchedData.folder_name);
+            setSelectedValues(fetchedData.file_data.map((row) => [...row]));
           } else {
             console.error("Failed to fetch data:", await response.json());
           }
@@ -107,13 +64,15 @@ const ExcelUpdate = () => {
     colIndex: number,
     newValue: string
   ) => {
-    const newSelectedValues = [...selectedValues];
-    newSelectedValues[rowIndex][colIndex] = newValue;
+    const newSelectedValues = selectedValues.map((row, rIndex) =>
+      rIndex === rowIndex
+        ? row.map((cell, cIndex) => (cIndex === colIndex ? newValue : cell))
+        : row
+    );
     setSelectedValues(newSelectedValues);
   };
 
   const handleUpdate = async () => {
-    //const fileId = params.get("file-id");
     const searchParams = new URLSearchParams(window.location.search);
     const fileId = searchParams.get("file-id");
 
@@ -121,21 +80,19 @@ const ExcelUpdate = () => {
       try {
         const response = await fetch(`${BACKEND_URL}/excel-update`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: fileId,
-            folderName: folderName || "defaultFolder",
-            fileName: fileName || "defaultFile",
-            arrayData: selectedValues || [],
+            folderName,
+            fileName,
+            arrayData: selectedValues,
           }),
         });
 
         if (response.ok) {
           console.log("Excel Update Successful");
         } else {
-          console.error("Update failed:", Error);
+          console.error("Update failed:", await response.text());
         }
       } catch (error) {
         console.error("Error Updating Excel:", error);
@@ -144,61 +101,48 @@ const ExcelUpdate = () => {
   };
 
   return (
-    <div style={{ padding: "16px" }} className="gap-4 flex-col">
-      <div className="w-full flex  justify-between bg-slate-300 p-3">
+    <div className="p-4 flex flex-col gap-4">
+      <div className="w-full flex justify-between bg-slate-300 p-3">
         <div>
           <h1 className="text-2xl font-semibold mb-4">{data?.file_name}</h1>
           <h4 className="text-sm font-semibold mb-4 text-gray-400">
             {data?.created_at}
           </h4>
         </div>
-
         <div className="flex gap-3">
           <div>
-            <Label>Klasor Ismi</Label>
+            <Label>Klasör İsmi</Label>
             <Input
-              defaultValue={data?.folder_name}
+              value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
             />
           </div>
-
           <div>
-            <Label>Dosya Ismi</Label>
+            <Label>Dosya İsmi</Label>
             <Input
-              defaultValue={data?.file_name}
+              value={fileName}
               onChange={(e) => setFileName(e.target.value)}
             />
           </div>
-
-          <Button onClick={handleUpdate}>Değişikleri Kaydet</Button>
+          <Button onClick={handleUpdate}>Değişiklikleri Kaydet</Button>
         </div>
       </div>
-
-      <div
-        style={{ padding: "20px" }}
-        className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300"
-      >
-        <table className="border-collapse border border-gray-200">
+      <div className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300 p-4">
+        <table className="border-collapse border border-gray-200 w-full">
           <thead>
             <tr className="bg-gray-100">
-              {tempData !== undefined &&
-                tempData !== null &&
-                tempData[0].map((row, index) => (
-                  <th
-                    key={index}
-                    className="p-4 text-left font-medium text-gray-700"
-                  >
-                    {index === 0 ? (
-                      <p></p>
-                    ) : (
-                      <p className="flex-row">Soru{index}</p>
-                    )}
-                  </th>
-                ))}
+              {data?.file_data[0]?.map((header, index) => (
+                <th
+                  key={index}
+                  className="p-4 text-left font-medium text-gray-700"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {tempData.map((row, rowIndex) => (
+            {selectedValues.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t">
                 {row.map((cell, cellIndex) => (
                   <td key={cellIndex} className="p-4">
@@ -206,24 +150,22 @@ const ExcelUpdate = () => {
                       <span className="text-gray-600">{cell}</span>
                     ) : (
                       <Select
-                        value={
-                          selectedValues[rowIndex]?.[cellIndex - 1] ||
-                          cell ||
-                          ""
-                        }
+                        value={cell || ""}
                         onValueChange={(newValue) =>
-                          handleSelectChange(rowIndex, cellIndex - 1, newValue)
+                          handleSelectChange(rowIndex, cellIndex, newValue)
                         }
                       >
                         <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
                           <SelectValue placeholder="Seçiniz" />
                         </SelectTrigger>
                         <SelectContent>
-                          {["A", "B", "C", "D", "E"].map((option, index) => (
-                            <SelectItem key={index} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
+                          {["A", "B", "C", "D", "E", "Boş"].map(
+                            (option, index) => (
+                              <SelectItem key={index} value={option}>
+                                {option}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                     )}
@@ -234,7 +176,6 @@ const ExcelUpdate = () => {
           </tbody>
         </table>
       </div>
-      <br />
     </div>
   );
 };

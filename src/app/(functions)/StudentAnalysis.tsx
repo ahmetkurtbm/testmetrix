@@ -44,8 +44,8 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
         numberOfQuestions - scores[i],
         scores[i],
         ((scores[i] / numberOfQuestions) * 100).toFixed(2) + "%",
-        zScore[i],
-        tScore[i],
+        zScore[i].toFixed(2),
+        tScore[i].toFixed(2),
         succesRates[i],
       ]);
 

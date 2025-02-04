@@ -116,12 +116,12 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "Ogrenci_Cevaplari.xlsx");
+    saveAs(blob, "Secenekli_Ogrenci_Yanitlari.xlsx");
   };
 
   return (
     <Button className="w-full" onClick={handleDownload}>
-      Öğrenci Cevaplarını İndir <img src="download-icon.svg" />
+      Seçenekli Öğrenci Yanıtlarını İndir <img src="download-icon.svg" />
     </Button>
   );
 };

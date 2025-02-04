@@ -60,9 +60,9 @@ export function ComboboxForGrafic({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search grafik..." className="h-9" />
+          <CommandInput placeholder="Grafik ara..." className="h-9" />
           <CommandList>
-            <CommandEmpty>No data found.</CommandEmpty>
+            <CommandEmpty>grafik bulunamadı.</CommandEmpty>
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem

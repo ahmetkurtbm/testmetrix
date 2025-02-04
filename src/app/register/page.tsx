@@ -110,12 +110,12 @@ const Register = () => {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700"
               >
-                isim:
+                Ad:
               </label>
               <Input
                 id="name"
                 type="text"
-                placeholder="İsim"
+                placeholder="Ad"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -127,12 +127,12 @@ const Register = () => {
                 htmlFor="surname"
                 className="block text-sm font-medium text-gray-700"
               >
-                Soyisim:
+                Soyad:
               </label>
               <Input
                 id="surname"
                 type="text"
-                placeholder="Soyisim"
+                placeholder="Soyad"
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
                 required
@@ -144,12 +144,12 @@ const Register = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email:
+                E-Posta:
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Email"
+                placeholder="E-Posta"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

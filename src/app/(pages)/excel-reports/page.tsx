@@ -574,6 +574,24 @@ function calculateOptionsCount(studentAnswers: any) {
   return result; // OptionData[] türünde bir dizi döndür
 }
 
+// Öğrenci Puanları İçin Frekans Tablosu
+function calculateFrekans(scores: any) {
+  const frequencyMap: Record<number, number> = scores.reduce(
+    (acc: any, score: any) => {
+      acc[score] = (acc[score] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  const totalScores = scores.length;
+  const frequencyTable = Object.entries(frequencyMap).map(([score, count]) => [
+    parseInt(score, 10),
+    count,
+    Number(((count / totalScores) * 100).toFixed(2)),
+  ]);
+  return frequencyTable;
+}
+
 interface ExcelUpdateProps {
   folder_name: string;
   file_name: string;
@@ -635,8 +653,11 @@ const ExcelReports = () => {
   const [reliabilityIndex, setReliabilityIndex] = useState<number[]>([]);
   const [optionCounts, setOptionCounts] = useState<OptionData[]>([]);
   const [correctCount, setCorrectCount] = useState<number[]>([]);
+  const [frekansTable, setFrekansTable] = useState<number[][]>([]);
 
-  const [selectedGraficsData, setSelectedGraficsData] = useState("scores");
+  const [selectedGraficsData, setSelectedGraficsData] = useState(
+    "Öğrenci Puanlarının Frekansları"
+  );
   const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
   const [xValues, setXValues] = useState<any>();
   const [yValues, setYValues] = useState<any>();
@@ -744,6 +765,7 @@ const ExcelReports = () => {
     );
     const optionCount = calculateOptionsCount(studentAnswers);
     const correctCount = calculateCorrectCount(answerKey, studentAnswers);
+    const frequencyTable = calculateFrekans(scores);
 
     // Set state values
     setAverage(avg);
@@ -779,74 +801,39 @@ const ExcelReports = () => {
     setReliabilityIndex(reliability.map((item: number) => Number(item) || 0));
     setOptionCounts(optionCount);
     setCorrectCount(correctCount);
+    setFrekansTable(frequencyTable);
   }, [scores]);
 
-  // console.log("Answer Key:", answerKey);
-  // console.log("Student Answers:", studentAnswers);
-  // console.log("Student Names:", studentNames);
-  // console.log("Number of Questions:", numberOfQuestions);
-  // console.log("Number of Students:", numberOfStudents);
-
-  // console.log("Scores:", scores);
-  // console.log("Average:", average);
-  // console.log("Standard Deviation:", standardDeviation);
-  // console.log("Variance:", variance);
-  // console.log("Max Score:", maxScore);
-  // console.log("Median:", median);
-  // console.log("Range:", range);
-  // console.log("Skewness:", skewness);
-  // console.log("Kurtosis:", kurtosis);
-  // console.log("Success Rate:", successRate);
-  // console.log("KR-20:", kr20);
-  // console.log("KR-21:", kr21);
-  // console.log(
-  //   "Relative Coefficient of Variation:",
-  //   relativeCoefficientOfVariation
-  // );
-  // console.log("Mode:", mode);
-  // console.log("Percentage Map Per Question:", percentageMapPerQuestion);
-  // console.log("Student Answer 0/1:", studentAnswer01);
-  // console.log("Success Rates:", successRates);
-  // console.log("Z-Scores:", zScores);
-  // console.log("T-Scores:", tScores);
-  // console.log("Ranks:", ranks);
-  // console.log("Variance Per Item:", variancePerItem);
-  // console.log("Standard Deviation Per Item:", stdDevPerItem);
-  // console.log("Difficulty Index:", difficultyIndex);
-  // console.log("RBIS Index:", rbisIndex);
-  // console.log("PRBIS Index:", prbisIndex);
-  // console.log("Discrimination Index:", discriminationIndex);
-  // console.log("Reliability Index:", reliabilityIndex);
-  // console.log("Option Counts:", optionCounts);
-  // console.log("Correct Count:", correctCount);
-
+  // grafik için veri döndürür
   const getDataForPlot = () => {
     switch (selectedGraficsData) {
-      case "scores":
+      case "Öğrencilerin Puanları":
         return scores;
-      case "percentageMapPerQuestion":
+      case "Öğrenci Puanlarının Frekansları":
+        return frekansTable;
+      case "Soru Başına Yüzde Haritası (Percentage Map Per Question)":
         return percentageMapPerQuestion;
-      case "successRates":
+      case "Başarı Oranları (Success Rates)":
         return successRates;
-      case "zScores":
+      case "Z Puanları (Z-Scores)":
         return zScores;
-      case "tScores":
+      case "T Puanları (T-Scores)":
         return tScores;
-      case "ranks":
+      case "Sıralamalar (Ranks)":
         return ranks;
-      case "variancePerItem":
+      case "Soru Bazında Varyans (Item Variance)":
         return variancePerItem;
-      case "stdDevPerItem":
+      case "Soru Bazında Standart Sapma (Item Standard Deviation)":
         return stdDevPerItem;
-      case "difficultyIndex":
+      case "Soru Zorluk İndeksi (Item Difficulty Index)":
         return difficultyIndex;
-      case "rbisIndex":
+      case "Madde Toplam Korelasyon Katsayısı (RBis)":
         return rbisIndex;
-      case "prbisIndex":
+      case "Çift Katsayılı Kolerasyon Değeri (pRBis)":
         return prbisIndex;
-      case "discriminationIndex":
+      case "Ayırt Edicilik İndeksi (Discrimination Index)":
         return discriminationIndex;
-      case "reliabilityIndex":
+      case "reliabiGüvenirlik İndeksi (Reliability Index)lityIndex":
         return reliabilityIndex;
       default:
         return [];
@@ -854,11 +841,17 @@ const ExcelReports = () => {
   };
 
   useEffect(() => {
-    setXValues(
-      Array.from({ length: getDataForPlot().length }, (_, i) => i + 1)
-    );
-    setYValues(getDataForPlot());
-  }, [scores]);
+    if (selectedGraficsData === "Öğrenci Puanlarının Frekansları") {
+      const freqData = calculateFrekans(scores);
+      setXValues(freqData.map(([score]) => score)); // 📌 Puanları X ekseni için al
+      setYValues(freqData.map(([_, count]) => count)); // 📌 Frekansları Y ekseni için al
+    } else {
+      setXValues(
+        Array.from({ length: getDataForPlot().length }, (_, i) => i + 1)
+      );
+      setYValues(getDataForPlot());
+    }
+  }, [scores, selectedGraficsData]);
 
   return (
     <div>
@@ -866,6 +859,7 @@ const ExcelReports = () => {
         Veri Raporları
       </h2>
       <div className="p-1 flex gap-1 justify-center">
+        {/* Sol Taraftaki Excelleri İndirme Alanı */}
         <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md w-1/4">
           {/* Student Analysis */}
           <div className="m-3">
@@ -936,6 +930,7 @@ const ExcelReports = () => {
           </div>
         </div>
 
+        {/* Orta Taraftaki Grafikler Gösterme Alanı */}
         <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
           <div className="flex gap-1">
@@ -973,6 +968,7 @@ const ExcelReports = () => {
           </div>
         </div>
 
+        {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
         <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
           <p className="text-white text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
@@ -993,7 +989,7 @@ const ExcelReports = () => {
             <strong>Ortanca (Median):</strong> {median}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Mod:</strong> {mode}
+            <strong>Mod:</strong> {mode.length > 0 ? mode.join(", ") : "----"}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Maksimum Puan:</strong> {maxScore}

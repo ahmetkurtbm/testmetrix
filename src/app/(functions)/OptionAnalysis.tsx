@@ -141,13 +141,13 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "Madde_Analiz_Raporu.xlsx");
+    saveAs(blob, "Secenek_Analizini.xlsx");
   };
 
   return (
     <div>
       <Button className="w-full" onClick={handleDownload}>
-        Madde Analiz Raporunu İndir <img src="download-icon.svg" />
+        Seçenek Analizini İndir <img src="download-icon.svg" />
       </Button>
     </div>
   );

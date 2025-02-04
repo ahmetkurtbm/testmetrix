@@ -94,19 +94,6 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
       dataRow.getCell(3).alignment = { horizontal: "right" };
     });
 
-    // Histogram için başka bir sayfa ekle
-    const chartSheet = workbook.addWorksheet("Histogram");
-    chartSheet.addRow(["Puan", "Frekans"]);
-    frequencyTable.forEach(([score, count]) => {
-      chartSheet.addRow([score, count]);
-    });
-
-    // Histogram oluşturma talimatını ekleyin
-    chartSheet.addRow([]);
-    chartSheet.addRow([
-      "Not: Bu veriler kullanılarak Excel'de manuel olarak bir grafik oluşturabilirsiniz. Grafik oluşturmak için bu sayfadaki verileri seçin ve Excel'in 'Ekle' sekmesinden 'Çubuk Grafik' seçeneğini kullanın.",
-    ]);
-
     // Stil Ayarları
     worksheet.columns = [{ width: 30 }, { width: 20 }, { width: 20 }];
     worksheet.eachRow((row, rowIndex) => {
@@ -138,12 +125,12 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "Test_Istatistik_Raporu.xlsx");
+    saveAs(blob, "Test_Istatistikleri.xlsx");
   };
 
   return (
     <Button className="w-full" onClick={handleDownload}>
-      Test Analizini İndir <img src="download-icon.svg" />
+      Test İstatistilerini İndir <img src="download-icon.svg" />
     </Button>
   );
 };

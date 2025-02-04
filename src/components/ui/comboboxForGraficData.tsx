@@ -21,56 +21,60 @@ import {
 
 const frameworks = [
   {
-    value: "scores",
+    value: "Öğrencilerin Puanları",
     label: "Öğrencilerin Puanları",
   },
   {
-    value: "percentageMapPerQuestion",
-    label: "Percentage Map Per Question (Soru Başına Yüzde Haritası)",
+    value: "Öğrenci Puanlarının Frekansları",
+    label: "Öğrenci Puanlarının Frekansları",
   },
   {
-    value: "successRates",
-    label: "Success Rates (Başarı Oranları)",
+    value: "Soru Başına Yüzde Haritası (Percentage Map Per Question)",
+    label: "Soru Başına Yüzde Haritası (Percentage Map Per Question)",
   },
   {
-    value: "zScores",
-    label: "Z-Scores (Z Puanları)",
+    value: "Başarı Oranları (Success Rates)",
+    label: "Başarı Oranları (Success Rates)",
   },
   {
-    value: "tScores",
-    label: "T-Scores (T Puanları)",
+    value: "Z Puanları (Z-Scores)",
+    label: "Z Puanları (Z-Scores)",
   },
   {
-    value: "ranks",
-    label: "Ranks (Sıralamalar)",
+    value: "T Puanları (T-Scores)",
+    label: "T Puanları (T-Scores)",
   },
   {
-    value: "variancePerItem",
-    label: "Item Variance (Soru Bazında Varyans)",
+    value: "Sıralamalar (Ranks)",
+    label: "Sıralamalar (Ranks)",
   },
   {
-    value: "stdDevPerItem",
-    label: "Item Standard Deviation (Soru Bazında Standart Sapma)",
+    value: "Soru Bazında Varyans (Item Variance)",
+    label: "Soru Bazında Varyans (Item Variance)",
   },
   {
-    value: "difficultyIndex",
-    label: "Item Difficulty Index (Soru Zorluk İndeksi)",
+    value: "Soru Bazında Standart Sapma (Item Standard Deviation)",
+    label: "Soru Bazında Standart Sapma (Item Standard Deviation)",
   },
   {
-    value: "rbisIndex",
-    label: "RBis (Madde Toplam Korelasyon Katsayısı)",
+    value: "Soru Zorluk İndeksi (Item Difficulty Index)",
+    label: "Soru Zorluk İndeksi (Item Difficulty Index)",
   },
   {
-    value: "prbisIndex",
-    label: "pRBis (Düzeltilmiş RBis)",
+    value: "Madde Toplam Korelasyon Katsayısı (RBis)",
+    label: "Madde Toplam Korelasyon Katsayısı (RBis)",
   },
   {
-    value: "discriminationIndex",
-    label: "Discrimination Index (Ayırt Edicilik İndeksi)",
+    value: "Çift Katsayılı Kolerasyon Değeri (pRBis)",
+    label: "Çift Katsayılı Kolerasyon Değeri (pRBis)",
   },
   {
-    value: "reliabilityIndex",
-    label: "Reliability Index (Güvenirlik İndeksi)",
+    value: "Ayırt Edicilik İndeksi (Discrimination Index)",
+    label: "Ayırt Edicilik İndeksi (Discrimination Index)",
+  },
+  {
+    value: "Güvenirlik İndeksi (Reliability Index)",
+    label: "Güvenirlik İndeksi (Reliability Index)",
   },
 ];
 
@@ -94,15 +98,15 @@ export function ComboboxForData({
         >
           {value
             ? frameworks.find((framework) => framework.value === value)?.label
-            : "Data seçiniz..."}
+            : "Veri seçiniz..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search data..." className="h-9" />
+          <CommandInput placeholder="Veri ara..." className="h-9" />
           <CommandList>
-            <CommandEmpty>No data found.</CommandEmpty>
+            <CommandEmpty>Veri bulunamadı.</CommandEmpty>
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem

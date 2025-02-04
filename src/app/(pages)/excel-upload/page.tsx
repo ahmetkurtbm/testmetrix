@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,8 +28,8 @@ const ExcelUploadPage = () => {
 
   const router = useRouter();
 
-  const [jsonData, setJsonData] = useState<Record<string, any>>({}); // JSON verisi için state
-  const [arrayData, setArrayData] = useState<any[]>([]); // Array verisi için state
+  const [jsonData, setJsonData] = useState<Record<string, any>>({});
+  const [arrayData, setArrayData] = useState<any[]>([]);
   const [showExcel, setShowExcel] = useState(false);
   const [reportExcel, setReportExcel] = useState(false);
   const [folderName, setFolderName] = useState("");
@@ -60,7 +61,7 @@ const ExcelUploadPage = () => {
         header: 1,
       });
 
-      const json: Record<string, any> = {}; // Verinin türünü belirtiyoruz
+      const json: Record<string, any> = {};
 
       array.forEach((row: any) => {
         if (row[0]) {
@@ -70,12 +71,27 @@ const ExcelUploadPage = () => {
         }
       });
 
-      setFileName(file.name); // Set the file name
+      setFileName(file.name);
       setJsonData(json);
       setArrayData(array);
     };
 
     reader.readAsBinaryString(file);
+  };
+
+  const downloadSampleFile = async () => {
+    try {
+      const response = await fetch("/sample.xlsx");
+      const buffer = await response.arrayBuffer();
+
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      saveAs(blob, "Ornek_Dosya.xlsx");
+    } catch (error) {
+      console.error("Dosya indirilemedi:", error);
+    }
   };
 
   // const handleExcelView = () => {
@@ -132,20 +148,33 @@ const ExcelUploadPage = () => {
               </h1>
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <label
-                  htmlFor="fileUpload"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Excel Dosyası Yükle
-                </label>
-                <Input
-                  id="fileUpload"
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileUpload}
-                  className="w-full"
-                />
+              <div className="flex w-full gap-1">
+                <div className="mb-4 w-full">
+                  <label
+                    htmlFor="fileUpload"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Veri Dosyası Yükle
+                  </label>
+                  <Input
+                    id="fileUpload"
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={handleFileUpload}
+                    className="w-full"
+                  />
+                </div>
+                <div className="mb-4 w-full">
+                  <label
+                    htmlFor="fileUpload"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    İstenilen Veri Tipi
+                  </label>
+                  <Button className="w-full" onClick={downloadSampleFile}>
+                    Örnek Dosya
+                  </Button>
+                </div>
               </div>
               <div className="mb-4">
                 <label
