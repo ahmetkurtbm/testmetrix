@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import AddFolder from "@/app/(components)/AddFolder";
 
 interface File {
   id: number;
@@ -137,6 +138,9 @@ export default function Home() {
 
   return (
     <div>
+      <div className="flex p-1 gap-1">
+        <AddFolder></AddFolder>{" "}
+      </div>
       {folders.map((folder) => (
         <Card key={folder.folder_name} className="mb-4 m-3 border-black">
           <CardHeader>

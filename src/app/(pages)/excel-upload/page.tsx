@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TableContainer from "@/app/(components)/TableContainer";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
 
 const ExcelUploadPage = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -33,6 +33,8 @@ const ExcelUploadPage = () => {
   const [showExcel, setShowExcel] = useState(false);
   const [reportExcel, setReportExcel] = useState(false);
   const [folderName, setFolderName] = useState("");
+  const [folderId, setFolderId] = useState();
+
   const [fileName, setFileName] = useState("");
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,14 +96,6 @@ const ExcelUploadPage = () => {
     }
   };
 
-  const handleExcelView = () => {
-    console.log(arrayData);
-  };
-
-  // const handleExcelReport = () => {
-  //   setReportExcel(!reportExcel);
-  // };
-
   const handleSave = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/excel-upload`, {
@@ -111,7 +105,7 @@ const ExcelUploadPage = () => {
         },
         credentials: "include",
         body: JSON.stringify({
-          folderName: folderName || "defaultFolder",
+          folderId: folderId,
           fileName: fileName || "defaultFile",
           arrayData: arrayData || [],
         }),
@@ -181,21 +175,20 @@ const ExcelUploadPage = () => {
                   htmlFor="folderName"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Klasör Adı
+                  Klasör Seç
                 </label>
-                {/* <ComboboxDemo
-                  folderNames={folderNames}
-                  folderName={folderName}
-                  setFolderName={setFolderName}
-                ></ComboboxDemo> */}
-                <Input
+                <ComboboxDemo
+                  folderId={folderId}
+                  setFolderId={setFolderId}
+                ></ComboboxDemo>
+                {/* <Input
                   id="folderName"
                   type="text"
                   placeholder="Klasör Adı"
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
                   className="w-full"
-                />
+                /> */}
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -209,7 +202,6 @@ const ExcelUploadPage = () => {
                   <DialogTrigger asChild>
                     <Button
                       variant="default"
-                      onClick={handleExcelView}
                       className="bg-blue-600 text-white hover:bg-blue-700"
                     >
                       Görüntüle
@@ -225,13 +217,6 @@ const ExcelUploadPage = () => {
                     <TableContainer data={arrayData} />
                   </DialogContent>
                 </Dialog>
-                {/* <Button
-                  variant="default"
-                  onClick={handleExcelReport}
-                  className="bg-green-600 text-white hover:bg-green-700"
-                >
-                  Raporlar
-                </Button> */}
                 <Button
                   variant="default"
                   onClick={handleSave}
