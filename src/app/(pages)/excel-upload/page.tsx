@@ -94,13 +94,13 @@ const ExcelUploadPage = () => {
     }
   };
 
-  // const handleExcelView = () => {
-  //   router.push(`/excel-update?file=${fileName}`);
-  // };
-
-  const handleExcelReport = () => {
-    setReportExcel(!reportExcel);
+  const handleExcelView = () => {
+    console.log(arrayData);
   };
+
+  // const handleExcelReport = () => {
+  //   setReportExcel(!reportExcel);
+  // };
 
   const handleSave = async () => {
     try {
@@ -209,7 +209,7 @@ const ExcelUploadPage = () => {
                   <DialogTrigger asChild>
                     <Button
                       variant="default"
-                      // onClick={handleExcelView}
+                      onClick={handleExcelView}
                       className="bg-blue-600 text-white hover:bg-blue-700"
                     >
                       Görüntüle
@@ -223,18 +223,15 @@ const ExcelUploadPage = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <TableContainer data={arrayData} />
-                    <DialogFooter>
-                      <Button type="submit">Save changes</Button>
-                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <Button
+                {/* <Button
                   variant="default"
                   onClick={handleExcelReport}
                   className="bg-green-600 text-white hover:bg-green-700"
                 >
                   Raporlar
-                </Button>
+                </Button> */}
                 <Button
                   variant="default"
                   onClick={handleSave}
