@@ -10,9 +10,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
 import Cookies from "js-cookie";
-import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -24,19 +23,15 @@ import AddFolder from "@/app/(components)/AddFolder";
 
 interface File {
   id: number;
-  folder_name: string;
+  folder_id: number;
   file_name: string;
   created_at: string;
 }
 
-interface FolderProps {
+interface FolderNames {
+  id: number;
   folder_name: string;
-  files: File[];
-}
-
-interface FolderName {
-  value: string;
-  label: string;
+  created_at: string;
 }
 
 export default function Home() {
@@ -44,20 +39,47 @@ export default function Home() {
 
   const router = useRouter();
 
-  const [folders, setFolders] = useState<FolderProps[]>([]);
-  const [folderNames, setFolderNames] = useState<FolderName[]>([]);
+  const [excels, setExcels] = useState<File[]>([]);
+  const [folders, setFolders] = useState<FolderNames[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [folderId, setFolderId] = useState<number>();
 
+  console.log(folderId);
+
+  // Token Kontrolü
   useEffect(() => {
     if (!Cookies.get("token")) {
       router.push("/login");
     }
   }, []);
 
+  // Get Folders
   useEffect(() => {
     async function fetchFolders() {
       try {
         const response = await fetch(`${BACKEND_URL}/folders`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data: FolderNames[] = await response.json();
+
+        setFolders(data);
+      } catch (error) {
+        console.error("Error fetching folders:", error);
+      }
+    }
+
+    fetchFolders();
+  }, []);
+
+  // Get Excels
+  useEffect(() => {
+    async function fetchExcels() {
+      try {
+        const response = await fetch(`${BACKEND_URL}/excels`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -67,46 +89,93 @@ export default function Home() {
 
         const data: File[] = await response.json();
 
-        interface FolderName {
-          value: string;
-          label: string;
-        }
-
-        const uniqueFolderNames: FolderName[] = Array.from(
-          new Map(
-            data.map((item) => [
-              item.folder_name,
-              { value: item.folder_name, label: item.folder_name },
-            ])
-          ).values()
-        );
-
-        setFolderNames(uniqueFolderNames);
-
-        const groupedFolders: FolderProps[] = data.reduce((acc, file) => {
-          const folderIndex = acc.findIndex(
-            (folder) => folder.folder_name === file.folder_name
-          );
-
-          if (folderIndex === -1) {
-            acc.push({ folder_name: file.folder_name, files: [file] });
-          } else {
-            acc[folderIndex].files.push(file);
-          }
-
-          return acc;
-        }, [] as FolderProps[]);
-
-        setFolders(groupedFolders);
+        setExcels(data);
       } catch (error) {
         console.error("Error fetching folders:", error);
       }
     }
 
-    fetchFolders();
+    fetchExcels();
   }, []);
 
-  const handleDelete = async (fileId: any) => {
+  // useEffect(() => {
+  //   const handleUpdate = async () => {
+  //     if (fileId) {
+  //       try {
+  //         const response = await fetch(`${BACKEND_URL}/excel-update`, {
+  //           method: "PUT",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             id: fileId,
+  //             folder_id: folderId,
+  //           }),
+  //         });
+
+  //         if (response.ok) {
+  //           console.log("Excel Update Successful");
+  //         } else {
+  //           console.error("Update failed:", await response.text());
+  //         }
+  //       } catch (error) {
+  //         console.error("Error Updating Excel:", error);
+  //       }
+  //     }
+  //   };
+  //   handleUpdate();
+  // }, [folderId]);
+
+  const handleUpdateFolders = async (folderId: any, newName: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/update-folder`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: folderId, folder_name: newName }),
+      });
+
+      if (response.ok) {
+        setFolders((prevFolders) =>
+          prevFolders.map((folder) =>
+            folder.id === folderId
+              ? { ...folder, folder_name: newName }
+              : folder
+          )
+        );
+        setIsEditing(false);
+      } else {
+        console.error("Güncelleme başarısız");
+      }
+    } catch (error) {
+      console.error("Hata oluştu:", error);
+    }
+  };
+
+  const handleDeleteFolders = async (folderId: any) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/delete-folder`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: folderId }),
+      });
+
+      if (response.ok) {
+        setFolders((prevFolders) =>
+          prevFolders.filter((folder) => folder.id !== folderId)
+        );
+
+        setIsEditing(false);
+      } else {
+        console.error("Silme başarısız");
+      }
+    } catch (error) {
+      console.error("Hata oluştu:", error);
+    }
+  };
+
+  const handleDeleteExcel = async (fileId: any) => {
     try {
       const response = await fetch(`${BACKEND_URL}/excel-delete`, {
         method: "DELETE",
@@ -149,7 +218,7 @@ export default function Home() {
                 {folder.folder_name}
               </h2>
               <p className="text-sm text-gray-500 ml-auto">
-                {new Date(folder.files[0].created_at).toLocaleString()}
+                {new Date(folder.created_at).toLocaleString()}
               </p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -158,19 +227,27 @@ export default function Home() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="p-2 w-48">
-                  {/* İsim Değiştirme Alanı */}
                   {isEditing ? (
                     <div className="flex items-center gap-2 p-2">
                       <Input
-                        value={folder.folder_name}
-                        onChange={(e) => console.log(e.target.value)}
+                        defaultValue={folder.folder_name}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const newName = e.target.value;
+                          setFolders((prevFolders) =>
+                            prevFolders.map((f) =>
+                              f.id === folder.id
+                                ? { ...f, folder_name: newName }
+                                : f
+                            )
+                          );
+                        }}
                         className="h-8 text-sm"
                       />
                       <Button
                         size="sm"
                         onClick={() => {
-                          //onRename(folder.id, folderName);
-                          setIsEditing(false);
+                          handleUpdateFolders(folder.id, folder.folder_name);
                         }}
                       >
                         Kaydet
@@ -180,7 +257,7 @@ export default function Home() {
                     <div
                       className=" hover:bg-green-500 hover:text-white bg-slate-300 m-1 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-green-500"
                       onClick={(e) => {
-                        e.stopPropagation(); // Menü kapanmasını engeller
+                        e.stopPropagation();
                         setIsEditing(true);
                       }}
                     >
@@ -188,7 +265,7 @@ export default function Home() {
                     </div>
                   )}
                   <DropdownMenuItem
-                    //onClick={() => onDelete(folder.id)}
+                    onClick={() => handleDeleteFolders(folder.id)}
                     className="text-red-500 hover:bg-red-500 hover:text-white bg-slate-300 m-1"
                   >
                     Klasörü Sil
@@ -199,80 +276,85 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 m-3">
-              {folder.files.map((file) => (
-                <li key={file.id} className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium text-blue-700 ">
-                      {file.file_name}
-                    </span>
-                    <span className="text-sm text-gray-400 ml-2">
-                      {new Date(file.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  {/* content="Edit File" delay={500} */}
-                  <TooltipProvider>
-                    <div className="flex gap-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-blue-500 text-white"
-                            onClick={() => handleUpdate(file.id)}
-                          >
-                            Düzenle
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Excel Dosyanızı Düzenleyebilirsiniz
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-green-500 text-white"
-                            onClick={() => handleRaports(file.id)}
-                          >
-                            Raporlar
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Excel Dosyanızın Raporlarını ve Grafiklerini
-                          Görebilirsiniz
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <ComboboxDemo
-                            folderNames={folderNames}
-                            id={file.id}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Excel Raporunuzu İstediğiniz Klasöre Taşıyabilirsiniz
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-red-500 text-white"
-                            onClick={() => handleDelete(file.id)}
-                          >
-                            Sil
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Excel Dosyanızı Silebilirsiniz
-                        </TooltipContent>
-                      </Tooltip>
+              {excels
+                .filter((excel) => excel.folder_id === folder.id) // Sadece eşleşenleri al
+                .map((excel) => (
+                  <li
+                    key={excel.id}
+                    className="flex justify-between items-center"
+                  >
+                    <div>
+                      <span className="font-medium text-blue-700">
+                        {excel.file_name}
+                      </span>
+                      <span className="text-sm text-gray-400 ml-2">
+                        {new Date(excel.created_at).toLocaleString()}
+                      </span>
                     </div>
-                  </TooltipProvider>
-                </li>
-              ))}
+                    <TooltipProvider>
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-blue-500 text-white"
+                              onClick={() => handleUpdate(excel.id)}
+                            >
+                              Düzenle
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Excel Dosyanızı Düzenleyebilirsiniz
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-green-500 text-white"
+                              onClick={() => handleRaports(excel.id)}
+                            >
+                              Raporlar
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Excel Dosyanızın Raporlarını ve Grafiklerini
+                            Görebilirsiniz
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <ComboboxDemo
+                              folderId={folderId}
+                              setFolderId={setFolderId}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Excel Raporunuzu İstediğiniz Klasöre
+                            Taşıyabilirsiniz
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-red-500 text-white"
+                              onClick={() => handleDeleteExcel(excel.id)}
+                            >
+                              Sil
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Excel Dosyanızı Silebilirsiniz
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
+                  </li>
+                ))}
             </ul>
           </CardContent>
         </Card>

@@ -22,7 +22,7 @@ export default function FolderAdder() {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/folder`, {
+      const response = await fetch(`${BACKEND_URL}/upload-folder`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

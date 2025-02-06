@@ -11,10 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
 
 interface File {
   id: number;
-  folder_name: string;
+  folder_id: number;
   file_name: string;
   created_at: string;
   file_data: string[][];
@@ -27,6 +28,7 @@ const ExcelUpdate = () => {
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [fileName, setFileName] = useState<string>("");
   const [folderName, setFolderName] = useState<string>("");
+  const [folderId, setFolderId] = useState<number>();
 
   useEffect(() => {
     const getExcel = async () => {
@@ -45,7 +47,7 @@ const ExcelUpdate = () => {
             const fetchedData: File = (await response.json())[0];
             setData(fetchedData);
             setFileName(fetchedData.file_name);
-            setFolderName(fetchedData.folder_name);
+            setFolderId(fetchedData.folder_id);
             setSelectedValues(fetchedData.file_data.map((row) => [...row]));
           } else {
             console.error("Failed to fetch data:", await response.json());
@@ -79,13 +81,13 @@ const ExcelUpdate = () => {
     if (fileId) {
       try {
         const response = await fetch(`${BACKEND_URL}/excel-update`, {
-          method: "POST",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: fileId,
-            folderName,
-            fileName,
-            arrayData: selectedValues,
+            folder_id: folderId,
+            file_name: fileName,
+            file_data: selectedValues,
           }),
         });
 
@@ -110,13 +112,10 @@ const ExcelUpdate = () => {
           </h4>
         </div>
         <div className="flex gap-3">
-          <div>
-            <Label>Klasör İsmi</Label>
-            <Input
-              value={folderName}
-              onChange={(e) => setFolderName(e.target.value)}
-            />
-          </div>
+          <ComboboxDemo
+            folderId={folderId}
+            setFolderId={setFolderId}
+          ></ComboboxDemo>
           <div>
             <Label>Dosya İsmi</Label>
             <Input

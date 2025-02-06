@@ -19,44 +19,46 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-interface FolderName {
-  value: string;
-  label: string;
-}
-
 export function ComboboxDemo({
-  folderNames,
-  id,
+  folderId,
+  setFolderId,
 }: {
-  folderNames: FolderName[];
-  id: any;
+  folderId: any;
+  setFolderId: (id: any) => void;
 }) {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [folderName, setFolderName] = React.useState("");
+  const [folders, setFolders] = React.useState<
+    { id: any; folder_name: string; created_at: any }[]
+  >([]);
 
-  const handleChange = async (folderName: any) => {
-    console.log(id, folderName);
-    try {
-      const response = await fetch(`${BACKEND_URL}/excel-update-folder-name`, {
-        method: "POST",
-        body: JSON.stringify({ id: id, folderName: folderName }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Excel Updated Successful");
-      } else {
-        console.error("Update failed:", data.error);
+  React.useEffect(() => {
+    const handleGetFolders = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/folders`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setFolders(data);
+        } else {
+          console.error("Update failed:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching folders:", error);
       }
+    };
+    handleGetFolders();
+  }, [BACKEND_URL]);
 
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating Excel:", error);
-    }
+  const handleChange = (folderId: any, folderName: string) => {
+    setFolderId(folderId); // Seçilen klasörün ID'sini güncelle
+    setFolderName(folderName); // Seçilen klasörün adını güncelle
   };
 
   return (
@@ -67,36 +69,32 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[100px] justify-between bg-orange-500 text-white"
+          className="w-1/2 justify-between bg-orange-500 text-white"
         >
-          {value
-            ? folderNames.find((folderName) => folderName.value === value)
-                ?.label
-            : "Taşı..."}
+          {folderName || "Klasörler..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput placeholder="Klasör Ara..." className="h-9" />
           <CommandList>
             <CommandEmpty>Klasör Bulunamadı.</CommandEmpty>
             <CommandGroup>
-              {folderNames.map((folderName) => (
+              {folders.map((folder) => (
                 <CommandItem
-                  key={folderName.value}
-                  value={folderName.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
-                    handleChange(currentValue);
+                  key={folder.id}
+                  value={folder.folder_name}
+                  onSelect={() => {
+                    handleChange(folder.id, folder.folder_name);
                     setOpen(false);
                   }}
                 >
-                  {folderName.label}
+                  {folder.folder_name}
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === folderName.value ? "opacity-100" : "opacity-0"
+                      folderId === folder.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

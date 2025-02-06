@@ -37,7 +37,7 @@ export function ComboboxDemo({
   React.useEffect(() => {
     const handleGetFolders = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/folder`, {
+        const response = await fetch(`${BACKEND_URL}/folders`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
