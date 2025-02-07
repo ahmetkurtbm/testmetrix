@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Plot from "react-plotly.js";
-import { PlotType } from "plotly.js";
+// import Plot from "react-plotly.js";
+// import { PlotType } from "plotly.js";
 
 type OptionData = {
   madde: string;
@@ -658,7 +658,7 @@ const ExcelReports = () => {
   const [selectedGraficsData, setSelectedGraficsData] = useState(
     "Öğrenci Puanlarının Frekansları"
   );
-  const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
+  // const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
   const [xValues, setXValues] = useState<any>();
   const [yValues, setYValues] = useState<any>();
 
@@ -931,7 +931,7 @@ const ExcelReports = () => {
         </div>
 
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}
-        <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
+        {/* <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
           <div className="flex gap-1">
             <ComboboxForData
@@ -945,28 +945,31 @@ const ExcelReports = () => {
           </div>
 
           <div className="flex justify-center rounded-md mt-6">
-            {xValues !== undefined && yValues !== undefined && (
-              <Plot
-                data={[
-                  {
-                    labels: xValues,
-                    values: yValues,
-                    x: xValues,
-                    y: yValues,
-                    type: selectedGrafic,
-                    mode: "lines+markers",
-                    marker: { color: "blue" },
-                  },
-                ]}
-                layout={{
-                  title: selectedGraficsData,
-                  xaxis: { title: "" },
-                  yaxis: { title: "Değerler" },
-                }}
-              />
-            )}
+            {xValues !== undefined &&
+              yValues !== undefined &&
+              selectedGrafic !== undefined &&
+              selectedGraficsData !== undefined && (
+                <Plot
+                  data={[
+                    {
+                      labels: xValues,
+                      values: yValues,
+                      x: xValues,
+                      y: yValues,
+                      type: selectedGrafic,
+                      mode: "lines+markers",
+                      marker: { color: "blue" },
+                    },
+                  ]}
+                  layout={{
+                    title: selectedGraficsData,
+                    xaxis: { title: "" },
+                    yaxis: { title: "Değerler" },
+                  }}
+                />
+              )}
           </div>
-        </div>
+        </div> */}
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
         <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
