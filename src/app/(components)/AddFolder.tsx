@@ -8,7 +8,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ChevronDownSquare } from "lucide-react";
 
 export default function FolderAdder() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;

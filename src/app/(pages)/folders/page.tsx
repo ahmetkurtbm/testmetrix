@@ -198,17 +198,17 @@ export default function Home() {
   };
 
   const handleUpdate = async (fileId: any) => {
-    router.push(`/excel-update?file-id=${encodeURIComponent(fileId)}`);
+    router.push(`/excel-update?file-id=${fileId}`);
   };
 
   const handleRaports = async (fileId: any) => {
-    router.push(`/excel-reports?file-id=${encodeURIComponent(fileId)}`);
+    router.push(`/excel-reports?file-id=${fileId}`);
   };
 
   return (
     <div>
       <div className="flex p-1 gap-1">
-        <AddFolder></AddFolder>{" "}
+        <AddFolder></AddFolder>
       </div>
       {folders.map((folder) => (
         <Card key={folder.folder_name} className="mb-4 m-3 border-black">

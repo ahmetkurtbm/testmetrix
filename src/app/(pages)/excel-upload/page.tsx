@@ -78,6 +78,7 @@ const ExcelUploadPage = () => {
       setArrayData(array);
     };
 
+    // değiştirilecek
     reader.readAsBinaryString(file);
   };
 
@@ -124,7 +125,7 @@ const ExcelUploadPage = () => {
   };
 
   return (
-    <>
+    <div>
       <div className="flex h-screen  bg-blue-100">
         {/* Sol Kısım - Excel Logosunun Animasyonlu Alanı */}
         <div className="w-1/2 flex items-center justify-center">
@@ -229,7 +230,7 @@ const ExcelUploadPage = () => {
           </Card>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

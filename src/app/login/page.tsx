@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -62,11 +61,7 @@ const Login = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>Giriş Ekranı</title>
-        <meta name="description" content="Login Page" />
-      </Head>
+    <div>
       <div className="flex items-center justify-center h-screen">
         <img
           className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
@@ -152,7 +147,7 @@ const Login = () => {
           </CardFooter>
         </Card>
       </div>
-    </>
+    </div>
   );
 };
 

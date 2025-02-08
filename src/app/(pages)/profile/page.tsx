@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -78,11 +77,7 @@ const Profile = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>Profil</title>
-        <meta name="description" content="Profile Page" />
-      </Head>
+    <div>
       <div className="flex items-center justify-center h-screen">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
@@ -200,7 +195,7 @@ const Profile = () => {
           </CardFooter>
         </Card>
       </div>
-    </>
+    </div>
   );
 };
 

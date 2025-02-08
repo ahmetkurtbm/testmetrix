@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -71,11 +70,7 @@ const Register = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>Kayıt Ekranı</title>
-        <meta name="description" content="Register Page" />
-      </Head>
+    <div>
       <div className="flex items-center justify-center h-screen">
         <img
           className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
@@ -223,7 +218,7 @@ const Register = () => {
           </CardFooter>
         </Card>
       </div>
-    </>
+    </div>
   );
 };
 
