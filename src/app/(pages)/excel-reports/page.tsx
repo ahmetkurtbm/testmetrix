@@ -679,7 +679,7 @@ const ExcelReports = () => {
           });
 
           if (response.ok) {
-            const fetchedData: File[] = await response.json();
+            const fetchedData: File = await response.json();
 
             const file_name = fetchedData.file_name;
             const folder_id = fetchedData.folder_id;

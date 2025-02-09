@@ -202,9 +202,9 @@ export default function Home() {
                   {isEditing ? (
                     <div className="flex items-center gap-2 p-2">
                       <Input
-                        defaultValue={folder.folder_name}
+                        value={folder.folder_name}
                         onChange={(e) => {
-                          e.stopPropagation();
+                          e.preventDefault();
                           const newName = e.target.value;
                           setFolders((prevFolders) =>
                             prevFolders.map((f) =>

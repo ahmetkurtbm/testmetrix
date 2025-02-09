@@ -34,10 +34,8 @@ export default function FolderAdder() {
 
       const data = await response.json();
 
-      console.log(data);
-
       if (response.ok) {
-        console.log("Folder Upload Successful");
+        ("Folder Upload Successful");
       } else {
         console.error("Upload failed:", data.error);
       }

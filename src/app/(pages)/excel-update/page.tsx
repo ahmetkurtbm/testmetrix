@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
 
 interface File {
-  id: number;
+  id: string;
   folder_id: string;
   file_name: string;
   created_at: string;
@@ -119,7 +119,6 @@ const ExcelUpdate = () => {
             setFolderId={setFolderId}
           ></ComboboxDemo>
           <div>
-            <Label>Dosya İsmi</Label>
             <Input
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}

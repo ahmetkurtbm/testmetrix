@@ -30,7 +30,6 @@ const Register = () => {
 
   const handleKVKK = (event: any) => {
     setKVKK(event);
-    console.log("Checkbox Durumu:", event);
   };
 
   const handleRegister = async () => {
@@ -58,7 +57,7 @@ const Register = () => {
       }
 
       const data = await response.json();
-      console.log("Kayıt başarılı:", data);
+      console.log("Kayıt başarılı");
       navigateLogin();
     } catch (error) {
       console.error("Hata:", error);

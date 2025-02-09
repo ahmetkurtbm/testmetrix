@@ -39,11 +39,9 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log("Gelen yanıt:", data);
 
       if (response.ok) {
         Cookies.set("token", data.token, { expires: 1 / 24 }); // Token'ı elle çerezlere kaydet
-        console.log("Başarılı giriş, token cookies'e kaydedildi:", data.token);
         router.push("/folders");
       } else {
         console.error("Giriş başarısız:", data.error);
