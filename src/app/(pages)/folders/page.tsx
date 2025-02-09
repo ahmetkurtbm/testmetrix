@@ -22,14 +22,14 @@ import {
 import AddFolder from "@/app/(components)/AddFolder";
 
 interface File {
-  id: number;
-  folder_id: number;
+  _id: string;
+  folder_id: string;
   file_name: string;
   created_at: string;
 }
 
 interface FolderNames {
-  id: number;
+  _id: string;
   folder_name: string;
   created_at: string;
 }
@@ -42,14 +42,21 @@ export default function Home() {
   const [excels, setExcels] = useState<File[]>([]);
   const [folders, setFolders] = useState<FolderNames[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [folderId, setFolderId] = useState<number>();
-
-  console.log(folderId);
+  const [folderId, setFolderId] = useState<string>();
 
   // Token Kontrolü
   useEffect(() => {
     if (!Cookies.get("token")) {
       router.push("/login");
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      console.log("Token found:", token);
+    } else {
+      console.log("Token not found");
     }
   }, []);
 
@@ -137,7 +144,7 @@ export default function Home() {
       if (response.ok) {
         setFolders((prevFolders) =>
           prevFolders.map((folder) =>
-            folder.id === folderId
+            folder._id === folderId
               ? { ...folder, folder_name: newName }
               : folder
           )
@@ -163,7 +170,7 @@ export default function Home() {
 
       if (response.ok) {
         setFolders((prevFolders) =>
-          prevFolders.filter((folder) => folder.id !== folderId)
+          prevFolders.filter((folder) => folder._id !== folderId)
         );
 
         setIsEditing(false);
@@ -236,7 +243,7 @@ export default function Home() {
                           const newName = e.target.value;
                           setFolders((prevFolders) =>
                             prevFolders.map((f) =>
-                              f.id === folder.id
+                              f._id === folder._id
                                 ? { ...f, folder_name: newName }
                                 : f
                             )
@@ -247,7 +254,7 @@ export default function Home() {
                       <Button
                         size="sm"
                         onClick={() => {
-                          handleUpdateFolders(folder.id, folder.folder_name);
+                          handleUpdateFolders(folder._id, folder.folder_name);
                         }}
                       >
                         Kaydet
@@ -265,7 +272,7 @@ export default function Home() {
                     </div>
                   )}
                   <DropdownMenuItem
-                    onClick={() => handleDeleteFolders(folder.id)}
+                    onClick={() => handleDeleteFolders(folder._id)}
                     className="text-red-500 hover:bg-red-500 hover:text-white bg-slate-300 m-1"
                   >
                     Klasörü Sil
@@ -277,10 +284,10 @@ export default function Home() {
           <CardContent>
             <ul className="space-y-2 m-3">
               {excels
-                .filter((excel) => excel.folder_id === folder.id) // Sadece eşleşenleri al
+                .filter((excel) => excel.folder_id === folder._id) // Sadece eşleşenleri al
                 .map((excel) => (
                   <li
-                    key={excel.id}
+                    key={excel._id}
                     className="flex justify-between items-center"
                   >
                     <div>
@@ -299,7 +306,7 @@ export default function Home() {
                               variant="outline"
                               size="sm"
                               className="bg-blue-500 text-white"
-                              onClick={() => handleUpdate(excel.id)}
+                              onClick={() => handleUpdate(excel._id)}
                             >
                               Düzenle
                             </Button>
@@ -314,7 +321,7 @@ export default function Home() {
                               variant="outline"
                               size="sm"
                               className="bg-green-500 text-white"
-                              onClick={() => handleRaports(excel.id)}
+                              onClick={() => handleRaports(excel._id)}
                             >
                               Raporlar
                             </Button>
@@ -342,7 +349,7 @@ export default function Home() {
                               variant="outline"
                               size="sm"
                               className="bg-red-500 text-white"
-                              onClick={() => handleDeleteExcel(excel.id)}
+                              onClick={() => handleDeleteExcel(excel._id)}
                             >
                               Sil
                             </Button>

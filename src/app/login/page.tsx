@@ -40,16 +40,17 @@ const Login = () => {
           email,
           password,
         }),
+        credentials: "include",
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Login successful, redirecting...");
         Cookies.set("token", data.token, { expires: 1 / 24 });
-        console.log("Başarılı giriş, token cookies'e kaydedildi");
         router.push("/folders");
       } else {
-        console.error("Giriş başarısız:", data.error);
+        console.error("Login failed:", data.error);
       }
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
