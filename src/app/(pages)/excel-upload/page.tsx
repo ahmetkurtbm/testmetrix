@@ -98,6 +98,7 @@ const ExcelUploadPage = () => {
   };
 
   const handleSave = async () => {
+    console.log(folderId, fileName, arrayData);
     try {
       const response = await fetch(`${BACKEND_URL}/excel-upload`, {
         method: "POST",
@@ -106,9 +107,9 @@ const ExcelUploadPage = () => {
         },
         credentials: "include",
         body: JSON.stringify({
-          folderId: folderId,
-          fileName: fileName || "defaultFile",
-          arrayData: arrayData || [],
+          folder_id: folderId,
+          file_name: fileName || "defaultFile",
+          file_data: arrayData || [],
         }),
       });
 

@@ -29,6 +29,7 @@ export default function FolderAdder() {
         body: JSON.stringify({
           folderName: folderName,
         }),
+        credentials: "include",
       });
 
       const data = await response.json();

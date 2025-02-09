@@ -33,24 +33,20 @@ const Login = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // Çerezlerin set edilmesini sağlar
       });
 
       const data = await response.json();
+      console.log("Gelen yanıt:", data);
 
       if (response.ok) {
-        console.log("Login successful, redirecting...");
-        Cookies.set("token", data.token, { expires: 1 / 24 });
+        Cookies.set("token", data.token, { expires: 1 / 24 }); // Token'ı elle çerezlere kaydet
+        console.log("Başarılı giriş, token cookies'e kaydedildi:", data.token);
         router.push("/folders");
       } else {
-        console.error("Login failed:", data.error);
+        console.error("Giriş başarısız:", data.error);
       }
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);

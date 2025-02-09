@@ -51,15 +51,6 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      console.log("Token found:", token);
-    } else {
-      console.log("Token not found");
-    }
-  }, []);
-
   // Get Folders
   useEffect(() => {
     async function fetchFolders() {
@@ -104,32 +95,6 @@ export default function Home() {
 
     fetchExcels();
   }, []);
-
-  // useEffect(() => {
-  //   const handleUpdate = async () => {
-  //     if (fileId) {
-  //       try {
-  //         const response = await fetch(`${BACKEND_URL}/excel-update`, {
-  //           method: "PUT",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({
-  //             id: fileId,
-  //             folder_id: folderId,
-  //           }),
-  //         });
-
-  //         if (response.ok) {
-  //           console.log("Excel Update Successful");
-  //         } else {
-  //           console.error("Update failed:", await response.text());
-  //         }
-  //       } catch (error) {
-  //         console.error("Error Updating Excel:", error);
-  //       }
-  //     }
-  //   };
-  //   handleUpdate();
-  // }, [folderId]);
 
   const handleUpdateFolders = async (folderId: any, newName: string) => {
     try {

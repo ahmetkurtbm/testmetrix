@@ -15,7 +15,7 @@ import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
 
 interface File {
   id: number;
-  folder_id: number;
+  folder_id: string;
   file_name: string;
   created_at: string;
   file_data: string[][];
@@ -27,8 +27,8 @@ const ExcelUpdate = () => {
   const [data, setData] = useState<File | null>(null);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [fileName, setFileName] = useState<string>("");
-  const [folderName, setFolderName] = useState<string>("");
-  const [folderId, setFolderId] = useState<number>();
+  const [createdAt, setCreatedAt] = useState<string>("");
+  const [folderId, setFolderId] = useState<string>();
 
   useEffect(() => {
     const getExcel = async () => {
@@ -44,11 +44,13 @@ const ExcelUpdate = () => {
           });
 
           if (response.ok) {
-            const fetchedData: File = (await response.json())[0];
+            const fetchedData: File = await response.json();
+
             setData(fetchedData);
             setFileName(fetchedData.file_name);
             setFolderId(fetchedData.folder_id);
             setSelectedValues(fetchedData.file_data.map((row) => [...row]));
+            setCreatedAt(fetchedData.created_at);
           } else {
             console.error("Failed to fetch data:", await response.json());
           }

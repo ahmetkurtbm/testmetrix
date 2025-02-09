@@ -9,9 +9,12 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const Profile = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -71,6 +74,37 @@ const Profile = () => {
       }
 
       alert("Profil güncellendi.");
+    } catch (error: any) {
+      alert("Hata: " + error.message);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!formData.currentPassword) {
+      alert("Lütfen silme işlemi için şifrenizi giriniz.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/user`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: formData.currentPassword }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Profil silinemedi.");
+      }
+
+      alert("Profil silindi.");
+      Cookies.remove("token");
+
+      router.push("/login");
+
+      window.location.href = "/login";
     } catch (error: any) {
       alert("Hata: " + error.message);
     }
@@ -191,6 +225,12 @@ const Profile = () => {
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               Profili Güncelle
+            </Button>
+            <Button
+              onClick={handleDeleteProfile}
+              className="w-full bg-red-600 text-white hover:bg-red-700"
+            >
+              Profili Kaldır
             </Button>
           </CardFooter>
         </Card>

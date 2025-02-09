@@ -593,15 +593,15 @@ function calculateFrekans(scores: any) {
 }
 
 interface ExcelUpdateProps {
-  folder_name: string;
+  folder_id: string;
   file_name: string;
   created_at: string;
   file_data: string[][];
 }
 
 interface File {
-  id: number;
-  folder_name: string;
+  id: string;
+  folder_id: string;
   file_name: string;
   created_at: string;
   file_data: string[][];
@@ -611,7 +611,6 @@ const ExcelReports = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
-
   const [answerKey, setAnswerKey] = useState<string[]>([]);
   const [studentAnswers, setStudentAnswers] = useState<string[][]>([[]]);
   const [studentNames, setStudentNames] = useState<string[]>([]);
@@ -682,12 +681,12 @@ const ExcelReports = () => {
           if (response.ok) {
             const fetchedData: File[] = await response.json();
 
-            const file_name = fetchedData[0].file_name;
-            const folder_name = fetchedData[0].folder_name;
-            const created_at = fetchedData[0].created_at;
-            const file_data = fetchedData[0].file_data;
+            const file_name = fetchedData.file_name;
+            const folder_id = fetchedData.folder_id;
+            const created_at = fetchedData.created_at;
+            const file_data = fetchedData.file_data;
 
-            setData({ file_name, folder_name, created_at, file_data });
+            setData({ file_name, folder_id, created_at, file_data });
           } else {
             console.error("Failed to fetch data:", await response.json());
           }
@@ -1001,23 +1000,25 @@ const ExcelReports = () => {
             <strong>Ranj (Range):</strong> {range}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Çarpıklık Katsayısı (Skewness):</strong> {skewness}
+            <strong>Çarpıklık Katsayısı (Skewness):</strong>{" "}
+            {skewness.toFixed(2)}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Basıklık Katsayısı (Kurtosis):</strong> {kurtosis}
+            <strong>Basıklık Katsayısı (Kurtosis):</strong>{" "}
+            {kurtosis.toFixed(2)}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Puanların Başarı Yüzdesi:</strong> {successRate}%
+            <strong>Puanların Başarı Yüzdesi:</strong> {successRate.toFixed(2)}%
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20}
+            <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20.toFixed(2)}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21}
+            <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21.toFixed(2)}
           </p>
           <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
             <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
-            {relativeCoefficientOfVariation}
+            {relativeCoefficientOfVariation.toFixed(2)}
           </p>
         </div>
       </div>

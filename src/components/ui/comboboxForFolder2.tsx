@@ -24,14 +24,14 @@ export function ComboboxDemo({
   setFolderId,
 }: {
   folderId: any;
-  setFolderId: (id: any) => void;
+  setFolderId: (_id: any) => void;
 }) {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
 
   const [open, setOpen] = React.useState(false);
   const [folderName, setFolderName] = React.useState("");
   const [folders, setFolders] = React.useState<
-    { id: any; folder_name: string; created_at: any }[]
+    { _id: any; folder_name: string; created_at: any }[]
   >([]);
 
   React.useEffect(() => {
@@ -81,12 +81,12 @@ export function ComboboxDemo({
           <CommandList>
             <CommandEmpty>Klasör Bulunamadı.</CommandEmpty>
             <CommandGroup>
-              {folders.map((folder) => (
+              {folders.map((folder, index) => (
                 <CommandItem
-                  key={folder.id}
+                  key={folder._id || index}
                   value={folder.folder_name}
                   onSelect={() => {
-                    handleChange(folder.id, folder.folder_name);
+                    handleChange(folder._id, folder.folder_name);
                     setOpen(false);
                   }}
                 >
@@ -94,7 +94,7 @@ export function ComboboxDemo({
                   <Check
                     className={cn(
                       "ml-auto",
-                      folderId === folder.id ? "opacity-100" : "opacity-0"
+                      folderId === folder._id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
