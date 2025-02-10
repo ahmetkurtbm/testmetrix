@@ -222,7 +222,7 @@ function calculateRelativeCoefficientOfVariation(
   return ((standardDeviation / average) * 100).toFixed(2);
 }
 
-// aoruların doğru cevaplanma yüzdesi
+// soruların doğru cevaplanma yüzdesi
 function calculatePercentageMapPerQuestion(
   answerKey: any,
   studentAnswers: any
@@ -374,111 +374,216 @@ function calculateItemDifficultyIndexForAll(
   return itemDifficulties;
 }
 
-///RBIS DEĞERLERİ BURADAAA
-// function calculateRpbIndexForAll(
-//   studentAnswers: string[][],
-//   answerKey: string[],
-//   stdDevPerItem: any
-// ): number[] {
-//   const numQuestions = answerKey.length;
-//   const itemRpb: number[] = [];
+// Rbis
+function calculateRpbIndexForAll(
+  studentAnswers01: string[][], // Öğrenci cevapları (0 ve 1'lerden oluşan string dizisi)
+  stdDev: number, // Her soru için standart sapma
+  scores: number[], // Her öğrencinin toplam puanı
+  average: number, // Tüm öğrencilerin toplam puan ortalaması
+  numberOfQuestions: number // Soru sayısı
+): number[] {
+  const itemRpb: number[] = []; // RPB değerlerini tutacak dizi
 
-//   for (let i = 0; i < numQuestions; i++) {
-//     const itemScores = studentAnswers.map((studentAnswer) =>
-//       studentAnswer[i] === answerKey[i] ? 1 : 0
-//     );
+  for (let i = 0; i < numberOfQuestions; i++) {
+    // Her soru için öğrencilerin cevaplarını al (0 veya 1)
+    const itemScores = studentAnswers01.map((student) => parseInt(student[i]));
 
-//     const totalScores = studentAnswers.map((answers) =>
-//       answers.reduce(
-//         (sum, answer, index) => sum + (answer === answerKey[index] ? 1 : 0),
-//         0
-//       )
-//     );
+    // Doğru yapan öğrencilerin toplam puanlarını al
+    const correctScores = itemScores
+      .map((score, index) => (score === 1 ? scores[index] : 0)) // Doğru yapanların puanlarını al
+      .filter((score) => score !== 0); // Sadece doğru yapanların puanlarını filtrele
 
-//     const meanItem =
-//       itemScores.reduce((sum, score) => sum + score, 0) / itemScores.length;
-//     const meanTotal =
-//       totalScores.reduce((sum, score) => sum + score, 0) / totalScores.length;
+    // Doğru yapan kişilerin puan ortalaması
+    const meanCorrect =
+      correctScores.length > 0
+        ? correctScores.reduce((sum, score) => sum + score, 0) /
+          correctScores.length
+        : 0;
 
-//     // Doğru ve yanlış yanıt sayılarını hesapla
-//     const correctCount = itemScores.filter((score) => score === 1).length;
-//     const incorrectCount = itemScores.length - correctCount;
+    // Doğru ve yanlış yapanların sayısı
+    const correctCount = correctScores.length;
+    const incorrectCount = itemScores.length - correctCount;
 
-//     // Kök içerisinde (doğru / yanlış) oranını hesapla
-//     const ratio = correctCount / incorrectCount;
-//     const sqrtRatio = Math.sqrt(ratio);
+    // Karekök içindeki oran (doğru / yanlış)
+    const sqrtRatio =
+      incorrectCount === 0
+        ? 0
+        : Math.sqrt(correctCount / 10 / (incorrectCount / 10));
 
-//     // RPB'yi hesapla ve kök içerisindeki oran ile çarp
-//     const rpb =
-//       parseFloat((covariance / Math.sqrt(varianceTotal)).toFixed(2)) *
-//       sqrtRatio;
-//     itemRpb.push(rpb);
-//   }
+    // Standart sapma kontrolü
+    //const stdDev = stdDevPerItem[i] === 0 ? 0.01 : stdDevPerItem[i];
 
-//   return itemRpb;
-// }
+    // RPB hesaplama
+    const rpb =
+      correctCount > 0 && incorrectCount > 0
+        ? ((meanCorrect - average) / stdDev) * sqrtRatio
+        : 0;
 
-// function calculateRbIndexForAll(
-//   studentAnswers: string[][],
-//   answerKey: string[]
-// ): number[] {
-//   const numQuestions = answerKey.length;
-//   const itemRb: number[] = [];
+    itemRpb.push(parseFloat(rpb.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
+  }
 
-//   for (let i = 0; i < numQuestions; i++) {
-//     const itemScores = studentAnswers.map((studentAnswer) =>
-//       studentAnswer[i] === answerKey[i] ? 1 : 0
-//     );
+  return itemRpb;
+}
 
-//     const totalScores = studentAnswers.map((answers) =>
-//       answers.reduce(
-//         (sum, answer, index) => sum + (answer === answerKey[index] ? 1 : 0),
-//         0
-//       )
-//     );
+// Prbis
+function calculateRbIndexForAll(
+  studentAnswers01: string[][], // Öğrenci cevapları (0 ve 1'lerden oluşan string dizisi)
+  stdDev: number, // Her soru için standart sapma
+  scores: number[], // Her öğrencinin toplam puanı
+  average: number, // Tüm öğrencilerin toplam puan ortalaması
+  numberOfQuestions: number // Soru sayısı
+): number[] {
+  const itemRpb: number[] = []; // RPB değerlerini tutacak dizi
+  const totalStudents = studentAnswers01.length; // Toplam öğrenci sayısı
 
-//     const meanItem =
-//       itemScores.reduce((sum, score) => sum + score, 0) / itemScores.length;
-//     const meanTotal =
-//       totalScores.reduce((sum, score) => sum + score, 0) / totalScores.length;
+  // Tablodan p ve O değerlerini eşleştiren bir obje oluştur
+  const pToO: { [key: string]: number } = {
+    "0.01": 0.026,
+    "0.02": 0.049,
+    "0.03": 0.068,
+    "0.04": 0.086,
+    "0.05": 0.102,
+    "0.06": 0.118,
+    "0.07": 0.133,
+    "0.08": 0.148,
+    "0.09": 0.163,
+    "0.10": 0.176,
+    "0.11": 0.187,
+    "0.12": 0.199,
+    "0.13": 0.211,
+    "0.14": 0.223,
+    "0.15": 0.232,
+    "0.16": 0.244,
+    "0.17": 0.254,
+    "0.18": 0.261,
+    "0.19": 0.271,
+    "0.20": 0.28,
+    "0.21": 0.287,
+    "0.22": 0.297,
+    "0.23": 0.303,
+    "0.24": 0.31,
+    "0.25": 0.319,
+    "0.26": 0.325,
+    "0.27": 0.331,
+    "0.28": 0.337,
+    "0.29": 0.343,
+    "0.30": 0.348,
+    "0.31": 0.352,
+    "0.32": 0.357,
+    "0.33": 0.362,
+    "0.34": 0.367,
+    "0.35": 0.37,
+    "0.36": 0.374,
+    "0.37": 0.378,
+    "0.38": 0.38,
+    "0.39": 0.384,
+    "0.40": 0.387,
+    "0.41": 0.389,
+    "0.42": 0.391,
+    "0.43": 0.393,
+    "0.44": 0.394,
+    "0.45": 0.396,
+    "0.46": 0.397,
+    "0.47": 0.398,
+    "0.48": 0.398,
+    "0.49": 0.399,
+    "0.50": 0.399,
+    "0.51": 0.399,
+    "0.52": 0.398,
+    "0.53": 0.398,
+    "0.54": 0.397,
+    "0.55": 0.396,
+    "0.56": 0.394,
+    "0.57": 0.393,
+    "0.58": 0.391,
+    "0.59": 0.389,
+    "0.60": 0.387,
+    "0.61": 0.384,
+    "0.62": 0.38,
+    "0.63": 0.378,
+    "0.64": 0.374,
+    "0.65": 0.37,
+    "0.66": 0.367,
+    "0.67": 0.362,
+    "0.68": 0.357,
+    "0.69": 0.352,
+    "0.70": 0.348,
+    "0.71": 0.343,
+    "0.72": 0.337,
+    "0.73": 0.331,
+    "0.74": 0.325,
+    "0.75": 0.319,
+    "0.76": 0.31,
+    "0.77": 0.303,
+    "0.78": 0.297,
+    "0.79": 0.287,
+    "0.80": 0.28,
+    "0.81": 0.271,
+    "0.82": 0.261,
+    "0.83": 0.254,
+    "0.84": 0.244,
+    "0.85": 0.232,
+    "0.86": 0.223,
+    "0.87": 0.211,
+    "0.88": 0.199,
+    "0.89": 0.187,
+    "0.90": 0.176,
+    "0.91": 0.163,
+    "0.92": 0.148,
+    "0.93": 0.133,
+    "0.94": 0.118,
+    "0.95": 0.102,
+    "0.96": 0.086,
+    "0.97": 0.068,
+    "0.98": 0.049,
+    "0.99": 0.026,
+  };
 
-//     const covariance = itemScores.reduce(
-//       (sum, score, index) =>
-//         sum + (score - meanItem) * (totalScores[index] - meanTotal),
-//       0
-//     );
+  for (let i = 0; i < numberOfQuestions; i++) {
+    // Her soru için öğrencilerin cevaplarını al (0 veya 1)
+    const itemScores = studentAnswers01.map((student) => parseInt(student[i]));
 
-//     const questionVariance =
-//       itemScores.reduce(
-//         (sum, score) => sum + Math.pow(score - meanItem, 2),
-//         0
-//       ) / itemScores.length;
+    // Doğru yapan öğrencilerin toplam puanlarını al
+    const correctScores = itemScores
+      .map((score, index) => (score === 1 ? scores[index] : 0)) // Doğru yapanların puanlarını al
+      .filter((score) => score !== 0); // Sadece doğru yapanların puanlarını filtrele
 
-//     const totalVariance =
-//       totalScores.reduce(
-//         (sum, score) => sum + Math.pow(score - meanTotal, 2),
-//         0
-//       ) / totalScores.length;
+    // Doğru yapan kişilerin puan ortalaması
+    const meanCorrect =
+      correctScores.length > 0
+        ? correctScores.reduce((sum, score) => sum + score, 0) /
+          correctScores.length
+        : 0;
 
-//     // Doğru ve yanlış yanıt sayılarını hesapla
-//     const correctCount = itemScores.filter((score) => score === 1).length;
-//     const incorrectCount = itemScores.length - correctCount;
+    // Doğru ve yanlış yapanların sayısı
+    const correctCount = correctScores.length;
+    const p = correctCount / totalStudents; // Doğru yapanların oranı
 
-//     // Kök içerisinde (doğru / yanlış) oranını hesapla
-//     const ratio = correctCount / incorrectCount;
-//     const sqrtRatio = Math.sqrt(ratio);
+    // p değerine en yakın p değerini bul
+    const closestP = Object.keys(pToO).reduce((prev, curr) =>
+      Math.abs(parseFloat(curr) - p) < Math.abs(parseFloat(prev) - p)
+        ? curr
+        : prev
+    );
 
-//     // RB'yi hesapla ve kök içerisindeki oran ile çarp
-//     const rb =
-//       parseFloat(
-//         (covariance / Math.sqrt(questionVariance * totalVariance)).toFixed(2)
-//       ) * sqrtRatio;
-//     itemRb.push(rb);
-//   }
+    // y değerini tablodan al
+    const y = pToO[closestP];
 
-//   return itemRb;
-// }
+    // RPB hesaplama
+    const rpb =
+      correctCount > 0 && y > 0
+        ? ((meanCorrect - average) / stdDev) *
+          Math.sqrt(correctCount / (totalStudents - correctCount)) *
+          y
+        : 0;
 
+    itemRpb.push(parseFloat(rpb.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
+  }
+
+  return itemRpb;
+}
+
+// Bence Bu Yanlış
 // Madde Ayırt Edicilik İndeksi (%27) Hesaplama
 function calculateDiscriminationIndexForAll(
   studentAnswers: any,
@@ -752,8 +857,20 @@ const ExcelReports = () => {
       studentAnswers,
       answerKey
     );
-    // const rbis = calculateRbIndexForAll(studentAnswers, answerKey);
-    // const prbis = calculateRpbIndexForAll(studentAnswers, answerKey);
+    const rbis = calculateRbIndexForAll(
+      studentAns01,
+      stdDev,
+      scores,
+      avg,
+      numberOfQuestions
+    );
+    const prbis = calculateRpbIndexForAll(
+      studentAns01,
+      stdDev,
+      scores,
+      avg,
+      numberOfQuestions
+    );
     const discrimination = calculateDiscriminationIndexForAll(
       studentAnswers,
       answerKey
@@ -792,8 +909,8 @@ const ExcelReports = () => {
     setVariancePerItem(itemVariance.map((item) => Number(item) || 0)); // Converts string to number
     setStdDevPerItem(itemStdDev.map((item) => Number(item) || 0)); // Converts string to number
     setDifficultyIndex(difficultyIndexValue.map((item) => Number(item) || 0)); // Converts string to number
-    // setRbisIndex(rbis.map((item) => Number(item) || 0)); // Converts string to number
-    // setPrbisIndex(prbis.map((item) => Number(item) || 0)); // Converts string to number
+    setRbisIndex(rbis.map((item) => Number(item) || 0)); // Converts string to number
+    setPrbisIndex(prbis.map((item) => Number(item) || 0)); // Converts string to number
     setDiscriminationIndex(discrimination.map((item) => Number(item) || 0)); // Converts string to number
     setPercentageMapPerQuestion(percMap.map((item) => Number(item) || 0)); // Converts string to number
 
@@ -880,8 +997,8 @@ const ExcelReports = () => {
               itemVariance={variancePerItem}
               itemStd={stdDevPerItem}
               itemDifficulty={difficultyIndex}
-              // itemRbis={rbisIndex}
-              // itemPrbis={prbisIndex}
+              itemRbis={rbisIndex}
+              itemPrbis={prbisIndex}
               item27={discriminationIndex}
               itemReliability={reliabilityIndex}
             />
@@ -907,7 +1024,7 @@ const ExcelReports = () => {
           </div>
 
           <div className="m-3">
-            <OptionAnalysis data={optionCounts} />
+            <OptionAnalysis data={optionCounts} scores={scores} />
           </div>
 
           <div className="m-3">

@@ -16,18 +16,27 @@ interface OptionData {
 
 interface OptionAnalysisProps {
   data: OptionData[];
+  scores: number[]; // Öğrencilerin toplam puanları
 }
 
-const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
+const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data, scores }) => {
   // Her madde için üst ve alt grupları hesapla
-  const calculateAnalysisData = (data: OptionData[]) => {
+  const calculateAnalysisData = (data: OptionData[], scores: number[]) => {
+    // Öğrencileri puanlarına göre sırala
+    const sortedScores = [...scores].sort((a, b) => b - a); // Büyükten küçüğe sırala
+    const totalStudents = sortedScores.length;
+
+    // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
+    const groupSize = Math.round(totalStudents * 0.27);
+
+    // Üst ve alt grupların puan eşiklerini belirle
+    const upperThreshold = sortedScores[groupSize - 1];
+    const lowerThreshold = sortedScores[totalStudents - groupSize];
+
     return data.map((item) => {
       const total = item.A + item.B + item.C + item.D + item.E + item.Bos;
 
-      // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
-      const groupSize = Math.round(total * 0.27);
-
-      // Her madde için üst ve alt grupları hesapla
+      // Üst ve alt grupların seçenek dağılımını hesapla
       const upperGroup = [
         Math.round((item.A / total) * groupSize),
         Math.round((item.B / total) * groupSize),
@@ -72,7 +81,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data }) => {
     const worksheet = workbook.addWorksheet("Madde Analiz Raporu");
 
     // Veriyi analiz et
-    const analysisData = calculateAnalysisData(data);
+    const analysisData = calculateAnalysisData(data, scores);
 
     // Veriyi Excel'e Ekle
     analysisData.forEach((item, index) => {
