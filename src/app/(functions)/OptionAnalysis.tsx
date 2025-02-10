@@ -17,45 +17,61 @@ interface OptionData {
 interface OptionAnalysisProps {
   data: OptionData[];
   scores: number[]; // Öğrencilerin toplam puanları
+  studentAnswers: any[][]; // Öğrencilerin cevapları (0 ve 1'lerden oluşan string dizisi)
 }
 
-const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data, scores }) => {
+const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
+  data,
+  scores,
+  studentAnswers,
+}) => {
   // Her madde için üst ve alt grupları hesapla
-  const calculateAnalysisData = (data: OptionData[], scores: number[]) => {
+  const calculateAnalysisData = (
+    data: OptionData[],
+    scores: number[],
+    studentAnswers: string[][]
+  ) => {
     // Öğrencileri puanlarına göre sırala
-    const sortedScores = [...scores].sort((a, b) => b - a); // Büyükten küçüğe sırala
-    const totalStudents = sortedScores.length;
+    const sortedIndices = scores
+      .map((score, index) => ({ score, index }))
+      .sort((a, b) => b.score - a.score) // Büyükten küçüğe sırala
+      .map((item) => item.index);
+
+    const totalStudents = sortedIndices.length;
 
     // Üst ve alt grupların boyutunu hesapla (toplam öğrenci sayısının %27'si)
     const groupSize = Math.round(totalStudents * 0.27);
 
-    // Üst ve alt grupların puan eşiklerini belirle
-    const upperThreshold = sortedScores[groupSize - 1];
-    const lowerThreshold = sortedScores[totalStudents - groupSize];
+    // Üst ve alt grupların indekslerini belirle
+    const upperGroupIndices = sortedIndices.slice(0, groupSize);
+    const lowerGroupIndices = sortedIndices.slice(-groupSize);
 
-    return data.map((item) => {
+    return data.map((item, questionIndex) => {
       const total = item.A + item.B + item.C + item.D + item.E + item.Bos;
 
       // Üst ve alt grupların seçenek dağılımını hesapla
-      const upperGroup = [
-        Math.round((item.A / total) * groupSize),
-        Math.round((item.B / total) * groupSize),
-        Math.round((item.C / total) * groupSize),
-        Math.round((item.D / total) * groupSize),
-        Math.round((item.E / total) * groupSize),
-        Math.round((item.Bos / total) * groupSize),
-        groupSize,
-      ];
+      const upperGroup = [0, 0, 0, 0, 0, 0, groupSize]; // A, B, C, D, E, Boş, Toplam
+      const lowerGroup = [0, 0, 0, 0, 0, 0, groupSize]; // A, B, C, D, E, Boş, Toplam
 
-      const lowerGroup = [
-        Math.round((item.A / total) * groupSize),
-        Math.round((item.B / total) * groupSize),
-        Math.round((item.C / total) * groupSize),
-        Math.round((item.D / total) * groupSize),
-        Math.round((item.E / total) * groupSize),
-        Math.round((item.Bos / total) * groupSize),
-        groupSize,
-      ];
+      upperGroupIndices.forEach((studentIndex) => {
+        const answer = studentAnswers[studentIndex][questionIndex + 1];
+        if (answer === "A") upperGroup[0]++;
+        else if (answer === "B") upperGroup[1]++;
+        else if (answer === "C") upperGroup[2]++;
+        else if (answer === "D") upperGroup[3]++;
+        else if (answer === "E") upperGroup[4]++;
+        else if (answer === "Bos") upperGroup[5]++;
+      });
+
+      lowerGroupIndices.forEach((studentIndex) => {
+        const answer = studentAnswers[studentIndex][questionIndex + 1];
+        if (answer === "A") lowerGroup[0]++;
+        else if (answer === "B") lowerGroup[1]++;
+        else if (answer === "C") lowerGroup[2]++;
+        else if (answer === "D") lowerGroup[3]++;
+        else if (answer === "E") lowerGroup[4]++;
+        else if (answer === "Bos") lowerGroup[5]++;
+      });
 
       return {
         madde: item.madde,
@@ -81,7 +97,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({ data, scores }) => {
     const worksheet = workbook.addWorksheet("Madde Analiz Raporu");
 
     // Veriyi analiz et
-    const analysisData = calculateAnalysisData(data, scores);
+    const analysisData = calculateAnalysisData(data, scores, studentAnswers);
 
     // Veriyi Excel'e Ekle
     analysisData.forEach((item, index) => {
