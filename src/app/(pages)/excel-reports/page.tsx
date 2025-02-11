@@ -1,16 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
-// import Plot from "react-plotly.js";
-// import { PlotType } from "plotly.js";
 
 type OptionData = {
   madde: string;
@@ -770,9 +760,9 @@ const ExcelReports = () => {
   const [selectedGraficsData, setSelectedGraficsData] = useState(
     "Öğrenci Puanlarının Frekansları"
   );
-  // const [selectedGrafic, setSelectedGrafic] = useState<PlotType>("bar");
-  const [xValues, setXValues] = useState<any>();
-  const [yValues, setYValues] = useState<any>();
+  const [selectedGrafic, setSelectedGrafic] = useState<any>("bar");
+  const [xValues, setXValues] = useState<any[]>();
+  const [yValues, setYValues] = useState<any[]>();
 
   // first useEffect
   useEffect(() => {
@@ -1058,7 +1048,7 @@ const ExcelReports = () => {
           </div>
         </div>
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}
-        {/* <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
+        <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
           <div className="flex gap-1">
             <ComboboxForData
@@ -1070,40 +1060,9 @@ const ExcelReports = () => {
               setValue={setSelectedGrafic}
             />
           </div>
+          <div>{/*Grafik gelecek bu kısma */}</div>
+        </div>
 
-          <div className="flex justify-center rounded-md mt-6">
-            {xValues !== undefined &&
-              yValues !== undefined &&
-              selectedGrafic !== undefined &&
-              selectedGraficsData !== undefined && (
-                <Plot
-                  data={[
-                    {
-                      labels: xValues,
-                      values: yValues,
-                      x: xValues,
-                      y: yValues,
-                      type: selectedGrafic,
-                      mode: "lines+markers",
-                      marker: { color: "blue" },
-                    },
-                  ]}
-                  layout={{
-                    title: selectedGraficsData,
-                    xaxis: { title: "" },
-                    yaxis: { title: "Değerler" },
-                  }}
-                />
-              )}
-          </div>
-        </div> */}
-        {/* <LineChart width={400} height={300}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="x" />
-          <YAxis />
-          <Tooltip />
-          <Line type="monotone" dataKey="y" stroke="#8884d8" />
-        </LineChart> */}
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
         <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
           <p className="text-white text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
