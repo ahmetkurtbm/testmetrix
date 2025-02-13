@@ -21,16 +21,24 @@ import {
 
 const frameworks = [
   {
-    value: "scatter",
+    value: "line",
     label: "Çizgi Grafiği",
   },
   {
     value: "bar",
-    label: "Sütun Grafik",
+    label: "Çubuk Grafik",
   },
   {
     value: "pie",
     label: "Daire Grafik",
+  },
+  {
+    value: "radar",
+    label: "Radar Grafik",
+  },
+  {
+    value: "doughnut",
+    label: "Doughnut Grafik",
   },
 ];
 

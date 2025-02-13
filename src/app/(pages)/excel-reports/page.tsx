@@ -2,6 +2,34 @@
 
 import { useState, useEffect } from "react";
 
+import { Line, Bar, Pie, Radar, Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale,
+} from "chart.js";
+// Gerekli bileşenleri kaydet
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend
+);
+
 type OptionData = {
   madde: string;
   A: number;
@@ -760,7 +788,7 @@ const ExcelReports = () => {
   const [selectedGraficsData, setSelectedGraficsData] = useState(
     "Öğrenci Puanlarının Frekansları"
   );
-  const [selectedGrafic, setSelectedGrafic] = useState<any>("bar");
+  const [selectedGrafic, setSelectedGrafic] = useState<any>("line");
   const [xValues, setXValues] = useState<any[]>();
   const [yValues, setYValues] = useState<any[]>();
 
@@ -967,11 +995,89 @@ const ExcelReports = () => {
     }
   }, [scores, selectedGraficsData]);
 
+  const labels = getDataForPlot().map((_, index) => `Veri ${index + 1}`); // X ekseni için otomatik etiketler
+
+  // Rastgele renkler oluştur (Pie ve Doughnut için)
+  const generateColors = (count: number) =>
+    Array.from(
+      { length: count },
+      () => `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`
+    );
+
+  const graficdata = {
+    labels,
+    datasets: [
+      {
+        label: "Veri Seti",
+        data: getDataForPlot(),
+        borderColor: "rgb(54, 162, 235)",
+        backgroundColor: generateColors(getDataForPlot().length), // Pasta/Radar grafikleri için renkli
+        borderWidth: 2,
+        pointRadius: 5, // Noktaları büyüt
+        pointBackgroundColor: "rgb(255, 99, 132)", // Nokta rengi
+        hoverBackgroundColor: "rgba(255, 99, 132, 0.6)", // Hover efekti
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top" as const,
+        labels: {
+          color: "#333",
+          font: { size: 14 },
+        },
+      },
+      title: {
+        display: true,
+        text: "📊 Dinamik Grafik Türü",
+        color: "#222",
+        font: { size: 20 },
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: "#333",
+        titleFont: { size: 16 },
+        bodyFont: { size: 14 },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { color: "#222", font: { size: 14 } },
+        grid: { color: "rgba(200, 200, 200, 0.2)" },
+      },
+      y: {
+        ticks: { color: "#222", font: { size: 14 } },
+        grid: { color: "rgba(200, 200, 200, 0.2)" },
+      },
+    },
+  };
+
+  // Seçilen grafik türüne göre bileşeni belirle
+  const renderChart = () => {
+    switch (selectedGrafic) {
+      case "bar":
+        return <Bar data={graficdata} options={options} />;
+      case "pie":
+        return <Pie data={graficdata} options={options} />;
+      case "radar":
+        return <Radar data={graficdata} options={options} />;
+      case "doughnut":
+        return <Doughnut data={graficdata} options={options} />;
+      default:
+        return <Line data={graficdata} options={options} />;
+    }
+  };
+
   return (
     <div>
       <h2 className="text-3xl font-semibold text-center p-1 m-2 text-green-500">
         Veri Raporları
       </h2>
+
       <div className="p-1 flex gap-1 justify-center">
         {/* Sol Taraftaki Excelleri İndirme Alanı */}
         <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md w-1/4">
@@ -1047,6 +1153,7 @@ const ExcelReports = () => {
             />
           </div>
         </div>
+
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}
         <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
@@ -1060,7 +1167,7 @@ const ExcelReports = () => {
               setValue={setSelectedGrafic}
             />
           </div>
-          <div>{/*Grafik gelecek bu kısma */}</div>
+          <div className="w-[500px] h-[500px]">{renderChart()}</div>
         </div>
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
