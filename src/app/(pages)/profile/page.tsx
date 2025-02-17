@@ -16,6 +16,27 @@ const Profile = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
 
+  // Token Kontrolü
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+          method: "GET",
+          credentials: "include", // Çerezleri otomatik ekler
+        });
+
+        if (!response.ok) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Kimlik doğrulama hatası:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     surname: "",

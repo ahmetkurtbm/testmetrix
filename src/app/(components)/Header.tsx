@@ -13,17 +13,20 @@ import { Avatar } from "@/components/ui/avatar";
 import Cookies from "js-cookie";
 
 const Header = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      Cookies.remove("token");
+      await fetch(`${BACKEND_URL}/logout`, {
+        method: "POST",
+        credentials: "include", // Çerezleri backend'e gönderir
+      });
 
-      router.push("/login");
-
-      window.location.href = "/login";
+      router.push("/login"); // Sayfayı yönlendir
+      window.location.reload(); // Sayfayı yenileyerek çerezi tamamen temizle
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Çıkış yaparken hata oluştu:", error);
     }
   };
 

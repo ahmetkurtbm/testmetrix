@@ -48,6 +48,7 @@ import TestAnalysis from "../../(functions)/TestAnalysis";
 import OptionAnalysis from "../../(functions)/OptionAnalysis";
 import { ComboboxForData } from "@/components/ui/comboboxForGraficData";
 import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
+import { useRouter } from "next/navigation";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -740,6 +741,28 @@ interface File {
 
 const ExcelReports = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+  const router = useRouter();
+
+  // Token Kontrolü
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+          method: "GET",
+          credentials: "include", // Çerezleri otomatik ekler
+        });
+
+        if (!response.ok) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Kimlik doğrulama hatası:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
   const [answerKey, setAnswerKey] = useState<string[]>([]);
@@ -807,6 +830,7 @@ const ExcelReports = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ fileId }),
+            credentials: "include",
           });
 
           if (response.ok) {

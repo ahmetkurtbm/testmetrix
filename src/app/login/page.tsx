@@ -23,10 +23,25 @@ const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
+  // Token kontrolü
   useEffect(() => {
-    if (Cookies.get("token")) {
-      router.push("/folders");
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+          method: "GET",
+          credentials: "include", // Çerezleri otomatik ekler
+        });
+
+        if (!response.ok) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Kimlik doğrulama hatası:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const handleLogin = async () => {
@@ -35,15 +50,14 @@ const Login = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include", // Çerezlerin set edilmesini sağlar
+        credentials: "include", // Çerezlerin backend'e kaydedilmesini sağlar
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        Cookies.set("token", data.token, { expires: 1 / 24 }); // Token'ı elle çerezlere kaydet
+        console.log("Giriş başarılı. Çerez tarayıcıya kaydedildi.");
         router.push("/folders");
       } else {
+        const data = await response.json();
         console.error("Giriş başarısız:", data.error);
       }
     } catch (error) {

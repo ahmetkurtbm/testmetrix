@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -21,12 +21,32 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TableContainer from "@/app/(components)/TableContainer";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 
 const ExcelUploadPage = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
-
   const router = useRouter();
+
+  // Token Kontrolü
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+          method: "GET",
+          credentials: "include", // Çerezleri otomatik ekler
+        });
+
+        if (!response.ok) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Kimlik doğrulama hatası:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const [jsonData, setJsonData] = useState<Record<string, any>>({});
   const [arrayData, setArrayData] = useState<any[]>([]);

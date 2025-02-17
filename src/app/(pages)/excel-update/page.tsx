@@ -11,7 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder2";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import { useRouter } from "next/navigation";
 
 interface File {
   id: string;
@@ -23,6 +24,28 @@ interface File {
 
 const ExcelUpdate = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
+  const router = useRouter();
+
+  // Token Kontrolü
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+          method: "GET",
+          credentials: "include", // Çerezleri otomatik ekler
+        });
+
+        if (!response.ok) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Kimlik doğrulama hatası:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const [data, setData] = useState<File | null>(null);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
@@ -41,6 +64,7 @@ const ExcelUpdate = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fileId }),
+            credentials: "include",
           });
 
           if (response.ok) {
@@ -91,6 +115,7 @@ const ExcelUpdate = () => {
             file_name: fileName,
             file_data: selectedValues,
           }),
+          credentials: "include",
         });
 
         if (response.ok) {
