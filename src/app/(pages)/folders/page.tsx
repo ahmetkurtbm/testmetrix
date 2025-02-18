@@ -38,7 +38,7 @@ export default function Folders() {
   const router = useRouter();
 
   const successSaveFolder = () =>
-    toast.success("Giriş Başarılı!", {
+    toast.success("Klasör Başarıyla Kaydedildi!", {
       position: "bottom-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -50,7 +50,7 @@ export default function Folders() {
     });
 
   const successUpdateFolder = () =>
-    toast.success("Giriş Başarılı!", {
+    toast.success("Klasör İsmi Güncellendi!", {
       position: "bottom-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -62,7 +62,19 @@ export default function Folders() {
     });
 
   const successDeleteFolder = () =>
-    toast.success("Giriş Başarılı!", {
+    toast.success("Klasör Silindi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successDeleteExcel = () =>
+    toast.success("Veri Dosyası Silindi!", {
       position: "bottom-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -74,64 +86,52 @@ export default function Folders() {
     });
 
   const errorSaveFolder = () =>
-    toast.error(
-      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
-      {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      }
-    );
+    toast.error("Klasör Kaydedilemedi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const errorUpdateFolder = () =>
-    toast.error(
-      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
-      {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      }
-    );
+    toast.error("Klasör İsmi GÜncellenemedi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const errorDeleteFolder = () =>
-    toast.error(
-      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
-      {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      }
-    );
+    toast.error("Klasör Silinemedi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const errorDeleteExcel = () =>
-    toast.error(
-      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
-      {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      }
-    );
+    toast.error("Veri Dosyası Silinemedi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const [excels, setExcels] = useState<File[]>([]);
   const [folders, setFolders] = useState<FolderNames[]>([]);
@@ -209,6 +209,7 @@ export default function Folders() {
       });
 
       if (response.ok) {
+        successUpdateFolder();
         setFolders((prevFolders) =>
           prevFolders.map((folder) =>
             folder._id === folderId
@@ -218,9 +219,11 @@ export default function Folders() {
         );
         setIsEditing(false);
       } else {
+        errorUpdateFolder();
         console.error("Güncelleme başarısız");
       }
     } catch (error) {
+      errorUpdateFolder();
       console.error("Hata oluştu:", error);
     }
   };
@@ -237,6 +240,7 @@ export default function Folders() {
       });
 
       if (response.ok) {
+        successDeleteFolder();
         setFolders((prevFolders) =>
           prevFolders.filter((folder) => folder._id !== folderId)
         );
