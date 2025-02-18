@@ -12,13 +12,40 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { ToastContainer, toast } from "react-toastify";
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Register = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
-
   const router = useRouter();
+
+  const success = () =>
+    toast.success("Kayıt Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const error = () =>
+    toast.error(
+      "Kayıt Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
 
   const [role, setRole] = useState("Öğrenci");
   const [name, setName] = useState("");
@@ -53,15 +80,17 @@ const Register = () => {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        throw new Error("Kayıt işlemi başarısız");
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Kayıt başarılı");
+        success();
+        navigateLogin();
+      } else {
+        error();
+        console.log("Kayıt işlemi başarısız");
       }
-
-      const data = await response.json();
-      console.log("Kayıt başarılı");
-      navigateLogin();
-    } catch (error) {
-      console.error("Hata:", error);
+    } catch (err) {
+      console.error("Hata:", err);
     }
   };
 
@@ -218,6 +247,18 @@ const Register = () => {
           </CardFooter>
         </Card>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };

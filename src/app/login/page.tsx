@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,13 +10,40 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { ToastContainer, toast } from "react-toastify";
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
 const Login = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
-
   const router = useRouter();
+
+  const success = () =>
+    toast.success("Giriş Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const error = () =>
+    toast.error(
+      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
 
   const [role, setRole] = useState<string>("Öğrenci");
   const [email, setEmail] = useState<string>("");
@@ -56,9 +82,11 @@ const Login = () => {
       if (response.ok) {
         console.log("Giriş başarılı. Çerez tarayıcıya kaydedildi.");
         router.push("/folders");
+        success();
       } else {
         const data = await response.json();
         console.error("Giriş başarısız:", data.error);
+        error();
       }
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
@@ -156,6 +184,18 @@ const Login = () => {
           </CardFooter>
         </Card>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };

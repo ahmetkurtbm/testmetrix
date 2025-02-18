@@ -47,7 +47,7 @@ export default function FolderAdder() {
   };
 
   return (
-    <div className="flex p-1 gap-1">
+    <div className="flex gap-1">
       <Button onClick={handleAddFolder}>Klasör Ekle</Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

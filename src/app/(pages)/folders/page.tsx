@@ -10,8 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import React, { useState, useEffect } from "react";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
-import Cookies from "js-cookie";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -20,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddFolder from "@/app/(components)/AddFolder";
+import { ToastContainer, toast } from "react-toastify";
 
 interface File {
   _id: string;
@@ -37,6 +36,102 @@ interface FolderNames {
 export default function Folders() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+
+  const successSaveFolder = () =>
+    toast.success("Giriş Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successUpdateFolder = () =>
+    toast.success("Giriş Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successDeleteFolder = () =>
+    toast.success("Giriş Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const errorSaveFolder = () =>
+    toast.error(
+      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const errorUpdateFolder = () =>
+    toast.error(
+      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const errorDeleteFolder = () =>
+    toast.error(
+      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const errorDeleteExcel = () =>
+    toast.error(
+      "Giriş Başarısız, Lütfen Girdiğiniz Bilgileri Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
 
   const [excels, setExcels] = useState<File[]>([]);
   const [folders, setFolders] = useState<FolderNames[]>([]);
@@ -190,8 +285,12 @@ export default function Folders() {
 
   return (
     <div>
-      <div className="flex p-1 gap-1">
-        <AddFolder></AddFolder>
+      <div className="flex p-1 justify-center">
+        <div className="flex gap-2 p-1 w-1/2 align-top">
+          <Input></Input>
+          <Button>Arama Iconu Koyulacak Buraya</Button>
+          <AddFolder></AddFolder>
+        </div>
       </div>
       {folders !== undefined &&
         folders.map((folder, index) => {
@@ -314,18 +413,6 @@ export default function Folders() {
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <ComboboxDemo
-                                  folderId={folderId}
-                                  setFolderId={setFolderId}
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Excel Raporunuzu İstediğiniz Klasöre
-                                Taşıyabilirsiniz
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -348,6 +435,18 @@ export default function Folders() {
             </Card>
           );
         })}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }

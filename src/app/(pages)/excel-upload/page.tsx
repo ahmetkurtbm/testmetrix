@@ -22,10 +22,38 @@ import {
 } from "@/components/ui/dialog";
 import TableContainer from "@/app/(components)/TableContainer";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import { ToastContainer, toast } from "react-toastify";
 
 const ExcelUploadPage = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+
+  const successUpload = () =>
+    toast.success("Veri Yükleme İşlemi Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const errorUpload = () =>
+    toast.error(
+      "Veri Yükleme İşlemi Başarısız, Veri ve Yüklenecek Konumunu Doğru Seçtiğinden Emin Ol!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
 
   // Token Kontrolü
   useEffect(() => {
@@ -119,27 +147,34 @@ const ExcelUploadPage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/excel-upload`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          folder_id: folderId,
-          file_name: fileName || "defaultFile",
-          file_data: arrayData || [],
-        }),
-      });
+      if (arrayData.length !== 0 && folderId !== undefined) {
+        const response = await fetch(`${BACKEND_URL}/excel-upload`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            folder_id: folderId,
+            file_name: fileName || "defaultFile",
+            file_data: arrayData || [],
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        console.log("Excel Upload Successful");
+        if (response.ok) {
+          successUpload();
+          console.log("Excel Upload Successful");
+        } else {
+          errorUpload();
+          console.error("Upload failed:", data.error);
+        }
       } else {
-        console.error("Upload failed:", data.error);
+        errorUpload();
       }
     } catch (error) {
+      errorUpload();
       console.error("Error uploading Excel:", error);
     }
   };
@@ -159,7 +194,7 @@ const ExcelUploadPage = () => {
           <Card className="w-full max-w-xl shadow-md">
             <CardHeader>
               <h1 className="text-2xl font-bold text-center rounded-md bg-gray-400 p-1">
-                Excel Yükle
+                Veri Yükle
               </h1>
             </CardHeader>
             <CardContent>
@@ -250,6 +285,18 @@ const ExcelUploadPage = () => {
           </Card>
         </div>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };

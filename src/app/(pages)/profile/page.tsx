@@ -11,10 +11,78 @@ import {
 import { Input } from "@/components/ui/input";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 
 const Profile = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+
+  const successUpdate = () =>
+    toast.success("Kullanıcı Bilgileri Güncelleme İşlemi Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successDelete = () =>
+    toast.success("Kullanıcı Bilgileri Başarıyla Kaldırıldı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const errorUpdate = () =>
+    toast.error(
+      "Kullanıcı Bilgileri Güncellenemedi, Lütfen Girdiğiniz Bilgileri(Şifrenizi) Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const errorDelete = () =>
+    toast.error(
+      "Kullanıcı Bilgileri Kaldırılamadı, Lütfen Girdiğiniz Bilgileri(Şifrenizi) Kontrol Ediniz!",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const warning = () => {
+    toast.warn("Lütfen Şifrenizi Giriniz!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+  };
 
   // Token Kontrolü
   useEffect(() => {
@@ -76,7 +144,7 @@ const Profile = () => {
 
   const handleSaveProfile = async () => {
     if (!formData.currentPassword) {
-      alert("Lütfen güncelleme işlemi için şifrenizi giriniz.");
+      warning();
       return;
     }
 
@@ -91,18 +159,20 @@ const Profile = () => {
       });
 
       if (!response.ok) {
+        errorUpdate();
         throw new Error("Profil kaydedilemedi.");
       }
 
-      alert("Profil güncellendi.");
+      successUpdate();
+      console.log("Profil güncellendi.");
     } catch (error: any) {
-      alert("Hata: " + error.message);
+      console.log("Hata: " + error.message);
     }
   };
 
   const handleDeleteProfile = async () => {
     if (!formData.currentPassword) {
-      alert("Lütfen silme işlemi için şifrenizi giriniz.");
+      warning();
       return;
     }
 
@@ -117,17 +187,19 @@ const Profile = () => {
       });
 
       if (!response.ok) {
+        errorDelete();
         throw new Error("Profil silinemedi.");
       }
 
-      alert("Profil silindi.");
+      successDelete();
       Cookies.remove("token");
 
       router.push("/login");
 
       window.location.href = "/login";
     } catch (error: any) {
-      alert("Hata: " + error.message);
+      errorDelete();
+      console.log("Hata: " + error.message);
     }
   };
 
@@ -256,6 +328,18 @@ const Profile = () => {
           </CardFooter>
         </Card>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };
