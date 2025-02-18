@@ -52,6 +52,7 @@ const Register = () => {
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [university, setUniversity] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [KVKK, setKVKK] = useState(false);
 
@@ -105,7 +106,7 @@ const Register = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
           src="login-teacher-student.webp"
         />
-        <Card className="w-full max-w-md shadow-lg">
+        <Card className="w-full max-w-lg shadow-lg">
           <CardHeader>
             <h1 className="text-2xl font-bold text-center">Kayıt Ekranı</h1>
           </CardHeader>
@@ -129,90 +130,132 @@ const Register = () => {
                 ))}
               </TabsList>
             </Tabs>
-            <div className="mb-4">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Ad:
-              </label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Ad"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
+            <div className="flex gap-1 w-full">
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Ad:
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Ad"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="surname"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Soyad:
+                </label>
+                <Input
+                  id="surname"
+                  type="text"
+                  placeholder="Soyad"
+                  value={surname}
+                  onChange={(e) => setSurname(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="surname"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Soyad:
-              </label>
-              <Input
-                id="surname"
-                type="text"
-                placeholder="Soyad"
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
+            <div className="flex gap-1 w-full">
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  E-Posta:
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="E-Posta"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="university"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Kurum:
+                </label>
+                <Input
+                  id="university"
+                  type="text"
+                  placeholder="Kurum"
+                  value={university}
+                  onChange={(e) => setUniversity(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                E-Posta:
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="E-Posta"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
+            <div className="flex gap-1 w-full">
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Telefon:
+                </label>
+                <Input
+                  id="phone"
+                  type="text"
+                  placeholder="Telefon"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="university"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Kurum:
-              </label>
-              <Input
-                id="university"
-                type="text"
-                placeholder="Kurum"
-                value={university}
-                onChange={(e) => setUniversity(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Şifre:
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Şifre"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
+            <div className="flex gap-1 w-full">
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Şifre:
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Şifre"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
+              <div className="mb-4 w-full">
+                <label
+                  htmlFor="passwordAgain"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Şifre Tekrar:
+                </label>
+                <Input
+                  id="passwordAgain"
+                  type="password"
+                  placeholder="Şifre Tekrar"
+                  // value={password}
+                  // onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1 w-full"
+                />
+              </div>
             </div>
           </CardContent>
           <CardFooter className="gap-1 flex-col">

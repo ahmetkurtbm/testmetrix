@@ -8,7 +8,7 @@ interface TableContainerProps {
 
 const TableContainer: React.FC<TableContainerProps> = ({ data }) => {
   return (
-    <div>
+    <>
       {data !== null && data !== undefined && data.length !== 0 ? (
         <div className="overflow-x-auto max-w-full max-h-96 overflow-y-auto">
           <table className="min-w-full table-auto border-collapse">
@@ -52,7 +52,7 @@ const TableContainer: React.FC<TableContainerProps> = ({ data }) => {
       ) : (
         <p>Lütfen Veri Dosyası Yükleyiniz...</p>
       )}
-    </div>
+    </>
   );
 };
 

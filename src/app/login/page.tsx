@@ -11,6 +11,8 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
@@ -52,21 +54,15 @@ const Login = () => {
   // Token kontrolü
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const response = await fetch(`${BACKEND_URL}/user-authentication`, {
-          method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
-        });
+      const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+        method: "GET",
+        credentials: "include",
+      });
 
-        if (!response.ok) {
-          router.push("/login");
-        }
-      } catch (error) {
-        console.error("Kimlik doğrulama hatası:", error);
-        router.push("/login");
+      if (response.ok) {
+        router.push("/folders");
       }
     };
-
     checkAuth();
   }, []);
 
@@ -104,7 +100,7 @@ const Login = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
           src="login-teacher-student.webp"
         />
-        <Card className="w-full max-w-md shadow-lg">
+        <Card className="w-full max-w-lg shadow-lg">
           <CardHeader>
             <h1 className="text-2xl font-bold text-center bg-gray-300 rounded-md p-1">
               Giriş Ekranı
@@ -116,12 +112,12 @@ const Login = () => {
               onValueChange={(value) => setRole(value)}
               className="mb-4"
             >
-              <TabsList className="w-full border bg-slate-200 gap-1">
+              <TabsList className="w-full bg-blue-200 ">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={`font-bold bg-slate-100 w-full
+                    className={`font-bold  w-full
                 ${role === r ? " text-blue-600" : "text-gray-500"}
               `}
                   >
@@ -163,6 +159,15 @@ const Login = () => {
                 required
                 className="mt-1 w-full"
               />
+              <div className="flex align-middle mt-2 justify-between">
+                <div className="flex items-center gap-1">
+                  <Checkbox></Checkbox>
+                  <p>Beni Hatırla</p>
+                </div>
+                <p className="font-bold text-blue-950 cursor-pointer">
+                  Şifremi unuttum
+                </p>
+              </div>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-1 ">

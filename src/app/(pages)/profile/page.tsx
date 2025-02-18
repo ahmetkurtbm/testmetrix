@@ -311,6 +311,22 @@ const Profile = () => {
                 className="mt-1 w-full"
               />
             </div>
+            <div className="mb-4">
+              <label
+                htmlFor="newPasswordAgain"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Yeni Şifre Tekrar:
+              </label>
+              <Input
+                id="newPasswordAgain"
+                type="password"
+                name="newPasswordAgain"
+                // value={formData.newPassword}
+                // onChange={handleInputChange}
+                className="mt-1 w-full"
+              />
+            </div>
           </CardContent>
           <CardFooter className="gap-1 flex-col">
             <Button

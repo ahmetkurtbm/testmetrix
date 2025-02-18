@@ -166,6 +166,9 @@ const ExcelUploadPage = () => {
         if (response.ok) {
           successUpload();
           console.log("Excel Upload Successful");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           errorUpload();
           console.error("Upload failed:", data.error);
