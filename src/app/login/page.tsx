@@ -71,7 +71,7 @@ const Login = () => {
       const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, role, password }),
         credentials: "include", // Çerezlerin backend'e kaydedilmesini sağlar
       });
 

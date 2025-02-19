@@ -47,6 +47,30 @@ const Register = () => {
       }
     );
 
+  const warnEmail = () =>
+    toast.warn("Geçerli bir e-posta adresi girin.", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const warnPassword = () =>
+    toast.warn("Girdiğiniz Şifrelerin Aynı Olduğundan Emin Olun.", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
   const [role, setRole] = useState("Öğrenci");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -54,6 +78,7 @@ const Register = () => {
   const [university, setUniversity] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordAgain, setPasswordAgain] = useState("");
   const [KVKK, setKVKK] = useState(false);
 
   const handleKVKK = (event: any) => {
@@ -66,12 +91,23 @@ const Register = () => {
       surname,
       email,
       university,
+      phone,
       role,
       KVKK,
       password,
     };
 
     try {
+      if (!email.includes("@") || !email.includes(".")) {
+        warnEmail();
+        return;
+      }
+
+      if (password !== passwordAgain) {
+        warnPassword();
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/register`, {
         method: "POST",
         headers: {
@@ -179,7 +215,7 @@ const Register = () => {
                   type="email"
                   placeholder="E-Posta"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.trim())}
                   required
                   className="mt-1 w-full"
                 />
@@ -250,8 +286,8 @@ const Register = () => {
                   id="passwordAgain"
                   type="password"
                   placeholder="Şifre Tekrar"
-                  // value={password}
-                  // onChange={(e) => setPassword(e.target.value)}
+                  value={passwordAgain}
+                  onChange={(e) => setPasswordAgain(e.target.value)}
                   required
                   className="mt-1 w-full"
                 />
