@@ -10,9 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 import { useRouter } from "next/navigation";
+import { produce } from "immer";
+import { unstable_batchedUpdates } from "react-dom";
 
 interface File {
   id: string;
@@ -70,11 +72,13 @@ const ExcelUpdate = () => {
           if (response.ok) {
             const fetchedData: File = await response.json();
 
-            setData(fetchedData);
-            setFileName(fetchedData.file_name);
-            setFolderId(fetchedData.folder_id);
-            setSelectedValues(fetchedData.file_data.map((row) => [...row]));
-            setCreatedAt(fetchedData.created_at);
+            unstable_batchedUpdates(() => {
+              setData(fetchedData);
+              setFileName(fetchedData.file_name);
+              setFolderId(fetchedData.folder_id);
+              setSelectedValues(fetchedData.file_data.map((row) => [...row]));
+              setCreatedAt(fetchedData.created_at);
+            });
           } else {
             console.error("Failed to fetch data:", await response.json());
           }
@@ -87,17 +91,23 @@ const ExcelUpdate = () => {
     getExcel();
   }, []);
 
+  const handleFileNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFileName(e.target.value);
+    },
+    []
+  );
+
   const handleSelectChange = (
     rowIndex: number,
     colIndex: number,
     newValue: string
   ) => {
-    const newSelectedValues = selectedValues.map((row, rIndex) =>
-      rIndex === rowIndex
-        ? row.map((cell, cIndex) => (cIndex === colIndex ? newValue : cell))
-        : row
+    setSelectedValues((prevValues) =>
+      produce(prevValues, (draft) => {
+        draft[rowIndex][colIndex] = newValue;
+      })
     );
-    setSelectedValues(newSelectedValues);
   };
 
   const handleUpdate = async () => {
@@ -119,7 +129,7 @@ const ExcelUpdate = () => {
         });
 
         if (response.ok) {
-          console.log("Excel Update Successful");
+          console.log("Success Excel Update Tostify Yaz");
         } else {
           console.error("Update failed:", await response.text());
         }
@@ -144,10 +154,7 @@ const ExcelUpdate = () => {
             setFolderId={setFolderId}
           ></ComboboxDemo>
           <div>
-            <Input
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-            />
+            <Input value={fileName} onChange={handleFileNameChange} />
           </div>
           <Button onClick={handleUpdate}>Değişiklikleri Kaydet</Button>
         </div>

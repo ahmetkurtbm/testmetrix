@@ -9,9 +9,21 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
+import { Pencil } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Profile = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -105,43 +117,6 @@ const Profile = () => {
     checkAuth();
   }, []);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    email: "",
-    university: "",
-    currentPassword: "",
-    newPassword: "",
-  });
-
-  useEffect(() => {
-    async function fetchUser() {
-      const response = await fetch(`${BACKEND_URL}/user`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      const userData = await response.json();
-
-      setFormData({
-        ...formData,
-        name: userData.name || "",
-        surname: userData.surname || "",
-        email: userData.email || "",
-        university: userData.university || "",
-      });
-    }
-    fetchUser();
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSaveProfile = async () => {
     if (!formData.currentPassword) {
       warning();
@@ -162,11 +137,9 @@ const Profile = () => {
         errorUpdate();
         throw new Error("Profil kaydedilemedi.");
       }
-
       successUpdate();
-      console.log("Profil güncellendi.");
     } catch (error: any) {
-      console.log("Hata: " + error.message);
+      error();
     }
   };
 
@@ -199,163 +172,176 @@ const Profile = () => {
       window.location.href = "/login";
     } catch (error: any) {
       errorDelete();
-      console.log("Hata: " + error.message);
+      error();
     }
   };
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState<"update" | "delete" | null>(
+    null
+  );
+  const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    university: "",
+    phone: "",
+    currentPassword: "",
+    newPassword: "",
+  });
+
+  useEffect(() => {
+    async function fetchUser() {
+      const response = await fetch(`${BACKEND_URL}/user`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const userData = await response.json();
+      setFormData({
+        ...formData,
+        name: userData.name || "",
+        surname: userData.surname || "",
+        email: userData.email || "",
+        university: userData.university || "",
+        phone: userData.phone || "",
+      });
+    }
+    fetchUser();
+  }, []);
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-center h-screen">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader>
-            <h1 className="text-2xl font-bold text-center">Profil Düzenle</h1>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                İsim:
-              </label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                name="name"
-                onChange={handleInputChange}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="surname"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Soyisim:
-              </label>
-              <Input
-                id="surname"
-                type="text"
-                value={formData.surname}
-                name="surname"
-                onChange={handleInputChange}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email:
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                name="email"
-                onChange={handleInputChange}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="university"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Kurum:
-              </label>
-              <Input
-                id="university"
-                type="text"
-                value={formData.university}
-                name="university"
-                onChange={handleInputChange}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="currentPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Mevcut Şifre:
-              </label>
-              <Input
-                id="currentPassword"
-                type="password"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Yeni Şifre:
-              </label>
-              <Input
-                id="newPassword"
-                type="password"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="newPasswordAgain"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Yeni Şifre Tekrar:
-              </label>
-              <Input
-                id="newPasswordAgain"
-                type="password"
-                name="newPasswordAgain"
-                // value={formData.newPassword}
-                // onChange={handleInputChange}
-                className="mt-1 w-full"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="gap-1 flex-col">
+    <div className="flex m-2 justify-center">
+      <Card className="w-full max-w-2xl shadow-lg p-4">
+        <CardHeader className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Profil</h1>
+          <Button variant="ghost" onClick={() => setIsEditing(!isEditing)}>
+            <Pencil className="w-5 h-5" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "İsim", name: "name" },
+              { label: "Soyisim", name: "surname" },
+              { label: "Email", name: "email" },
+              { label: "Kurum", name: "university" },
+              { label: "Telefon", name: "phone" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block text-sm font-medium text-gray-700">
+                  {field.label}:
+                </label>
+                <Input
+                  type="text"
+                  name={field.name}
+                  value={formData[field.name as keyof typeof formData]}
+                  onChange={handleInputChange}
+                  className={`mt-1 w-full ${
+                    isEditing
+                      ? "bg-white"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                  disabled={!isEditing}
+                />
+              </div>
+            ))}
+          </div>
+          {isEditing && (
+            <>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Mevcut Şifre:
+                </label>
+                <Input
+                  type="password"
+                  name="currentPassword"
+                  onChange={handleInputChange}
+                  className="mt-1 w-full"
+                />
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Yeni Şifre:
+                </label>
+                <Input
+                  type="password"
+                  name="newPassword"
+                  onChange={handleInputChange}
+                  className="mt-1 w-full"
+                />
+              </div>
+            </>
+          )}
+        </CardContent>
+        {isEditing && (
+          <CardFooter className="gap-1 flex my-2">
+            {/* Güncelleme Butonu */}
             <Button
-              onClick={handleSaveProfile}
+              onClick={() => setShowConfirm("update")}
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               Profili Güncelle
             </Button>
+
+            {/* Silme Butonu */}
             <Button
-              onClick={handleDeleteProfile}
+              onClick={() => setShowConfirm("delete")}
               className="w-full bg-red-600 text-white hover:bg-red-700"
             >
               Profili Kaldır
             </Button>
           </CardFooter>
-        </Card>
-      </div>
+        )}
+      </Card>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+        hideProgressBar
         theme="dark"
       />
+      {/* Onay Diyaloğu */}
+      {showConfirm && (
+        <AlertDialog
+          open={!!showConfirm}
+          onOpenChange={() => setShowConfirm(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {showConfirm === "update"
+                  ? "Profili Güncellemek Üzeresiniz!"
+                  : "Profili Silmek Üzeresiniz!"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {showConfirm === "update"
+                  ? "Profilinizi güncellemek istediğinize emin misiniz?"
+                  : "Bu işlemi geri alamazsınız! Profilinizi silmek istediğinize emin misiniz?"}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>İptal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (showConfirm === "update") {
+                    handleSaveProfile();
+                  } else {
+                    handleDeleteProfile();
+                  }
+                  setShowConfirm(null);
+                }}
+              >
+                Evet
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };

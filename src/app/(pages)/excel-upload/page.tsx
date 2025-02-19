@@ -27,6 +27,7 @@ import { ToastContainer, toast } from "react-toastify";
 const ExcelUploadPage = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+  const [isFolder, setIsFolder] = useState(false);
 
   const successUpload = () =>
     toast.success("Veri Yükleme İşlemi Başarılı!", {
@@ -66,14 +67,36 @@ const ExcelUploadPage = () => {
 
         if (!response.ok) {
           router.push("/login");
+        } else {
+          handleGetFolders();
         }
       } catch (error) {
         console.error("Kimlik doğrulama hatası:", error);
         router.push("/login");
       }
     };
-
     checkAuth();
+    const handleGetFolders = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/folders`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (response.ok) {
+          if (data.length !== 0) {
+            setIsFolder(true);
+          }
+        } else {
+          console.error("Update failed:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching folders:", error);
+      }
+    };
   }, []);
 
   const [jsonData, setJsonData] = useState<Record<string, any>>({});
@@ -184,109 +207,113 @@ const ExcelUploadPage = () => {
 
   return (
     <div>
-      <div className="flex h-screen  bg-blue-100">
+      <div className="flex h-screen">
         {/* Sol Kısım - Excel Logosunun Animasyonlu Alanı */}
         <div className="w-1/2 flex items-center justify-center">
           <div className="animate-scale-in">
             <img src="excel.svg" alt="Excel Logo" className="w-320 h-320" />
           </div>
         </div>
-
         {/* Sağ Kısım - Form Alanı */}
-        <div className="w-1/2 flex flex-col items-center justify-center p-6 ">
-          <Card className="w-full max-w-xl shadow-md">
-            <CardHeader>
-              <h1 className="text-2xl font-bold text-center rounded-md bg-gray-400 p-1">
-                Veri Yükle
-              </h1>
-            </CardHeader>
-            <CardContent>
-              <div className="flex w-full gap-1">
-                <div className="mb-4 w-full">
-                  <label
-                    htmlFor="fileUpload"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Veri Dosyası Yükle
-                  </label>
-                  <Input
-                    id="fileUpload"
-                    type="file"
-                    accept=".xlsx, .xls"
-                    onChange={handleFileUpload}
-                    className="w-full"
-                  />
+        {isFolder ? (
+          <div className="w-1/2 flex flex-col items-center justify-center p-6 ">
+            <Card className="w-full max-w-xl shadow-md">
+              <CardHeader>
+                <h1 className="text-2xl font-bold text-center rounded-md bg-gray-400 p-1">
+                  Veri Yükle
+                </h1>
+              </CardHeader>
+              <CardContent>
+                <div className="flex w-full gap-1">
+                  <div className="mb-4 w-full">
+                    <label
+                      htmlFor="fileUpload"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Veri Dosyası Yükle
+                    </label>
+                    <Input
+                      id="fileUpload"
+                      type="file"
+                      accept=".xlsx, .xls"
+                      onChange={handleFileUpload}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="mb-4 w-full">
+                    <label
+                      htmlFor="fileUpload"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      İstenilen Veri Tipi
+                    </label>
+                    <Button className="w-full" onClick={downloadSampleFile}>
+                      Örnek Dosya
+                    </Button>
+                  </div>
                 </div>
-                <div className="mb-4 w-full">
+                <div className="mb-4">
                   <label
-                    htmlFor="fileUpload"
+                    htmlFor="folderName"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    İstenilen Veri Tipi
+                    Klasör Seç
                   </label>
-                  <Button className="w-full" onClick={downloadSampleFile}>
-                    Örnek Dosya
+                  <ComboboxDemo
+                    folderId={folderId}
+                    setFolderId={setFolderId}
+                  ></ComboboxDemo>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Yüklenen Dosya: {fileName}
+                  </label>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <div className="flex justify-between space-x-4">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                        className="bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Görüntüle
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Tablo Görüntüle</DialogTitle>
+                        <DialogDescription>
+                          Tablona Bakabilirsin
+                        </DialogDescription>
+                      </DialogHeader>
+                      <TableContainer data={arrayData} />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="default"
+                    onClick={handleSave}
+                    className="bg-indigo-600 text-white hover:bg-indigo-700"
+                  >
+                    Yükle
                   </Button>
                 </div>
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="folderName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Klasör Seç
-                </label>
-                <ComboboxDemo
-                  folderId={folderId}
-                  setFolderId={setFolderId}
-                ></ComboboxDemo>
-                {/* <Input
-                  id="folderName"
-                  type="text"
-                  placeholder="Klasör Adı"
-                  value={folderName}
-                  onChange={(e) => setFolderName(e.target.value)}
-                  className="w-full"
-                /> */}
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Yüklenen Dosya: {fileName}
-                </label>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <div className="flex justify-between space-x-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="default"
-                      className="bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Görüntüle
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Tablo Görüntüle</DialogTitle>
-                      <DialogDescription>
-                        Tablona Bakabilirsin
-                      </DialogDescription>
-                    </DialogHeader>
-                    <TableContainer data={arrayData} />
-                  </DialogContent>
-                </Dialog>
-                <Button
-                  variant="default"
-                  onClick={handleSave}
-                  className="bg-indigo-600 text-white hover:bg-indigo-700"
-                >
-                  Yükle
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
+              </CardFooter>
+            </Card>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-screen">
+            <div className="bg-gray-100 p-6 rounded-2xl shadow-md text-center max-w-md">
+              <p className="text-lg font-semibold text-gray-700">
+                📁 Şu Anda Klasör Bulunmamaktadır
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Lütfen önce bir klasör ekleyiniz.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       <ToastContainer
         position="bottom-right"

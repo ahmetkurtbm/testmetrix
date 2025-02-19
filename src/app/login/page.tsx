@@ -76,7 +76,6 @@ const Login = () => {
       });
 
       if (response.ok) {
-        console.log("Giriş başarılı. Çerez tarayıcıya kaydedildi.");
         router.push("/folders");
         success();
       } else {

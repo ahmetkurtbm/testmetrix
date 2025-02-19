@@ -119,12 +119,10 @@ const Register = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Kayıt başarılı");
         success();
         navigateLogin();
       } else {
         error();
-        console.log("Kayıt işlemi başarısız");
       }
     } catch (err) {
       console.error("Hata:", err);

@@ -151,7 +151,6 @@ export default function Folders() {
         });
 
         const data: FolderNames[] = await response.json();
-
         setFolders(data);
       } catch (error) {
         console.error("Error fetching folders:", error);
@@ -168,7 +167,6 @@ export default function Folders() {
         });
 
         const data: File[] = await response.json();
-
         setExcels(data);
       } catch (error) {
         console.error("Error fetching folders:", error);
@@ -285,18 +283,17 @@ export default function Folders() {
     router.push(`/excel-reports?file-id=${fileId}`);
   };
 
-  console.log(folders);
-
   return (
     <div>
       <div className="flex p-1 justify-center">
         <div className="flex gap-2 p-1 w-1/2 align-top">
           <Input></Input>
-          <Button>Arama Iconu Koyulacak Buraya</Button>
+          <img src="search.svg" alt="ara" width="30" height="30" />
           <AddFolder></AddFolder>
         </div>
       </div>
       {folders !== undefined &&
+        folders !== null &&
         folders.map((folder, index) => {
           return (
             <Card key={index} className="mb-4 m-3 border-black">

@@ -36,6 +36,7 @@ export default function FolderAdder() {
 
       if (response.ok) {
         ("Folder Upload Successful");
+        window.location.reload();
       } else {
         console.error("Upload failed:", data.error);
       }
