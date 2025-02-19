@@ -136,7 +136,10 @@ export default function Folders() {
   const [excels, setExcels] = useState<File[]>([]);
   const [folders, setFolders] = useState<FolderNames[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [folderId, setFolderId] = useState<string>();
+  const [filteredExcels, setFilteredExcels] = useState<File[]>([]);
+  const [filteredFolders, setFilteredFolders] = useState<FolderNames[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Token Kontrolü // get folder // get excel
   useEffect(() => {
@@ -194,6 +197,21 @@ export default function Folders() {
 
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Filtered results based on search query
+    setFilteredExcels(
+      excels.filter((file) =>
+        file.file_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+
+    setFilteredFolders(
+      folders.filter((folder) =>
+        folder.folder_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [folders, excels, searchQuery]);
 
   const handleUpdateFolders = async (folderId: any, newName: string) => {
     try {
@@ -287,14 +305,19 @@ export default function Folders() {
     <div>
       <div className="flex p-1 justify-center">
         <div className="flex gap-2 p-1 w-1/2 align-top">
-          <Input></Input>
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Klasör Arayın..."
+          />
           <img src="search.svg" alt="ara" width="30" height="30" />
           <AddFolder></AddFolder>
         </div>
       </div>
-      {folders !== undefined &&
-        folders !== null &&
-        folders.map((folder, index) => {
+      {filteredFolders !== undefined &&
+        filteredFolders !== null &&
+        filteredFolders.map((folder, index) => {
           return (
             <Card key={index} className="mb-4 m-3 border-black">
               <CardHeader>
