@@ -319,22 +319,37 @@ export default function Folders() {
         filteredFolders !== null &&
         filteredFolders.map((folder, index) => {
           return (
-            <Card key={index} className="mb-4 m-3 border-black">
+            <Card key={index} className=" m-3 border-black">
               <CardHeader>
                 <div className="flex w-full justify-between items-center text-center gap-1 bg-slate-300 p-1 rounded-md">
-                  <h2 className="text-xl font-semibold bg-gray-400 rounded-md py-1 px-2">
-                    {folder.folder_name}
-                  </h2>
-                  <p className="text-sm text-gray-500 ml-auto">
-                    {new Date(folder.created_at).toLocaleString()}
-                  </p>
+                  <div className="flex gap-1 items-center">
+                    <h2 className="text-xl font-semibold rounded-md p-1">
+                      {folder.folder_name}
+                    </h2>
+                    <p className="text-sm text-gray-500 ml-auto">
+                      {new Date(folder.created_at).toLocaleString()}
+                    </p>
+                  </div>
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="m-0 p-0 bg-slate-300"
+                      >
                         <img src="threeDots.svg" alt="Menü" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="p-2 w-48">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          router.push("excel-upload");
+                        }}
+                        className="text-black hover:bg-green-500 hover:text-white bg-slate-300 m-1"
+                      >
+                        Dosya Yükle
+                      </DropdownMenuItem>
                       {isEditing ? (
                         <div className="flex items-center gap-2 p-2">
                           <Input
@@ -366,7 +381,7 @@ export default function Folders() {
                         </div>
                       ) : (
                         <div
-                          className=" hover:bg-green-500 hover:text-white bg-slate-300 m-1 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-green-500"
+                          className=" hover:bg-green-500 hover:text-white bg-slate-300 m-1 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
                             setIsEditing(true);

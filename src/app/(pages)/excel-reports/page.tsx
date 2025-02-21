@@ -1019,7 +1019,15 @@ const ExcelReports = () => {
     }
   }, [scores, selectedGraficsData]);
 
-  const labels = getDataForPlot().map((_, index) => `Veri ${index + 1}`); // X ekseni için otomatik etiketler
+  const tempdata = getDataForPlot();
+  const labelPrefix =
+    tempdata.length === 30
+      ? "Öğrenci"
+      : tempdata.length === 50
+      ? "Madde"
+      : "Veri";
+  const labels = tempdata.map((_, index) => `${labelPrefix} ${index + 1}`);
+  // X ekseni için otomatik etiketler
 
   // Rastgele renkler oluştur (Pie ve Doughnut için)
   const generateColors = (count: number) =>
@@ -1179,7 +1187,7 @@ const ExcelReports = () => {
         </div>
 
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}
-        <div className="flex-col gap-1 p-2 bg-black rounded-md w-1/2">
+        <div className="flex-col gap-1 p-2 rounded-md w-1/2">
           <p className="text-white text-center p-2">Grafikler</p>
           <div className="flex gap-1">
             <ComboboxForData
@@ -1191,7 +1199,9 @@ const ExcelReports = () => {
               setValue={setSelectedGrafic}
             />
           </div>
-          <div className="w-[500px] h-[500px]">{renderChart()}</div>
+          <div className="max-w-[500px] max-h-[500px] w-full h-full">
+            {renderChart()}
+          </div>
         </div>
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}

@@ -159,11 +159,13 @@ const Login = () => {
                 className="mt-1 w-full"
               />
               <div className="flex align-middle mt-2 justify-between">
-                <div className="flex items-center gap-1">
-                  <Checkbox></Checkbox>
-                  <p>Beni Hatırla</p>
-                </div>
-                <p className="font-bold text-blue-950 cursor-pointer">
+                <div className="flex"></div>
+                <p
+                  onClick={() => {
+                    router.push("forgot-password");
+                  }}
+                  className="font-bold text-blue-950 cursor-pointer"
+                >
                   Şifremi unuttum
                 </p>
               </div>

@@ -61,7 +61,7 @@ const Header = () => {
               <span className="hidden sm:block">Profil</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 mt-2">
+          <DropdownMenuContent align="end" className="w-40 mt-2">
             <DropdownMenuItem>
               <Link href="/profile" className=" w-full ">
                 <p className="block w-full text-left bg-blue-300 p-3 rounded-md hover:bg-blue-500">
