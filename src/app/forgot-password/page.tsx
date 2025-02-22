@@ -4,10 +4,107 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function ForgotPassword() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+
+  const success = () =>
+    toast.success("Şifre Yenileme Başarılı!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successMail = () =>
+    toast.success("Kod Mail Adresinize Gönderildi!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const successCode = () =>
+    toast.success("Kod Doğrulandı!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const error = () =>
+    toast.error("Şifre Yenileme, Başarısız!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const errorMail = () =>
+    toast.error("Bu Mail Adres Kayıtlı Kullanıcılarımıza Ait Değildir!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const warn = () =>
+    toast.warn("Lütfen tüm alanları doldurun!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const warnSamePassword = () =>
+    toast.warn("Şifreler eşleşmiyor!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const warnCode = () =>
+    toast.warn("Girilen kod yanlış veya süresi doldu!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -37,14 +134,19 @@ export default function ForgotPassword() {
         });
 
         if (response.ok) {
-          console.log("mail gönderildi");
-          //success();
+          setTimeout(() => {
+            successMail();
+          }, 3000);
         } else {
           const data = await response.json();
           console.error("Mail atılamadı:", data.error);
-          //error();
+          errorMail();
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
         }
       } catch (error) {
+        errorMail();
         console.error("Giriş sırasında hata oluştu:", error);
       }
     };
@@ -60,23 +162,23 @@ export default function ForgotPassword() {
         setSentCode(null);
         setIsCodeSent(false);
       }
-    }, 1000);
+    }, 3000);
   };
 
   const verifyCode = () => {
     if (code === sentCode) {
       setIsVerified(true);
-      alert("Kod doğrulandı, yeni şifrenizi belirleyin!");
+      setTimeout(() => {
+        successCode();
+      }, 3000);
     } else {
-      alert("Girilen kod yanlış veya süresi doldu!");
+      warnCode();
     }
   };
 
   const resetPassword = async () => {
-    if (!newPassword || !confirmPassword)
-      return alert("Lütfen tüm alanları doldurun");
-    if (newPassword !== confirmPassword) return alert("Şifreler eşleşmiyor");
-    alert("Şifreniz başarıyla güncellendi!");
+    if (!newPassword || !confirmPassword) return warn();
+    if (newPassword !== confirmPassword) return warnSamePassword();
 
     try {
       const response = await fetch(`${BACKEND_URL}/user-password`, {
@@ -88,10 +190,12 @@ export default function ForgotPassword() {
       });
 
       if (!response.ok) {
-        //errorUpdate();
+        error();
         throw new Error("Şifre değiştirilemedi.");
       }
-      //successUpdate();
+      setTimeout(() => {
+        success();
+      }, 3000);
       console.log("başarıyla şifre değiştirildi.");
       router.push("/login");
     } catch (error: any) {
@@ -147,6 +251,18 @@ export default function ForgotPassword() {
           <Button onClick={resetPassword}>Şifreyi Güncelle</Button>
         </>
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }
