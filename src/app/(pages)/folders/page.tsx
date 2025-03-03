@@ -225,6 +225,7 @@ export default function Folders() {
       });
 
       if (response.ok) {
+        console.log("hey");
         successUpdateFolder();
         setFolders((prevFolders) =>
           prevFolders.map((folder) =>
@@ -284,11 +285,16 @@ export default function Folders() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Excel Deleted Successful");
+        successDeleteExcel();
+        setExcels((prevExcels) =>
+          prevExcels.filter((excel) => excel._id !== fileId)
+        );
       } else {
+        errorDeleteExcel();
         console.error("Delete failed:", data.error);
       }
     } catch (error) {
+      errorDeleteExcel();
       console.error("Error deleting Excel:", error);
     }
   };
@@ -311,8 +317,8 @@ export default function Folders() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Klasör Arayın..."
           />
-          <img src="search.svg" alt="ara" width="30" height="30" />
-          <AddFolder></AddFolder>
+          <img src="search.svg" alt="ara" width="25" height="25" />
+          <AddFolder />
         </div>
       </div>
       {filteredFolders !== undefined &&

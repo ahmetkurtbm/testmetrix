@@ -8,6 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function FolderAdder() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -18,6 +19,30 @@ export default function FolderAdder() {
   const handleAddFolder = () => {
     setOpen(true);
   };
+
+  const success = () =>
+    toast.success("Klasör Eklendi.", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const error = () =>
+    toast.error("Klasör Ekleme Başarısız, Bir Hata Oluştu!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
   const handleSave = async () => {
     try {
@@ -35,13 +60,17 @@ export default function FolderAdder() {
       const data = await response.json();
 
       if (response.ok) {
-        ("Folder Upload Successful");
-        window.location.reload();
+        success();
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
+        error();
         console.error("Upload failed:", data.error);
       }
-    } catch (error) {
-      console.error("Error uploading Folder:", error);
+    } catch (err) {
+      error();
+      console.error("Error uploading Folder:", err);
     }
     setOpen(false);
     setFolderName("");

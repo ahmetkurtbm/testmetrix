@@ -31,23 +31,49 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center justify-between px-2 py-2 bg-gray-400 shadow-md">
-      <nav className="flex space-x-3">
-        <Avatar className="bg-green-400">
-          <img src="excelLogo.webp" />
-        </Avatar>
-        <Link
-          href="/folders"
-          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
-        >
-          <span className="">Klasörler</span>
-        </Link>
-        <Link
-          href="/excel-upload"
-          className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
-        >
-          <p className="">Dosya Yükle</p>
-        </Link>
+    <header className="flex items-center justify-between px-2 py-1 bg-gray-400 shadow-md">
+      <nav className="flex  w-full space-x-3">
+        <div className="max-w-10">
+          <img src="excel.svg" />
+        </div>
+        <div className="flex w-full justify-between px-2">
+          <div className="flex gap-2">
+            <Link
+              href="/folders"
+              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
+            >
+              <span className="">
+                <u>Klasörler</u>
+              </span>
+            </Link>
+            <Link
+              href="/excel-upload"
+              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
+            >
+              <p className="">
+                <u>Dosya Yükle</u>
+              </p>
+            </Link>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/information"
+              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
+            >
+              <p className="">
+                <u>Hakkımızda</u>
+              </p>
+            </Link>
+            <Link
+              href="/iletisim"
+              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
+            >
+              <p className="">
+                <u>İletişim</u>
+              </p>
+            </Link>
+          </div>
+        </div>
       </nav>
 
       <div className="relative">

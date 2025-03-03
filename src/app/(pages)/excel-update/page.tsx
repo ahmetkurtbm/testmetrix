@@ -15,6 +15,7 @@ import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 import { useRouter } from "next/navigation";
 import { produce } from "immer";
 import { unstable_batchedUpdates } from "react-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 interface File {
   id: string;
@@ -55,6 +56,48 @@ const ExcelUpdate = () => {
   const [createdAt, setCreatedAt] = useState<string>("");
   const [folderId, setFolderId] = useState<string>();
 
+  const success = () =>
+    toast.success("Güncelleme Başarılı!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const error = () =>
+    toast.error(
+      "Güncelleme Başarısız, Bir Hata Oluştu! Daha sonra tekrar deneyiniz.",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
+  const errorGetExcel = () =>
+    toast.error(
+      "Veri Çekme Başarısız, Bir Hata Oluştu! Daha sonra tekrar deneyiniz.",
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      }
+    );
+
   useEffect(() => {
     const getExcel = async () => {
       const searchParams = new URLSearchParams(window.location.search);
@@ -80,9 +123,11 @@ const ExcelUpdate = () => {
               setCreatedAt(fetchedData.created_at);
             });
           } else {
+            errorGetExcel();
             console.error("Failed to fetch data:", await response.json());
           }
         } catch (error) {
+          errorGetExcel();
           console.error("Error fetching Excel data:", error);
         }
       }
@@ -129,12 +174,14 @@ const ExcelUpdate = () => {
         });
 
         if (response.ok) {
-          console.log("Success Excel Update Tostify Yaz");
+          success();
         } else {
+          error();
           console.error("Update failed:", await response.text());
         }
-      } catch (error) {
-        console.error("Error Updating Excel:", error);
+      } catch (err) {
+        error();
+        console.error("Error Updating Excel:", err);
       }
     }
   };
@@ -208,6 +255,18 @@ const ExcelUpdate = () => {
           </tbody>
         </table>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };

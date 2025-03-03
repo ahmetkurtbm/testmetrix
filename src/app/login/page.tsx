@@ -47,7 +47,7 @@ const Login = () => {
       }
     );
 
-  const [role, setRole] = useState<string>("Öğrenci");
+  const [role, setRole] = useState<string>("Öğretmen");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 

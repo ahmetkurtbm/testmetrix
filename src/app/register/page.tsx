@@ -71,7 +71,7 @@ const Register = () => {
       theme: "dark",
     });
 
-  const [role, setRole] = useState("Öğrenci");
+  const [role, setRole] = useState("Öğretmen");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");

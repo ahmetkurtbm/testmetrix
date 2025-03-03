@@ -49,6 +49,7 @@ import OptionAnalysis from "../../(functions)/OptionAnalysis";
 import { ComboboxForData } from "@/components/ui/comboboxForGraficData";
 import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -809,7 +810,7 @@ const ExcelReports = () => {
   const [frekansTable, setFrekansTable] = useState<number[][]>([]);
 
   const [selectedGraficsData, setSelectedGraficsData] = useState(
-    "Öğrenci Puanlarının Frekansları"
+    "Öğrencilerin Puanları"
   );
   const [selectedGrafic, setSelectedGrafic] = useState<any>("line");
   const [xValues, setXValues] = useState<any[]>();
@@ -1199,61 +1200,48 @@ const ExcelReports = () => {
               setValue={setSelectedGrafic}
             />
           </div>
-          <div className="max-w-[500px] max-h-[500px] w-full h-full">
-            {renderChart()}
-          </div>
+          <div className="w-full h-full">{renderChart()}</div>
         </div>
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
         <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
-          <p className="text-white text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Öğrenci Sayısı:</strong> {numberOfStudents}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Madde Sayısı:</strong> {numberOfQuestions}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Ortalama Puan:</strong> {average.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Standart Sapma:</strong> {standardDeviation.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Varyans:</strong> {variance.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Ortanca (Median):</strong> {median}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Mod:</strong> {mode.length > 0 ? mode.join(", ") : "----"}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Maksimum Puan:</strong> {maxScore}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Ranj (Range):</strong> {range}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Çarpıklık Katsayısı (Skewness):</strong>{" "}
-            {skewness.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Basıklık Katsayısı (Kurtosis):</strong>{" "}
-            {kurtosis.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Puanların Başarı Yüzdesi:</strong> {successRate.toFixed(2)}%
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>KR-20 Güvenirlik Katsayısı:</strong> {kr20.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>KR-21 Güvenirlik Katsayısı:</strong> {kr21.toFixed(2)}
-          </p>
-          <p className="text-white text-lg whitespace-nowrap overflow-hidden text-ellipsis">
-            <strong>Bağıl Değişkenlik Katsayısı:</strong>{" "}
-            {relativeCoefficientOfVariation.toFixed(2)}
-          </p>
+          {[
+            { label: "Öğrenci Sayısı", value: numberOfStudents },
+            { label: "Madde Sayısı", value: numberOfQuestions },
+            { label: "Ortalama Puan", value: average.toFixed(2) },
+            { label: "Standart Sapma", value: standardDeviation.toFixed(2) },
+            { label: "Varyans", value: variance.toFixed(2) },
+            { label: "Ortanca (Median)", value: median },
+            { label: "Mod", value: mode.length > 0 ? mode.join(", ") : "----" },
+            { label: "Maksimum Puan", value: maxScore },
+            { label: "Ranj (Range)", value: range },
+            {
+              label: "Çarpıklık Katsayısı (Skewness)",
+              value: skewness.toFixed(2),
+            },
+            {
+              label: "Basıklık Katsayısı (Kurtosis)",
+              value: kurtosis.toFixed(2),
+            },
+            {
+              label: "Puanların Başarı Yüzdesi",
+              value: `${successRate.toFixed(2)}%`,
+            },
+            { label: "KR-20 Güvenirlik Katsayısı", value: kr20.toFixed(2) },
+            { label: "KR-21 Güvenirlik Katsayısı", value: kr21.toFixed(2) },
+            {
+              label: "Bağıl Değişkenlik Katsayısı",
+              value: relativeCoefficientOfVariation.toFixed(2),
+            },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-[auto_1fr] items-center w-full text-white text-lg"
+            >
+              <strong className="whitespace-nowrap">{item.label}:</strong>
+              <span className="ml-2 text-right">{item.value}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
