@@ -50,6 +50,7 @@ import { ComboboxForData } from "@/components/ui/comboboxForGraficData";
 import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
+import TestResults from "@/app/(functions)/TestResults";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -1185,6 +1186,10 @@ const ExcelReports = () => {
               scores={scores}
             />
           </div>
+          {/* 
+          <div className="m-3">
+            <TestResults />
+          </div> */}
         </div>
 
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}

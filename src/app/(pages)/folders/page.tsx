@@ -157,6 +157,7 @@ export default function Folders() {
         setFolders(data);
       } catch (error) {
         console.error("Error fetching folders:", error);
+        router.push("/login");
       }
     }
     async function fetchExcels() {

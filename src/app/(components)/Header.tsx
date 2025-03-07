@@ -11,10 +11,62 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+
+// const decodeToken = (token: any): DecodedToken => {
+//   try {
+//     const decoded = jwtDecode(token);
+//     return decoded;
+//   } catch (error) {
+//     console.error("Token çözülemedi:", error);
+//     return null;
+//   }
+// };
+
+// Token'ın yapısını tanımlayın
+interface DecodedToken {
+  role: string;
+  email: string;
+  userId?: string;
+  exp?: number;
+  iat?: number;
+}
+
+// decodeToken fonksiyonuna tip ekleyin
+const decodeToken = (token: string): DecodedToken => {
+  return jwtDecode(token);
+};
 
 const Header = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const response = await fetch(`${BACKEND_URL}/user-authentication`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token; // Token'ı burada alıyoruz
+
+        // Token'ı çözme işlemi burada yapılacak
+        const decodedToken = decodeToken(token);
+
+        if (decodedToken.role === "Yönetici") {
+          setIsAdmin(true);
+        }
+      } else {
+        router.push("/login");
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -54,6 +106,16 @@ const Header = () => {
                 <u>Dosya Yükle</u>
               </p>
             </Link>
+            {isAdmin && (
+              <Link
+                href="/dashboard"
+                className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
+              >
+                <p className="">
+                  <u>Yönetim</u>
+                </p>
+              </Link>
+            )}
           </div>
           <div className="flex gap-2">
             <Link

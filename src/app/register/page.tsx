@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
 
-const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
+const roles = ["Öğretmen", "Öğrenci"];
 
 const Register = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
