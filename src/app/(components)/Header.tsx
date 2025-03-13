@@ -14,16 +14,6 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
-// const decodeToken = (token: any): DecodedToken => {
-//   try {
-//     const decoded = jwtDecode(token);
-//     return decoded;
-//   } catch (error) {
-//     console.error("Token çözülemedi:", error);
-//     return null;
-//   }
-// };
-
 // Token'ın yapısını tanımlayın
 interface DecodedToken {
   role: string;
@@ -33,16 +23,12 @@ interface DecodedToken {
   iat?: number;
 }
 
-// decodeToken fonksiyonuna tip ekleyin
-const decodeToken = (token: string): DecodedToken => {
-  return jwtDecode(token);
-};
-
 const Header = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
   const router = useRouter();
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [mail, setMail] = useState("Profil");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -53,12 +39,9 @@ const Header = () => {
 
       if (response.ok) {
         const data = await response.json();
-        const token = data.token; // Token'ı burada alıyoruz
+        setMail(data.user.email);
 
-        // Token'ı çözme işlemi burada yapılacak
-        const decodedToken = decodeToken(token);
-
-        if (decodedToken.role === "Yönetici") {
+        if (data.user.role === "Yönetici") {
           setIsAdmin(true);
         }
       } else {
@@ -146,7 +129,7 @@ const Header = () => {
               className="flex items-center space-x-2 bg-slate-300 "
             >
               <Avatar className="w-8 h-8 bg-blue-500 text-white"></Avatar>
-              <span className="hidden sm:block">Profil</span>
+              <span className="hidden sm:block">{mail}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 mt-2">

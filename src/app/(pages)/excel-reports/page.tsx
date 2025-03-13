@@ -813,7 +813,7 @@ const ExcelReports = () => {
   const [selectedGraficsData, setSelectedGraficsData] = useState(
     "Öğrencilerin Puanları"
   );
-  const [selectedGrafic, setSelectedGrafic] = useState<any>("line");
+  const [selectedGrafic, setSelectedGrafic] = useState<any>("bar");
   const [xValues, setXValues] = useState<any[]>();
   const [yValues, setYValues] = useState<any[]>();
 
@@ -979,29 +979,27 @@ const ExcelReports = () => {
         return scores;
       case "Öğrenci Puanlarının Frekansları":
         return frekansTable;
-      case "Madde Başına Yüzde Haritası (Percentage Map Per Question)":
-        return percentageMapPerQuestion;
-      case "Başarı Oranları (Success Rates)":
-        return successRates;
-      case "Z Puanları (Z-Scores)":
-        return zScores;
-      case "T Puanları (T-Scores)":
-        return tScores;
-      case "Sıralamalar (Ranks)":
-        return ranks;
-      case "Madde Bazında Varyans (Item Variance)":
-        return variancePerItem;
-      case "Madde Bazında Standart Sapma (Item Standard Deviation)":
-        return stdDevPerItem;
-      case "Madde Zorluk İndeksi (Item Difficulty Index)":
+      case "Madde Güçlük İndeksi":
         return difficultyIndex;
-      case "Madde Toplam Korelasyon Katsayısı (RBis)":
+      case "Başarı Yüzdeleri":
+        return successRates;
+      case "Z Puanları":
+        return zScores;
+      case "T Puanları":
+        return tScores;
+      // case "Öğrenci Sıralamaları":
+      //   return ranks;
+      case "Madde Bazında Varyans":
+        return variancePerItem;
+      case "Madde Bazında Standart Sapma":
+        return stdDevPerItem;
+      case "Madde Toplam Korelasyon Katsayısı (Bis)":
         return rbisIndex;
-      case "Çift Katsayılı Kolerasyon Değeri (pRBis)":
+      case "Çift Katsayılı Kolerasyon Değeri (pBis)":
         return prbisIndex;
-      case "Ayırt Edicilik İndeksi (Discrimination Index)":
+      case "Ayırt Edicilik İndeksi":
         return discriminationIndex;
-      case "reliabiGüvenirlik İndeksi (Reliability Index)lityIndex":
+      case "Güvenirlik İndeksi":
         return reliabilityIndex;
       default:
         return [];
@@ -1011,13 +1009,13 @@ const ExcelReports = () => {
   useEffect(() => {
     if (selectedGraficsData === "Öğrenci Puanlarının Frekansları") {
       const freqData = calculateFrekans(scores);
-      setXValues(freqData.map(([score]) => score)); // 📌 Puanları X ekseni için al
-      setYValues(freqData.map(([_, count]) => count)); // 📌 Frekansları Y ekseni için al
+      setXValues(freqData.map(([_, count]) => count)); // 📌 X ekseni için frekansları al
+      setYValues(freqData.map(([score]) => "Puan " + score)); // 📌 Y ekseni için puanları al
     } else {
-      setXValues(
-        Array.from({ length: getDataForPlot().length }, (_, i) => i + 1)
+      setXValues(getDataForPlot()); // 📌 Veriyi direkt X eksenine al
+      setYValues(
+        Array.from({ length: getDataForPlot().length }, (_, i) => i + 1) // 📌 Sıralamayı Y ekseni için kullan
       );
-      setYValues(getDataForPlot());
     }
   }, [scores, selectedGraficsData]);
 
@@ -1028,7 +1026,13 @@ const ExcelReports = () => {
       : tempdata.length === 50
       ? "Madde"
       : "Veri";
-  const labels = tempdata.map((_, index) => `${labelPrefix} ${index + 1}`);
+
+  // Eğer tempdata.length === 30 ise labels, studentNames dizisi olsun
+  const labels =
+    tempdata.length === 30
+      ? studentNames
+      : tempdata.map((_, index) => `${labelPrefix} ${index + 1}`);
+
   // X ekseni için otomatik etiketler
 
   // Rastgele renkler oluştur (Pie ve Doughnut için)
@@ -1038,12 +1042,25 @@ const ExcelReports = () => {
       () => `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`
     );
 
+  const label =
+    tempdata.length === 30
+      ? "Öğrenci"
+      : tempdata.length === 50
+      ? "Madde"
+      : "Değer";
+
   const graficdata = {
-    labels,
+    labels:
+      selectedGraficsData === "Öğrenci Puanlarının Frekansları"
+        ? yValues
+        : labels,
     datasets: [
       {
-        label: "Veri Seti",
-        data: getDataForPlot(),
+        label: label,
+        data:
+          selectedGraficsData === "Öğrenci Puanlarının Frekansları"
+            ? xValues
+            : getDataForPlot(),
         borderColor: "rgb(54, 162, 235)",
         backgroundColor: generateColors(getDataForPlot().length), // Pasta/Radar grafikleri için renkli
         borderWidth: 2,
@@ -1080,7 +1097,11 @@ const ExcelReports = () => {
     },
     scales: {
       x: {
-        ticks: { color: "#222", font: { size: 14 } },
+        ticks: {
+          color: "#222",
+          font: { size: 14 },
+          autoSkip: false,
+        },
         grid: { color: "rgba(200, 200, 200, 0.2)" },
       },
       y: {

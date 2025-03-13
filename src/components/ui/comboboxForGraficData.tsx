@@ -29,52 +29,48 @@ const frameworks = [
     label: "Öğrenci Puanlarının Frekansları",
   },
   {
-    value: "Madde Başına Yüzde Haritası (Percentage Map Per Question)",
-    label: "Madde Başına Yüzde Haritası (Percentage Map Per Question)",
+    value: "Madde Güçlük İndeksi",
+    label: "Madde Güçlük İndeksi",
   },
   {
-    value: "Başarı Oranları (Success Rates)",
-    label: "Başarı Oranları (Success Rates)",
+    value: "Başarı Yüzdeleri",
+    label: "Başarı Yüzdeleri",
   },
   {
-    value: "Z Puanları (Z-Scores)",
-    label: "Z Puanları (Z-Scores)",
+    value: "Z Puanları",
+    label: "Z Puanları",
   },
   {
-    value: "T Puanları (T-Scores)",
-    label: "T Puanları (T-Scores)",
+    value: "T Puanları",
+    label: "T Puanları",
+  },
+  // {
+  //   value: "Öğrenci Sıralamaları",
+  //   label: "Öğrenci Sıralamaları",
+  // },
+  {
+    value: "Madde Bazında Varyans",
+    label: "Madde Bazında Varyans",
   },
   {
-    value: "Sıralamalar (Ranks)",
-    label: "Sıralamalar (Ranks)",
+    value: "Madde Bazında Standart Sapma",
+    label: "Madde Bazında Standart Sapma",
   },
   {
-    value: "Madde Bazında Varyans (Item Variance)",
-    label: "Madde Bazında Varyans (Item Variance)",
+    value: "Madde Toplam Korelasyon Katsayısı (Bis)",
+    label: "Madde Toplam Korelasyon Katsayısı (Bis)",
   },
   {
-    value: "Madde Bazında Standart Sapma (Item Standard Deviation)",
-    label: "Madde Bazında Standart Sapma (Item Standard Deviation)",
+    value: "Çift Katsayılı Kolerasyon Değeri (pBis)",
+    label: "Çift Katsayılı Kolerasyon Değeri (pBis)",
   },
   {
-    value: "Madde Zorluk İndeksi (Item Difficulty Index)",
-    label: "Madde Zorluk İndeksi (Item Difficulty Index)",
+    value: "Ayırt Edicilik İndeksi",
+    label: "Ayırt Edicilik İndeksi",
   },
   {
-    value: "Madde Toplam Korelasyon Katsayısı (RBis)",
-    label: "Madde Toplam Korelasyon Katsayısı (RBis)",
-  },
-  {
-    value: "Çift Katsayılı Kolerasyon Değeri (pRBis)",
-    label: "Çift Katsayılı Kolerasyon Değeri (pRBis)",
-  },
-  {
-    value: "Ayırt Edicilik İndeksi (Discrimination Index)",
-    label: "Ayırt Edicilik İndeksi (Discrimination Index)",
-  },
-  {
-    value: "Güvenirlik İndeksi (Reliability Index)",
-    label: "Güvenirlik İndeksi (Reliability Index)",
+    value: "Güvenirlik İndeksi",
+    label: "Güvenirlik İndeksi",
   },
 ];
 

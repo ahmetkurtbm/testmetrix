@@ -67,7 +67,7 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
     // Stil ayarları
     const headerRow = worksheet.getRow(1);
     headerRow.eachCell((cell) => {
-      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.font = { bold: true, color: { argb: "FFFFFF" } };
       cell.fill = {
         type: "pattern",
         pattern: "solid",
@@ -119,6 +119,20 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
           cell.alignment = { vertical: "middle", horizontal: "right" };
         }
       });
+
+      // Alternatif satır renkleri
+      if (rowIndex === 1) {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 8) {
+            // 7. indeks (H1 hücresi)
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FF0000" }, // Kırmızı renk
+            };
+          }
+        });
+      }
     });
 
     // Sütun genişlikleri ayarla

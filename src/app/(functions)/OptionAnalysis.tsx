@@ -134,7 +134,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
 
       if (rowIndex === 1 || row.values[1]?.toString().startsWith("Madde")) {
         row.eachCell((cell: any) => {
-          cell.font = { bold: true };
+          cell.font = { bold: true, color: { argb: "FFFFFF" } };
           cell.alignment = { horizontal: "center" };
           cell.fill = {
             type: "pattern",
