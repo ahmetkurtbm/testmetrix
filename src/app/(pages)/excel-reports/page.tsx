@@ -1207,10 +1207,10 @@ const ExcelReports = () => {
               scores={scores}
             />
           </div>
-          {/* 
+
           <div className="m-3">
             <TestResults />
-          </div> */}
+          </div>
         </div>
 
         {/* Orta Taraftaki Grafikler Gösterme Alanı */}

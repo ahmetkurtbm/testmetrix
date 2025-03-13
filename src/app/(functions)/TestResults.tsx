@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Page,
   Text,
@@ -24,6 +24,15 @@ import { Button } from "@/components/ui/button";
 //     }, // Bold
 //   ],
 // });
+
+const getRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
 
 const styles = StyleSheet.create({
   page: {
@@ -54,6 +63,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: "#555",
   },
+  p: {
+    fontSize: 12,
+    margin: 5,
+    color: "#555",
+  },
   boldText: {
     fontSize: 12,
     fontWeight: "bold",
@@ -70,26 +84,29 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 0.5,
     borderColor: "#000",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   tableRow: {
+    fontSize: 12,
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#000",
   },
   tableHeader: {
+    fontSize: 12,
     flex: 1,
     backgroundColor: "#4a5568", // Koyu gri arka plan
     color: "#fff", // Beyaz yazı rengi
-    padding: 5,
+    padding: 2,
     textAlign: "center",
     fontWeight: "bold",
     borderRightWidth: 1,
     borderRightColor: "#000",
   },
   tableCell: {
+    fontSize: 12,
     flex: 1,
-    padding: 5,
+    padding: 2,
     textAlign: "center",
     borderRightWidth: 1,
     borderRightColor: "#000",
@@ -101,7 +118,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
     borderRadius: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -112,7 +129,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#333",
+    color: "#fff",
   },
   barChart: {
     flexDirection: "row",
@@ -132,25 +149,34 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -20,
     left: "50%",
-    transform: "translateX(-50%)",
+    transform: "translateX(-15%)",
     fontSize: 10,
-    color: "#333",
+    color: "#fff",
   },
   barValue: {
     position: "absolute",
-    top: -20,
+    top: -10,
     left: "50%",
-    transform: "translateX(-50%)",
+    transform: "translateX(-10%)",
     fontSize: 10,
     color: "#fff",
   },
 });
 
 // Örnek veri dizisi
-const data = [
+const barData = [
   { label: "Ahmet", value: 85 },
   { label: "Mehmet", value: 60 },
-  { label: "Ayşe", value: 90 },
+  { label: "Fatma", value: 75 },
+  { label: "Ali", value: 50 },
+  { label: "Ahmet", value: 85 },
+  { label: "Mehmet", value: 60 },
+  { label: "Ayse", value: 90 },
+  { label: "Fatma", value: 75 },
+  { label: "Ali", value: 50 },
+  { label: "Ahmet", value: 85 },
+  { label: "Mehmet", value: 60 },
+  { label: "Ayse", value: 90 },
   { label: "Fatma", value: 75 },
   { label: "Ali", value: 50 },
 ];
@@ -172,7 +198,10 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => (
     {data.map((item, index) => (
       <View
         key={index}
-        style={[styles.bar, { height: `${item.value}%` }]} // Çubuk yüksekliği
+        style={[
+          styles.bar,
+          { height: `${item.value}%`, backgroundColor: getRandomColor() },
+        ]}
       >
         <Text style={styles.barValue}>{item.value}%</Text> {/* Değer */}
         <Text style={styles.barLabel}>{item.label}</Text> {/* Etiket */}
@@ -248,88 +277,31 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({ data }) => (
           </View>
         </View>
       </View>
-      <Text>
-        Testten en düşük X1 puan, en yüksek X2 puan alınmıştır. Puanlara ilişkin
-        dağılım X3 olarak elde edilmiştir. X3 ………………X5…….……………………………….Bağıl
-        değişkenlik katsayısı X6 bulunmuştur. Grubun X7 olduğu belirlenmiştir.
-        Bağıl değişkenlik katsayısın göre gruplar karşılaştırılabilir. Çarpıklık
-        ve basıklık katsayısı dikkate alındığında grubun yığılma noktasını
-        belirlemek amacıyla merkezi eğilim ölçüsü olarak X8 kullanılması
-        önerilmektedir. Grubun yarıdan fazlası aritmetik ortalamanın X9 yer
-        almaktadır. Testten elde edilen puanlara ait güvenirlik katsayısı X10
-        olarak bulunmuştur. Bu katsayısının X11 olduğu söylenebilir.
-        X12…………………….
-      </Text>
+      <View style={styles.section}>
+        <Text style={styles.p}>
+          Testten en düşük X1 puan, en yüksek X2 puan alınmıştır. Puanlara
+          ilişkin dağılım X3 olarak elde edilmiştir. X3
+          ………………X5…….……………………………….Bağıl değişkenlik katsayısı X6 bulunmuştur.
+          Grubun X7 olduğu belirlenmiştir. Bağıl değişkenlik katsayısın göre
+          gruplar karşılaştırılabilir. Çarpıklık ve basıklık katsayısı dikkate
+          alındığında grubun yığılma noktasını belirlemek amacıyla merkezi
+          eğilim ölçüsü olarak X8 kullanılması önerilmektedir. Grubun yarıdan
+          fazlası aritmetik ortalamanın X9 yer almaktadır. Testten elde edilen
+          puanlara ait güvenirlik katsayısı X10 olarak bulunmuştur. Bu
+          katsayısının X11 olduğu söylenebilir. X12…………………….
+        </Text>
+      </View>
+
       <View style={styles.divider} />
       <View style={styles.chartContainer}>
         <Text style={styles.chartTitle}>Basari Yüzdesi</Text>
-        {/* Buraya grafik veya başka bir görsel eklenebilir */}
+        <BarChart data={barData}></BarChart>
       </View>
     </Page>
   </Document>
-
-  // <Document>
-  //   <Page size="A4" style={styles.page}>
-  //     <Text style={styles.header}>
-  //       {/* 📊 */}
-  //       Test ve Madde Istatistikleri Ogretmen Raporu
-  //     </Text>
-
-  //     <View style={styles.section}>
-  //       <Text style={styles.boldText}>
-  //         Ogretmen: <Text style={styles.text}>{data.teacher}</Text>
-  //       </Text>
-  //       <Text style={styles.boldText}>
-  //         Okul: <Text style={styles.text}>{data.school}</Text>
-  //       </Text>
-  //       <Text style={styles.boldText}>
-  //         Test Adi: <Text style={styles.text}>{data.testName}</Text>
-  //       </Text>
-  //       <Text style={styles.boldText}>
-  //         Sinif: <Text style={styles.text}>{data.class}</Text>
-  //       </Text>
-  //       <Text style={styles.boldText}>
-  //         Konu: <Text style={styles.text}>{data.subject}</Text>
-  //       </Text>
-  //       <Text style={styles.boldText}>
-  //         Test Tarihi: <Text style={styles.text}>{data.date}</Text>
-  //       </Text>
-  //     </View>
-
-  //     <View style={styles.divider} />
-
-  //     <View style={styles.section}>
-  //       <Text style={styles.boldText}>
-  //         {/*📈 */}
-  //         Test Istatistikleri
-  //       </Text>
-  //       <View style={styles.table}>
-  //         <View style={styles.tableRow}>
-  //           <Text style={styles.tableHeader}>Ogrenci Sayisi</Text>
-  //           <Text style={styles.tableHeader}>En Yüksek Puan</Text>
-  //           <Text style={styles.tableHeader}>En Düsük Puan</Text>
-  //           <Text style={styles.tableHeader}>Ortalama</Text>
-  //           <Text style={styles.tableHeader}>Standart Sapma</Text>
-  //         </View>
-  //         <View style={styles.tableRow}>
-  //           <Text style={styles.tableCell}>{data.studentCount}</Text>
-  //           <Text style={styles.tableCell}>{data.highestScore}</Text>
-  //           <Text style={styles.tableCell}>{data.lowestScore}</Text>
-  //           <Text style={styles.tableCell}>{data.meanScore}</Text>
-  //           <Text style={styles.tableCell}>{data.stdDeviation}</Text>
-  //         </View>
-  //       </View>
-  //     </View>
-
-  //     <View style={styles.chartContainer}>
-  //       <Text style={styles.chartTitle}>Basari Yüzdesi</Text>
-  //       {/* Buraya grafik veya başka bir görsel eklenebilir */}
-  //     </View>
-  //   </Page>
-  // </Document>
 );
 
-const TestResults: React.FC = () => {
+const TestResults: React.FC<any> = ({ veri }) => {
   const testData: TestData = {
     teacher: "Mehmet Yilmaz",
     school: "Kocaeli Atilim Lisesi",
