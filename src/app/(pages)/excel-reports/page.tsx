@@ -96,6 +96,14 @@ function calculateMaxScore(scores: any) {
   return Math.max(...scores);
 }
 
+// öğrenci puanlarının mini
+function calculateMinScore(scores: any) {
+  if (!scores || scores.length === 0) {
+    return null;
+  }
+  return Math.min(...scores);
+}
+
 // öğrenci puanlarının varyansı
 function calculateVariance(scores: any) {
   if (!scores || scores.length === 0) {
@@ -779,6 +787,7 @@ const ExcelReports = () => {
   const [standardDeviation, setStandardDeviation] = useState<number>(0);
   const [variance, setVariance] = useState<number>(0);
   const [maxScore, setMaxScore] = useState<number>(0);
+  const [minScore, setMinScore] = useState<number>(0);
   const [median, setMedian] = useState<number>(0);
   const [range, setRange] = useState<number>(0);
   const [skewness, setSkewness] = useState<number>(0);
@@ -883,6 +892,7 @@ const ExcelReports = () => {
     const mode = calculateMode(scores);
     const median = calculateMedian(scores);
     const max = calculateMaxScore(scores) ?? 0;
+    const min = calculateMinScore(scores) ?? 0;
     const rangeValue = calculateRange(scores);
     const skew = calculateSkewness(scores);
     const kurt = calculateKurtosis(scores);
@@ -941,6 +951,7 @@ const ExcelReports = () => {
     setStandardDeviation(stdDev);
     setMode(mode);
     setMaxScore(max);
+    setMinScore(min);
     setRange(rangeValue);
     setMedian(median);
     setSkewness(Number(skew));
@@ -1209,7 +1220,22 @@ const ExcelReports = () => {
           </div>
 
           <div className="m-3">
-            <TestResults />
+            <TestResults
+              studentNames={studentNames!}
+              scores={scores}
+              maxScore={maxScore}
+              minScore={minScore}
+              average={average}
+              standardDeviation={standardDeviation}
+              frequencyTable={frekansTable}
+              median={median}
+              mode={mode}
+              kr20={kr20}
+              successRate={successRate}
+              varyans={variance}
+              kurtosis={kurtosis}
+              skewness={skewness}
+            />
           </div>
         </div>
 

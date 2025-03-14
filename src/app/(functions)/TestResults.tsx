@@ -34,6 +34,9 @@ const getRandomColor = () => {
   return color;
 };
 
+const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+const getColor = (index: number) => colors[index % colors.length];
+
 const styles = StyleSheet.create({
   page: {
     padding: 30,
@@ -84,16 +87,16 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 0.5,
     borderColor: "#000",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   tableRow: {
-    fontSize: 12,
+    fontSize: 9,
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#000",
   },
   tableHeader: {
-    fontSize: 12,
+    fontSize: 9,
     flex: 1,
     backgroundColor: "#4a5568", // Koyu gri arka plan
     color: "#fff", // Beyaz yazı rengi
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
     borderRightColor: "#000",
   },
   tableCell: {
-    fontSize: 12,
+    fontSize: 9,
     flex: 1,
     padding: 2,
     textAlign: "center",
@@ -116,8 +119,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 0, // Son hücrenin sağ çizgisini kaldır
   },
   chartContainer: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: 2,
+    padding: 5,
     backgroundColor: "#000",
     borderRadius: 5,
     shadowColor: "#000",
@@ -126,6 +129,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   chartTitle: {
+    textAlign: "center",
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 10,
@@ -134,52 +138,70 @@ const styles = StyleSheet.create({
   barChart: {
     flexDirection: "row",
     alignItems: "flex-end",
-    height: 150,
+    height: 120,
     borderBottomWidth: 1,
     borderBottomColor: "#000",
     marginBottom: 10,
   },
   bar: {
     flex: 1,
+    top: -30,
     backgroundColor: "#4a5568",
     marginHorizontal: 2,
     position: "relative",
   },
   barLabel: {
+    minWidth: 50,
     position: "absolute",
-    bottom: -20,
+    bottom: -50,
     left: "50%",
-    transform: "translateX(-15%)",
-    fontSize: 10,
+    transform: "translateX(-15%) rotate(-90deg)", // Çapraz hizala
+    fontSize: 8,
     color: "#fff",
+    whiteSpace: "nowrap", // Metni tek satırda tut
+    overflowWrap: "normal",
+    wordWrap: "normal",
+    transformOrigin: "0 0", // Dönüş merkezini ayarla
   },
   barValue: {
     position: "absolute",
-    top: -10,
+    top: -8,
     left: "50%",
-    transform: "translateX(-10%)",
-    fontSize: 10,
+    transform: "translateX(-5%)",
+    fontSize: 5,
     color: "#fff",
   },
+  bottomSection: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: "#e2e8f0",
+    borderRadius: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 2,
+  },
+  freq: {
+    height: 180,
+    width: "100%",
+    backgroundColor: "#00ff00",
+  },
+  pie: {
+    height: 100,
+    width: "20%",
+    backgroundColor: "#ff0000",
+  },
+  pieChart: {},
+  pieSlice: {
+    width: 100, // Sabit genişlik
+    height: 100, // Sabit yükseklik
+    backgroundColor: getRandomColor(),
+    borderRadius: 100, // Yüzde yerine sabit bir değer kullanın
+  },
 });
-
-// Örnek veri dizisi
-const barData = [
-  { label: "Ahmet", value: 85 },
-  { label: "Mehmet", value: 60 },
-  { label: "Fatma", value: 75 },
-  { label: "Ali", value: 50 },
-  { label: "Ahmet", value: 85 },
-  { label: "Mehmet", value: 60 },
-  { label: "Ayse", value: 90 },
-  { label: "Fatma", value: 75 },
-  { label: "Ali", value: 50 },
-  { label: "Ahmet", value: 85 },
-  { label: "Mehmet", value: 60 },
-  { label: "Ayse", value: 90 },
-  { label: "Fatma", value: 75 },
-  { label: "Ali", value: 50 },
-];
 
 // Veri yapısını tanımlama
 interface BarData {
@@ -187,9 +209,20 @@ interface BarData {
   value: number;
 }
 
+// Veri yapısını tanımlama
+interface PieData {
+  label: string;
+  value: string;
+}
+
 // BarChart bileşeninin prop'larını tanımlama
 interface BarChartProps {
   data: BarData[];
+}
+
+// PieChart bileşeninin prop'larını tanımlama
+interface PieChartProps {
+  data: PieData[];
 }
 
 // Çubuk grafik bileşeni
@@ -210,6 +243,28 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => (
   </View>
 );
 
+// Çubuk grafik bileşeni
+const PieChart: React.FC<PieChartProps> = ({ data }) => (
+  <View style={styles.pieChart}>
+    {data.map((item, index) => (
+      <View
+        key={index}
+        style={[
+          styles.pieSlice,
+          {
+            width: `${item.value}%`,
+            height: `${item.value}%`,
+            backgroundColor: getRandomColor(),
+          },
+        ]}
+      >
+        <Text style={styles.barValue}>{item.value}%</Text>
+        <Text style={styles.barLabel}>{item.label}</Text>
+      </View>
+    ))}
+  </View>
+);
+
 interface TestData {
   teacher: string;
   school: string;
@@ -221,87 +276,187 @@ interface TestData {
   highestScore: number;
   lowestScore: number;
   meanScore: number;
-  stdDeviation: number;
+  stdDeviation: number; // number olarak kalmalı
+  frequencyTable: { score: number; frequency: number }[];
+  median: number;
+  mode: number[];
+  kr20: number;
+  skewness: number;
+  kurtosis: number;
+  successRate: number;
+  varyans: number; // number olarak kalmalı
 }
 
 interface TestResultsPDFProps {
   data: TestData;
+  scores: number[];
+  studentNames: string[]; // studentNames için tür belirtin
+  maxScore: number;
+  minScore: number;
+  average: number;
+  standardDeviation: number;
+  frequencyTable: { score: number; frequency: number }[]; // frequencyTable için tür belirtin
+  median: number;
+  mode: number[]; // mode için tür belirtin
+  kr20: number;
+  skewness: number;
+  kurtosis: number;
+  successRate: number;
+  varyans: number;
 }
 
-const TestResultsPDF: React.FC<TestResultsPDFProps> = ({ data }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.header}>
-        {/* 📊 */}
-        Test ve Madde Istatistikleri Ogretmen Raporu
-      </Text>
-      <View style={styles.section}>
-        <Text style={styles.boldText}>Test Bilgileri</Text>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableHeader}>Ogretmen</Text>
-          <Text style={styles.tableHeader}>Okul</Text>
-          <Text style={styles.tableHeader}>Test Adi</Text>
-          <Text style={styles.tableHeader}>Sinif</Text>
-          <Text style={styles.tableHeader}>Konu</Text>
-          <Text style={styles.tableHeader}>Test Tarihi</Text>
-        </View>
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>{data.teacher}</Text>
-          <Text style={styles.tableCell}>{data.school}</Text>
-          <Text style={styles.tableCell}>{data.testName}</Text>
-          <Text style={styles.tableCell}>{data.class}</Text>
-          <Text style={styles.tableCell}>{data.subject}</Text>
-          <Text style={styles.tableCell}>{data.date}</Text>
-        </View>
-      </View>
-      <View style={styles.divider} />
-      <View style={styles.section}>
-        <Text style={styles.boldText}>
-          {/*📈 */}
-          Test Istatistikleri
+const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
+  data,
+  scores,
+  studentNames,
+  maxScore,
+  minScore,
+  average,
+  standardDeviation,
+  frequencyTable,
+}) => {
+  // studentNames ve scores dizilerini birleştirerek grafik için uygun veri yapısını oluştur
+  const barData = studentNames.map((name, index) => ({
+    label: name,
+    value: scores[index],
+  }));
+
+  interface ScoreCounts {
+    [key: number]: number;
+  }
+
+  // Puanların tekrar sayısını hesapla
+  const scoreCounts = scores.reduce((acc: ScoreCounts, score) => {
+    acc[score] = (acc[score] || 0) + 1;
+    return acc;
+  }, {} as ScoreCounts);
+
+  const totalScores = scores.length;
+  const pieData = Object.keys(scoreCounts).map((score) => ({
+    label: `Puan ${score}`,
+    value: ((scoreCounts[parseInt(score, 10)] / totalScores) * 100).toFixed(2), // Yüzde olarak hesapla
+  }));
+
+  console.log(pieData);
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>
+          {/* 📊 */}
+          Test ve Madde Istatistikleri Ogretmen Raporu
         </Text>
-        <View style={styles.table}>
+        <View style={styles.section}>
+          <Text style={styles.boldText}>Test Bilgileri</Text>
           <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>Ogrenci Sayisi</Text>
-            <Text style={styles.tableHeader}>En Yüksek Puan</Text>
-            <Text style={styles.tableHeader}>En Düsük Puan</Text>
-            <Text style={styles.tableHeader}>Ortalama</Text>
-            <Text style={styles.tableHeader}>Standart Sapma</Text>
+            <Text style={styles.tableHeader}>Ogretmen</Text>
+            <Text style={styles.tableHeader}>Okul</Text>
+            <Text style={styles.tableHeader}>Test Adi</Text>
+            <Text style={styles.tableHeader}>Sinif</Text>
+            <Text style={styles.tableHeader}>Konu</Text>
+            <Text style={styles.tableHeader}>Test Tarihi</Text>
           </View>
           <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>{data.studentCount}</Text>
-            <Text style={styles.tableCell}>{data.highestScore}</Text>
-            <Text style={styles.tableCell}>{data.lowestScore}</Text>
-            <Text style={styles.tableCell}>{data.meanScore}</Text>
-            <Text style={styles.tableCell}>{data.stdDeviation}</Text>
+            <Text style={styles.tableCell}>{data.teacher}</Text>
+            <Text style={styles.tableCell}>{data.school}</Text>
+            <Text style={styles.tableCell}>{data.testName}</Text>
+            <Text style={styles.tableCell}>{data.class}</Text>
+            <Text style={styles.tableCell}>{data.subject}</Text>
+            <Text style={styles.tableCell}>{data.date}</Text>
           </View>
         </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.p}>
-          Testten en düşük X1 puan, en yüksek X2 puan alınmıştır. Puanlara
-          ilişkin dağılım X3 olarak elde edilmiştir. X3
-          ………………X5…….……………………………….Bağıl değişkenlik katsayısı X6 bulunmuştur.
-          Grubun X7 olduğu belirlenmiştir. Bağıl değişkenlik katsayısın göre
-          gruplar karşılaştırılabilir. Çarpıklık ve basıklık katsayısı dikkate
-          alındığında grubun yığılma noktasını belirlemek amacıyla merkezi
-          eğilim ölçüsü olarak X8 kullanılması önerilmektedir. Grubun yarıdan
-          fazlası aritmetik ortalamanın X9 yer almaktadır. Testten elde edilen
-          puanlara ait güvenirlik katsayısı X10 olarak bulunmuştur. Bu
-          katsayısının X11 olduğu söylenebilir. X12…………………….
-        </Text>
-      </View>
+        <View style={styles.divider} />
+        <View style={styles.section}>
+          <Text style={styles.boldText}>
+            {/*📈 */}
+            Test Istatistikleri
+          </Text>
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableHeader}>Ogrenci Sayisi</Text>
+              <Text style={styles.tableHeader}>En Yüksek Puan</Text>
+              <Text style={styles.tableHeader}>En Düsük Puan</Text>
+              <Text style={styles.tableHeader}>Ortalama</Text>
+              <Text style={styles.tableHeader}>Standart Sapma</Text>
+              <Text style={styles.tableHeader}>Varyans</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCell}>{data.studentCount}</Text>
+              <Text style={styles.tableCell}>{data.highestScore}</Text>
+              <Text style={styles.tableCell}>{data.lowestScore}</Text>
+              <Text style={styles.tableCell}>{data.meanScore}</Text>
+              <Text style={styles.tableCell}>{data.stdDeviation}</Text>
+              <Text style={styles.tableCell}>{data.varyans}</Text>
+            </View>
+          </View>
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableHeader}>Ortanca</Text>
+              <Text style={styles.tableHeader}>Mod</Text>
+              <Text style={styles.tableHeader}>Basari Yüzdesi</Text>
+              <Text style={styles.tableHeader}>Çarpiklik Katsayisi</Text>
+              <Text style={styles.tableHeader}>Basiklik Katsayisi</Text>
+              <Text style={styles.tableHeader}>Kr-20 Güvenirlik Katsayisi</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCell}>{data.median}</Text>
+              <Text style={styles.tableCell}>{data.mode.join(", ")}</Text>{" "}
+              <Text style={styles.tableCell}>{data.successRate}</Text>
+              <Text style={styles.tableCell}>{data.skewness}</Text>
+              <Text style={styles.tableCell}>{data.kurtosis}</Text>
+              <Text style={styles.tableCell}>{data.kr20}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.p}>
+            Testten en dusuk {minScore} puan, en yuksek {maxScore} puan
+            alinmistir. Puanlara iliskin dagilim X3 olarak elde edilmistir. X3
+            ………………X5…….……………………………….Bagil degiskenlik katsayisi X6 bulunmustur.
+            Grubun X7 oldugu belirlenmistir. Bagil degiskenlik katsayisin gore
+            gruplar karsilastirilabilir. Carpiklik ve basiklik katsayisi dikkate
+            alindiginda grubun yigilma noktasini belirlemek amaciyla merkezi
+            egilim olcusu olarak X8 kullanilmasi onerilmektedir. Grubun yaridan
+            fazlasi aritmetik ortalamanin X9 yer almaktadir. Testten elde edilen
+            puanlara ait guvenirlik katsayisi X10 olarak bulunmustur. Bu
+            katsayisinin X11 oldugu soylenebilir. X12…………………….
+          </Text>
+        </View>
 
-      <View style={styles.divider} />
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Basari Yüzdesi</Text>
-        <BarChart data={barData}></BarChart>
-      </View>
-    </Page>
-  </Document>
-);
+        <View style={styles.divider} />
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>Basari Yüzdesi</Text>
+          <BarChart data={barData} />
+        </View>
 
-const TestResults: React.FC<any> = ({ veri }) => {
+        <View style={styles.divider} />
+        <View style={styles.bottomSection}>
+          <View style={styles.freq}></View>
+          <View style={styles.pie}>
+            <PieChart data={pieData} />
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+};
+
+const TestResults: React.FC<any> = ({
+  scores,
+  studentNames,
+  maxScore,
+  minScore,
+  average,
+  standardDeviation,
+  frequencyTable,
+  median,
+  mode,
+  varyans,
+  successRate,
+  kr20,
+  kurtosis,
+  skewness,
+}) => {
   const testData: TestData = {
     teacher: "Mehmet Yilmaz",
     school: "Kocaeli Atilim Lisesi",
@@ -309,15 +464,41 @@ const TestResults: React.FC<any> = ({ veri }) => {
     class: "2",
     subject: "Modüler Aritmetik",
     date: "08.08.2024 / 16:00",
-    studentCount: 20,
-    highestScore: 13.0,
-    lowestScore: 3.0,
-    meanScore: 7.05,
-    stdDeviation: 3.25,
+    studentCount: studentNames.length,
+    highestScore: maxScore,
+    lowestScore: minScore,
+    meanScore: average,
+    stdDeviation: standardDeviation.toFixed(2),
+    frequencyTable: frequencyTable,
+    median: median,
+    mode: mode,
+    varyans: varyans.toFixed(2),
+    successRate: successRate,
+    kr20: kr20,
+    kurtosis: kurtosis,
+    skewness: skewness,
   };
 
   const handleDownload = async () => {
-    const blob = await pdf(<TestResultsPDF data={testData} />).toBlob();
+    const blob = await pdf(
+      <TestResultsPDF
+        data={testData}
+        scores={scores}
+        studentNames={studentNames}
+        maxScore={maxScore}
+        minScore={minScore}
+        average={average}
+        standardDeviation={standardDeviation}
+        frequencyTable={frequencyTable}
+        median={median}
+        mode={mode}
+        successRate={successRate}
+        kr20={kr20}
+        varyans={varyans}
+        kurtosis={kurtosis}
+        skewness={skewness}
+      />
+    ).toBlob();
     saveAs(blob, "Test_Sonuclari.pdf");
   };
 
