@@ -8,6 +8,7 @@ import {
   pdf,
   Font,
 } from "@react-pdf/renderer";
+import { Svg, Circle, G, Path, Text as SvgText } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 
@@ -77,6 +78,13 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: "#222",
   },
+  boldTextPie: {
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#222",
+    textAlign: "center",
+  },
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
@@ -95,8 +103,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#000",
   },
+  tableRowFreq: {
+    fontSize: 6,
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
+  },
   tableHeader: {
     fontSize: 9,
+    flex: 1,
+    backgroundColor: "#4a5568", // Koyu gri arka plan
+    color: "#fff", // Beyaz yazı rengi
+    padding: 2,
+    textAlign: "center",
+    fontWeight: "bold",
+    borderRightWidth: 1,
+    borderRightColor: "#000",
+  },
+  tableHeaderFreq: {
+    fontSize: 6,
     flex: 1,
     backgroundColor: "#4a5568", // Koyu gri arka plan
     color: "#fff", // Beyaz yazı rengi
@@ -117,6 +142,15 @@ const styles = StyleSheet.create({
   },
   lastCell: {
     borderRightWidth: 0, // Son hücrenin sağ çizgisini kaldır
+  },
+  tableCellFreq: {
+    fontSize: 6,
+    flex: 1,
+    padding: 2,
+    textAlign: "center",
+    borderRightWidth: 1,
+    borderRightColor: "#000",
+    backgroundColor: "#e2e8f0", // Açık gri arka plan
   },
   chartContainer: {
     marginTop: 2,
@@ -185,21 +219,43 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   freq: {
-    height: 180,
+    height: 200,
     width: "100%",
-    backgroundColor: "#00ff00",
+    backgroundColor: "#bbbbbb",
   },
   pie: {
-    height: 100,
-    width: "20%",
-    backgroundColor: "#ff0000",
+    height: 200,
+    width: "100%",
+    backgroundColor: "#bbbbbb",
   },
   pieChart: {},
   pieSlice: {
+    padding: 10,
     width: 100, // Sabit genişlik
     height: 100, // Sabit yükseklik
     backgroundColor: getRandomColor(),
     borderRadius: 100, // Yüzde yerine sabit bir değer kullanın
+  },
+  pieLabel: {
+    // minWidth: 50,
+    // position: "absolute",
+    // bottom: -50,
+    // left: "50%",
+    // transform: "translateX(-15%) rotate(-90deg)", // Çapraz hizala
+    // fontSize: 8,
+    // whiteSpace: "nowrap", // Metni tek satırda tut
+    // overflowWrap: "normal",
+    // wordWrap: "normal",
+    // transformOrigin: "0 0", // Dönüş merkezini ayarla
+    color: "#000",
+  },
+  pieValue: {
+    // position: "absolute",
+    // top: -8,
+    // left: "50%",
+    // transform: "translateX(-5%)",
+    // fontSize: 5,
+    color: "#000",
   },
 });
 
@@ -243,27 +299,71 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => (
   </View>
 );
 
-// Çubuk grafik bileşeni
-const PieChart: React.FC<PieChartProps> = ({ data }) => (
-  <View style={styles.pieChart}>
-    {data.map((item, index) => (
-      <View
-        key={index}
-        style={[
-          styles.pieSlice,
-          {
-            width: `${item.value}%`,
-            height: `${item.value}%`,
-            backgroundColor: getRandomColor(),
-          },
-        ]}
-      >
-        <Text style={styles.barValue}>{item.value}%</Text>
-        <Text style={styles.barLabel}>{item.label}</Text>
-      </View>
-    ))}
-  </View>
-);
+const PieChart: React.FC<PieChartProps> = ({ data }) => {
+  const total = data.reduce((sum, item) => sum + parseFloat(item.value), 0);
+  let startAngle = 0;
+
+  return (
+    <Svg width={200} height={200}>
+      <G transform="translate(100, 100)">
+        {data.map((item, index) => {
+          const angle = (parseFloat(item.value) / total) * 360;
+          const endAngle = startAngle + angle;
+          const largeArcFlag = angle > 180 ? 1 : 0;
+
+          const x1 = Math.cos((startAngle * Math.PI) / 180) * 50;
+          const y1 = Math.sin((startAngle * Math.PI) / 180) * 50;
+          const x2 = Math.cos((endAngle * Math.PI) / 180) * 50;
+          const y2 = Math.sin((endAngle * Math.PI) / 180) * 50;
+
+          const path = `
+            M 0 0
+            L ${x1} ${y1}
+            A 50 50 0 ${largeArcFlag} 1 ${x2} ${y2}
+            Z
+          `;
+
+          // Dilimin orta açısını hesapla
+          const middleAngle = startAngle + angle / 2;
+
+          // Metin konumunu orta açıya göre ayarla
+          const textX = Math.cos((middleAngle * Math.PI) / 180) * 30; // 30, dairenin yarıçapından daha küçük bir değer
+          const textY = Math.sin((middleAngle * Math.PI) / 180) * 30; // 30, dairenin yarıçapından daha küçük bir değer
+
+          startAngle = endAngle;
+
+          return (
+            <G key={index}>
+              <Path d={path} fill={getColor(index)} />
+              {/* Label değerleri dairenin dışına yerleştir */}
+              <SvgText
+                x={x1 * 1.2}
+                y={y1 * 1.2}
+                fill="#000"
+                fontSize={8}
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                {item.label}
+              </SvgText>
+              {/* Value değerleri dilimlerin ortasına yerleştir */}
+              <SvgText
+                x={textX}
+                y={textY}
+                fill="#000"
+                fontSize={8}
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                {item.value}%
+              </SvgText>
+            </G>
+          );
+        })}
+      </G>
+    </Svg>
+  );
+};
 
 interface TestData {
   teacher: string;
@@ -333,11 +433,14 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
 
   const totalScores = scores.length;
   const pieData = Object.keys(scoreCounts).map((score) => ({
-    label: `Puan ${score}`,
-    value: ((scoreCounts[parseInt(score, 10)] / totalScores) * 100).toFixed(2), // Yüzde olarak hesapla
+    label: `${score}`,
+    value:
+      ((scoreCounts[parseInt(score, 10)] / totalScores) * 100)
+        .toFixed(2)
+        .toString() + "%", // Yüzde olarak hesapla
   }));
 
-  console.log(pieData);
+  console.log(frequencyTable);
 
   return (
     <Document>
@@ -431,8 +534,25 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
 
         <View style={styles.divider} />
         <View style={styles.bottomSection}>
-          <View style={styles.freq}></View>
+          <View style={styles.freq}>
+            <Text style={styles.boldTextPie}>Freakans Tablosu</Text>
+            <View style={styles.table}>
+              <View style={styles.tableRowFreq}>
+                <Text style={styles.tableHeaderFreq}>Puan</Text>
+                <Text style={styles.tableHeaderFreq}>F</Text>
+                <Text style={styles.tableHeaderFreq}>%</Text>
+              </View>
+              {Object.entries(frequencyTable).map(([value, index]) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={styles.tableCellFreq}>{value[0]}</Text>
+                  <Text style={styles.tableCellFreq}>{value[1]}</Text>
+                  <Text style={styles.tableCellFreq}>{value[2]}%</Text>
+                </View>
+              ))}
+            </View>
+          </View>
           <View style={styles.pie}>
+            <Text style={styles.boldTextPie}>Ogrenci Puanlari</Text>
             <PieChart data={pieData} />
           </View>
         </View>
