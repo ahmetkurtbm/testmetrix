@@ -94,7 +94,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
 
   const handleDownload = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Madde Analiz Raporu");
+    const worksheet = workbook.addWorksheet("Seçenek Analizi");
 
     // Veriyi analiz et
     const analysisData = calculateAnalysisData(data, scores, studentAnswers);
@@ -166,7 +166,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, "Secenek_Analizini.xlsx");
+    saveAs(blob, "Secenek_Analizi.xlsx");
   };
 
   return (

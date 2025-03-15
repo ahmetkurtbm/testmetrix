@@ -18,7 +18,7 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
 }) => {
   const handleDownload = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Öğrenci Cevapları");
+    const worksheet = workbook.addWorksheet("Öğrenci Yanıtları");
 
     // Cevap Anahtarını Ekle (ilk satır)
     worksheet.addRow(["Yanıt Anahtarı", "", ...answerKey]);
