@@ -1261,7 +1261,7 @@ const ExcelReports = () => {
         </div>
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
-        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4   w-auto">
+        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4">
           {[
             { label: "Öğrenci Sayısı", value: numberOfStudents },
             { label: "Madde Sayısı", value: numberOfQuestions },

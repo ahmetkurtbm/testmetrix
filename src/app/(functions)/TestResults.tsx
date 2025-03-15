@@ -340,7 +340,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
                 x={x1 * 1.2}
                 y={y1 * 1.2}
                 fill="#000"
-                fontSize={8}
+                font-size={8}
                 textAnchor="middle"
                 dominantBaseline="middle"
               >
@@ -351,7 +351,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
                 x={textX}
                 y={textY}
                 fill="#000"
-                fontSize={8}
+                font-size={8}
                 textAnchor="middle"
                 dominantBaseline="middle"
               >
@@ -543,7 +543,7 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
                 <Text style={styles.tableHeaderFreq}>%</Text>
               </View>
               {Object.entries(frequencyTable).map(([value, index]) => (
-                <View key={index} style={styles.tableRow}>
+                <View key={value} style={styles.tableRow}>
                   <Text style={styles.tableCellFreq}>{value[0]}</Text>
                   <Text style={styles.tableCellFreq}>{value[1]}</Text>
                   <Text style={styles.tableCellFreq}>{value[2]}%</Text>
