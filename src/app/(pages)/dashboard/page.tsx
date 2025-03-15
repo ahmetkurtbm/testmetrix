@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 
 interface User {
@@ -45,38 +46,73 @@ export default function UsersPage() {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-xl font-semibold">Loading...</p>;
   }
 
-  //   if (error) {
-  //     return <p style={{ color: "red" }}>{error}</p>;
-  //   }
-
   // Öğretmen ve öğrencileri ayırma
-  const teachers = users.filter((user) => user.role === "Öğretmen");
-  const students = users.filter((user) => user.role === "Öğrenci");
+  const teachers = users.filter((user) => user.role === "teacher");
+  const students = users.filter((user) => user.role === "student");
 
   return (
-    <div>
-      <h1>Teachers</h1>
-      <ul>
-        {teachers.map((teacher) => (
-          <li key={teacher.email}>
-            {teacher.name} {teacher.surname} - {teacher.email} - {teacher.phone}{" "}
-            - {teacher.university}
-          </li>
-        ))}
-      </ul>
+    <div className="container mx-auto p-6 ">
+      <img
+        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+        src="bg-anaekran2.jpg"
+      />
+      <h1 className="text-2xl font-bold mb-4 text-white text-center">
+        Kullanıcılar
+      </h1>
 
-      <h1>Students</h1>
-      <ul>
-        {students.map((student) => (
-          <li key={student.email}>
-            {student.name} {student.surname} - {student.email} - {student.phone}{" "}
-            - {student.university}
-          </li>
-        ))}
-      </ul>
+      {/* Kullanıcı Tablosu */}
+      <table className="w-full border-collapse border border-gray-300 rounded-md bg-slate-500">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border border-gray-300 p-2">Name</th>
+            <th className="border border-gray-300 p-2">Surname</th>
+            <th className="border border-gray-300 p-2">Email</th>
+            <th className="border border-gray-300 p-2">Phone</th>
+            <th className="border border-gray-300 p-2">University</th>
+            <th className="border border-gray-300 p-2">Role</th>
+            <th className="border border-gray-300 p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id} className="hover:bg-gray-400 ">
+              <td className="border border-gray-300 p-2 text-white">
+                {user.name}
+              </td>
+              <td className="border border-gray-300 p-2  text-white">
+                {user.surname}
+              </td>
+              <td className="border border-gray-300 p-2  text-white">
+                {user.email}
+              </td>
+              <td className="border border-gray-300 p-2  text-white">
+                {user.phone}
+              </td>
+              <td className="border border-gray-300 p-2  text-white">
+                {user.university}
+              </td>
+              <td className="border border-gray-300 p-2 font-semibold">
+                {user.role === "Öğretmen"
+                  ? "Öğretmen"
+                  : user.role === "Yönetici"
+                  ? "Yönetici"
+                  : "Öğrenci"}
+              </td>
+              <td className="border border-gray-300 p-2 flex gap-2">
+                <Button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 w-full">
+                  Düzenle
+                </Button>
+                <Button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 w-full">
+                  Sil
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

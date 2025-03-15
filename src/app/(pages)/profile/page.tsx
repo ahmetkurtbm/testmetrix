@@ -216,7 +216,11 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex m-2 justify-center">
+    <div className="flex m-2 justify-center items-center align-middle">
+      <img
+        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+        src="profil-bg.jpg"
+      />
       <Card className="w-full max-w-2xl shadow-lg p-4">
         <CardHeader className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Profil</h1>

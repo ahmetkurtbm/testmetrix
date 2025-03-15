@@ -1072,6 +1072,7 @@ const ExcelReports = () => {
           selectedGraficsData === "Öğrenci Puanlarının Frekansları"
             ? xValues
             : getDataForPlot(),
+        textColor: "rgb(250,250,250)",
         borderColor: "rgb(54, 162, 235)",
         backgroundColor: generateColors(getDataForPlot().length), // Pasta/Radar grafikleri için renkli
         borderWidth: 2,
@@ -1089,14 +1090,14 @@ const ExcelReports = () => {
         display: true,
         position: "top" as const,
         labels: {
-          color: "#333",
+          color: "#fff",
           font: { size: 14 },
         },
       },
       title: {
         display: true,
-        text: "📊 Dinamik Grafik Türü",
-        color: "#222",
+        text: `📊 ${selectedGraficsData}`,
+        color: "#fff",
         font: { size: 20 },
       },
       tooltip: {
@@ -1109,14 +1110,14 @@ const ExcelReports = () => {
     scales: {
       x: {
         ticks: {
-          color: "#222",
+          color: "#fff",
           font: { size: 14 },
           autoSkip: false,
         },
         grid: { color: "rgba(200, 200, 200, 0.2)" },
       },
       y: {
-        ticks: { color: "#222", font: { size: 14 } },
+        ticks: { color: "#fff", font: { size: 14 } },
         grid: { color: "rgba(200, 200, 200, 0.2)" },
       },
     },
@@ -1139,8 +1140,12 @@ const ExcelReports = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-3xl font-semibold text-center p-1 m-2 text-green-500">
+    <div className="max-h-5/6">
+      <img
+        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+        src="bg-anaekran2.jpg"
+      />
+      <h2 className="text-3xl font-semibold text-center p-1 m-1 text-green-500">
         Veri Raporları
       </h2>
 
@@ -1256,7 +1261,7 @@ const ExcelReports = () => {
         </div>
 
         {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
-        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4 overflow-auto">
+        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4   w-auto">
           {[
             { label: "Öğrenci Sayısı", value: numberOfStudents },
             { label: "Madde Sayısı", value: numberOfQuestions },

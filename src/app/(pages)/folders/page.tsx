@@ -309,8 +309,12 @@ export default function Folders() {
   };
 
   return (
-    <div>
+    <div className="h-5/6">
       <div className="flex p-1 justify-center">
+        <img
+          className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+          src="bg-anaekran2.jpg"
+        />
         <div className="flex gap-2 p-1 w-1/2 align-top">
           <Input
             type="text"

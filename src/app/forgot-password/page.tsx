@@ -205,52 +205,58 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen gap-4">
-      <h2 className="text-xl font-bold">Şifre Sıfırlama</h2>
-      {!isVerified ? (
-        <>
-          <Input
-            className="w-15"
-            type="email"
-            placeholder="E-posta adresinizi girin"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isCodeSent}
-          />
-          <Button onClick={sendMail} disabled={isCodeSent}>
-            Kod Gönder
-          </Button>
-          {isCodeSent && (
-            <div className="flex flex-col items-center gap-2">
-              <p>{timer} saniye içinde kodu girin</p>
-              <Input
-                type="text"
-                placeholder="Gönderilen kodu girin"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-              <Button onClick={verifyCode}>Doğrula</Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <Input
-            className="w-15"
-            type="password"
-            placeholder="Yeni Şifre"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <Input
-            className="w-15"
-            type="password"
-            placeholder="Yeni Şifre Tekrar"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <Button onClick={resetPassword}>Şifreyi Güncelle</Button>
-        </>
-      )}
+      <img
+        className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
+        src="login-teacher-student.webp"
+      />
+      <div className="flex flex-col rounded-md bg-gray-500 gap-5 p-5 items-center text-center justify-center">
+        <h2 className="text-xl font-bold text-white">Şifre Sıfırlama</h2>
+        {!isVerified ? (
+          <>
+            <Input
+              className="w-15"
+              type="email"
+              placeholder="E-posta adresinizi girin"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isCodeSent}
+            />
+            <Button onClick={sendMail} disabled={isCodeSent}>
+              Kod Gönder
+            </Button>
+            {isCodeSent && (
+              <div className="flex flex-col items-center gap-2">
+                <p>{timer} saniye içinde kodu girin</p>
+                <Input
+                  type="text"
+                  placeholder="Gönderilen kodu girin"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                />
+                <Button onClick={verifyCode}>Doğrula</Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <Input
+              className="w-15"
+              type="password"
+              placeholder="Yeni Şifre"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <Input
+              className="w-15"
+              type="password"
+              placeholder="Yeni Şifre Tekrar"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button onClick={resetPassword}>Şifreyi Güncelle</Button>
+          </>
+        )}
+      </div>
       <ToastContainer
         position="top-right"
         autoClose={5000}

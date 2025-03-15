@@ -206,10 +206,14 @@ const ExcelUploadPage = () => {
   };
 
   return (
-    <div>
-      <div className="flex h-screen">
+    <div className="h-5/6">
+      <div className="flex h-full">
         {/* Sol Kısım - Excel Logosunun Animasyonlu Alanı */}
         <div className="w-1/2 flex items-center justify-center">
+          <img
+            className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+            src="bg-anaekran2.jpg"
+          />
           <div className="animate-scale-in">
             <img src="excel.svg" alt="Excel Logo" className="w-320 h-320" />
           </div>

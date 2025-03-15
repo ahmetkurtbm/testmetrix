@@ -188,14 +188,18 @@ const ExcelUpdate = () => {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <div className="w-full flex justify-between bg-slate-300 p-3">
+      <img
+        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+        src="bg-anaekran2.jpg"
+      />
+      <div className="w-full flex justify-between bg-slate-300 p-3 rounded-md">
         <div>
           <h1 className="text-2xl font-semibold mb-4">{data?.file_name}</h1>
           <h4 className="text-sm font-semibold mb-4 text-gray-400">
             {data?.created_at}
           </h4>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 ">
           <ComboboxDemo
             folderId={folderId}
             setFolderId={setFolderId}
@@ -206,14 +210,14 @@ const ExcelUpdate = () => {
           <Button onClick={handleUpdate}>Değişiklikleri Kaydet</Button>
         </div>
       </div>
-      <div className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300 p-4">
+      <div className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300 p-4 rounded-md">
         <table className="border-collapse border border-gray-200 w-full">
           <thead>
             <tr className="bg-gray-100">
               {data?.file_data[0]?.map((header, index) => (
                 <th
                   key={index}
-                  className="p-4 text-left font-medium text-gray-700"
+                  className="p-4 text-left font-medium text-gray-700 text-xs"
                 >
                   {header}
                 </th>
@@ -226,7 +230,7 @@ const ExcelUpdate = () => {
                 {row.map((cell, cellIndex) => (
                   <td key={cellIndex} className="p-4">
                     {cellIndex === 0 ? (
-                      <span className="text-gray-600">{cell}</span>
+                      <span className="text-gray-600 text-xs">{cell}</span>
                     ) : (
                       <Select
                         value={cell || ""}
@@ -234,13 +238,17 @@ const ExcelUpdate = () => {
                           handleSelectChange(rowIndex, cellIndex, newValue)
                         }
                       >
-                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md text-xs">
                           <SelectValue placeholder="Seçiniz" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="text-xs">
                           {["A", "B", "C", "D", "E", "Boş"].map(
                             (option, index) => (
-                              <SelectItem key={index} value={option}>
+                              <SelectItem
+                                className="text-xs"
+                                key={index}
+                                value={option}
+                              >
                                 {option}
                               </SelectItem>
                             )
