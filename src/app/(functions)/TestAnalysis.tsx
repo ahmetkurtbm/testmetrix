@@ -133,7 +133,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
 
   return (
     <Button className="w-full" onClick={handleDownload}>
-      Test İstatistilerini İndir <img src="download-icon.svg" />
+      Test İstatistileri İndir <img src="download-icon.svg" />
     </Button>
   );
 };

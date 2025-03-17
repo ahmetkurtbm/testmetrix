@@ -121,7 +121,7 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
 
   return (
     <Button className="w-full" onClick={handleDownload}>
-      Seçenekli Öğrenci Yanıtlarını İndir <img src="download-icon.svg" />
+      Seçenekli Öğrenci Yanıtları İndir <img src="download-icon.svg" />
     </Button>
   );
 };

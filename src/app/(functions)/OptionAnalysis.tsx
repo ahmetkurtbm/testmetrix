@@ -172,7 +172,7 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
   return (
     <div>
       <Button className="w-full" onClick={handleDownload}>
-        Seçenek Analizini İndir <img src="download-icon.svg" />
+        Seçenek Analizi İndir <img src="download-icon.svg" />
       </Button>
     </div>
   );

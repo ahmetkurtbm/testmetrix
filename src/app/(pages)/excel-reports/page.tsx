@@ -437,6 +437,8 @@ function calculateRpbIndexForAll(
           correctScores.length
         : 0;
 
+    console.log(meanCorrect);
+
     // Doğru ve yanlış yapanların sayısı
     const correctCount = correctScores.length;
     const incorrectCount = itemScores.length - correctCount;
@@ -448,7 +450,7 @@ function calculateRpbIndexForAll(
         : Math.sqrt(correctCount / 10 / (incorrectCount / 10));
 
     // Standart sapma kontrolü
-    //const stdDev = stdDevPerItem[i] === 0 ? 0.01 : stdDevPerItem[i];
+    // const stdDev = stdDevPerItem[i] === 0 ? 0.01 : stdDevPerItem[i];
 
     // RPB hesaplama
     const rpb =
@@ -1021,7 +1023,7 @@ const ExcelReports = () => {
     if (selectedGraficsData === "Öğrenci Puanlarının Frekansları") {
       const freqData = calculateFrekans(scores);
       setXValues(freqData.map(([_, count]) => count)); // 📌 X ekseni için frekansları al
-      setYValues(freqData.map(([score]) => "Puan " + score)); // 📌 Y ekseni için puanları al
+      setYValues(freqData.map(([score]) => "" + score)); // 📌 Y ekseni için puanları al
     } else {
       setXValues(getDataForPlot()); // 📌 Veriyi direkt X eksenine al
       setYValues(

@@ -625,7 +625,7 @@ const TestResults: React.FC<any> = ({
   return (
     <div>
       <Button className="w-full" onClick={handleDownload}>
-        Test Sonuçlari <img src="download-icon.svg" />
+        Test Sonuçları İndir <img src="download-icon.svg" />
       </Button>
     </div>
   );
