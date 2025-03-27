@@ -1325,6 +1325,7 @@ const ExcelReports = () => {
               studentCount={numberOfStudents!}
               questionCount={numberOfQuestions!}
               scores={scores}
+              points={poitns}
               mean={average}
               median={median}
               mode={mode}

@@ -123,7 +123,7 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
       // Alternatif satır renkleri
       if (rowIndex === 1) {
         row.eachCell((cell, colNumber) => {
-          if (colNumber === 8 || colNumber === 9) {
+          if (colNumber === 8 || colNumber === 7) {
             // 7. indeks (H1 hücresi)
             cell.fill = {
               type: "pattern",

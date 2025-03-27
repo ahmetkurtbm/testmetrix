@@ -7,6 +7,7 @@ interface TestAnalysisProps {
   studentCount: number;
   questionCount: number;
   scores: number[];
+  points: number[];
   mean: number;
   median: number;
   mode: number[];
@@ -24,6 +25,7 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
   studentCount,
   questionCount,
   scores,
+  points,
   mean,
   median,
   mode,
@@ -45,8 +47,8 @@ const TestAnalysis: React.FC<TestAnalysisProps> = ({
       ["Öğrenci Sayısı", studentCount],
       ["Madde Sayısı", questionCount],
       ["Alınabilecek En Yüksek Puan", questionCount.toFixed(2)],
-      ["En Düşük Puan", Math.min(...scores).toFixed(2)],
-      ["En Yüksek Puan", Math.max(...scores).toFixed(2)],
+      ["En Düşük Puan", Math.min(...points).toFixed(2)],
+      ["En Yüksek Puan", Math.max(...points).toFixed(2)],
       ["Aritmetik Ortalama", mean.toFixed(2)],
       ["Ortanca", median.toFixed(2)],
       ["Mod", mode],

@@ -35,7 +35,11 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     for (let i = 0; i < studentNames.length; i++) {
       // İlk sütunu (ilk eleman) hariç yanıtları ekleyin
       const filteredAnswers = studentAnswers[i].slice(1);
-      worksheet.addRow([studentNames[i], scores[i], ...filteredAnswers]);
+      worksheet.addRow([
+        studentNames[i],
+        scores[i] * (answerKey.length / 100),
+        ...filteredAnswers,
+      ]);
     }
 
     // Stil ayarları

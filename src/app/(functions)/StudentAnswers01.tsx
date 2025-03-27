@@ -33,7 +33,11 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
 
     // Veri ekle (isim, skor, yanıtlar)
     for (let i = 0; i < studentNames.length; i++) {
-      worksheet.addRow([studentNames[i], scores[i], ...studentAnswers01[i]]);
+      worksheet.addRow([
+        studentNames[i],
+        scores[i] * (answerKey.length / 100),
+        ...studentAnswers01[i],
+      ]);
     }
 
     // Stil ayarları
