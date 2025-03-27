@@ -41,7 +41,7 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
       "Madde Varyansı",
       "Madde Standart Sapması",
       "Madde Güçlük İndeksi",
-      // "Madde Ayırt Edicilik İndeksi (BİS)",
+      "Madde Ayırt Edicilik İndeksi (BİS)",
       "Madde Ayırt Edicilik İndeksi (PBİS)",
       "Madde Ayırt Edicilik İndeksi (%27)",
       "Madde Güvenirlik İndeksi",
@@ -57,7 +57,7 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
         itemVariance[i].toFixed(2),
         itemStd[i].toFixed(2),
         itemDifficulty[i].toFixed(2),
-        // itemRbis[i].toFixed(2),
+        itemRbis[i].toFixed(2),
         itemPrbis[i].toFixed(2),
         item27[i].toFixed(2),
         itemReliability[i].toFixed(2),
@@ -121,18 +121,18 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
       });
 
       // Alternatif satır renkleri
-      // if (rowIndex === 1) {
-      //   row.eachCell((cell, colNumber) => {
-      //     if (colNumber === 8) {
-      //       // 7. indeks (H1 hücresi)
-      //       cell.fill = {
-      //         type: "pattern",
-      //         pattern: "solid",
-      //         fgColor: { argb: "FF0000" }, // Kırmızı renk
-      //       };
-      //     }
-      //   });
-      // }
+      if (rowIndex === 1) {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber === 8 || colNumber === 9) {
+            // 7. indeks (H1 hücresi)
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FF0000" }, // Kırmızı renk
+            };
+          }
+        });
+      }
     });
 
     // Sütun genişlikleri ayarla

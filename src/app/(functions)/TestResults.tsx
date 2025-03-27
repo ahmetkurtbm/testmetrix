@@ -412,7 +412,10 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   maxScore,
   minScore,
   average,
+  median,
   standardDeviation,
+  skewness,
+  kr20,
   frequencyTable,
 }) => {
   // studentNames ve scores dizilerini birleştirerek grafik için uygun veri yapısını oluştur
@@ -432,6 +435,7 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   }, {} as ScoreCounts);
 
   const totalScores = scores.length;
+
   const pieData = Object.keys(scoreCounts).map((score) => ({
     label: `${score}`,
     value:
@@ -440,7 +444,35 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         .toString() + "%", // Yüzde olarak hesapla
   }));
 
-  console.log(frequencyTable);
+  const X3 =
+    skewness === 0
+      ? "normal dağilim"
+      : skewness > 0
+      ? "saga carpik"
+      : "sola carpik";
+
+  const X5 =
+    X3 === "normal dağilim"
+      ? "Normal dagilim, merkezi egilim olculerinin birbirine yakin ciktigi durumda ortaya cikar. Carpiklik katsayisi (-1, +1) araliginda oldugundan dagilimin normalden cok uzaklasmadigi varsayilabilir. Grubun aritmetik ortalama cevresinden yigildigi ve cok dusuk ve cok yuksek puanlarda daha az ogrencinin yer aldigi soylenebilir. "
+      : X3 === "saga carpik"
+      ? "Saga carpik dagilim, Mod<Ortanca<Aritmetik Ortalama oldugu durumda veriler sol tarafa yani dusuk puanlara yigildiginda ortaya cikar. Simetriklik bozulmus ve verilerin yaridan fazlasi aritmetik ortalamanin altinda kalmistir. Bir basari testinde sorularin zor oldugu ya da grubun gorece basarisiz oldugu seklinde yorumlanabilir. "
+      : "Sola carpik dagilim, Aritmetik Ortalama<Ortanca<Mod oldugu durumda veriler sag tarafa yani yuksek puanlara yigildiginda ortaya cikar. Simetriklik bozulmus ve verilerin yaridan fazlasi aritmetik ortalamanin ustunde kalmistir. Bir basari testinde sorularin kolay oldugu ya da grubun gorece basarili oldugu seklinde yorumlanabilir. ";
+  const X6 = ((standardDeviation / average) * 100).toFixed(2);
+
+  const X7 = X3 === "normal dağilim" ? "heterojen" : "homojen";
+
+  const X8 = skewness < 1.5 && skewness > -1.5 ? average : median;
+
+  const X9 = skewness > 0 ? "üstünde" : "altinda";
+
+  const X10 = kr20;
+
+  const X11 = kr20 > 0.7 ? "yeterli" : "yetersiz";
+
+  const X12 =
+    kr20 > 0.7
+      ? "Bu durumda testin güvenirliği yeterli kabul edilebilir."
+      : "Bu durumda testin güvenirliği yetersiz kabul edilebilir.";
 
   return (
     <Document>
@@ -514,15 +546,15 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         <View style={styles.section}>
           <Text style={styles.p}>
             Testten en dusuk {minScore} puan, en yuksek {maxScore} puan
-            alinmistir. Puanlara iliskin dagilim X3 olarak elde edilmistir. X3
-            ………………X5…….……………………………….Bagil degiskenlik katsayisi X6 bulunmustur.
-            Grubun X7 oldugu belirlenmistir. Bagil degiskenlik katsayisin gore
-            gruplar karsilastirilabilir. Carpiklik ve basiklik katsayisi dikkate
+            alinmistir. Puanlara iliskin dagilim {X3} olarak elde edilmistir.
+            {X5}.Bagil degiskenlik katsayisi {X6} bulunmustur. Grubun {X7}
+            oldugu belirlenmistir. Bagil degiskenlik katsayisin gore gruplar
+            karsilastirilabilir. Carpiklik ve basiklik katsayisi dikkate
             alindiginda grubun yigilma noktasini belirlemek amaciyla merkezi
-            egilim olcusu olarak X8 kullanilmasi onerilmektedir. Grubun yaridan
-            fazlasi aritmetik ortalamanin X9 yer almaktadir. Testten elde edilen
-            puanlara ait guvenirlik katsayisi X10 olarak bulunmustur. Bu
-            katsayisinin X11 oldugu soylenebilir. X12…………………….
+            egilim olcusu olarak {X8} kullanilmasi onerilmektedir. Grubun
+            yaridan fazlasi aritmetik ortalamanin {X9} yer almaktadir. Testten
+            elde edilen puanlara ait guvenirlik katsayisi {X10} olarak
+            bulunmustur. Bu katsayisinin {X11} oldugu soylenebilir. {X12}.
           </Text>
         </View>
 

@@ -79,6 +79,24 @@ function calculateScores(answerKey: any, studentAnswers: any) {
   });
 }
 
+// öğrencilerin Puanlarını Hesaplar (puanları)
+function calculatePoints(
+  answerKey: any,
+  studentAnswers: any,
+  numberOfQuestions: any
+) {
+  return studentAnswers.map((studentAnswer: any) => {
+    let correctCount = 0;
+    const tempStudentAnswer = studentAnswer.slice(1);
+    tempStudentAnswer.forEach((answer: any, index: any) => {
+      if (answer === answerKey[index]) {
+        correctCount += 1;
+      }
+    });
+    return correctCount * (100 / numberOfQuestions);
+  });
+}
+
 // öğrenci puanlarının ortalaması
 function calculateAverage(scores: any) {
   if (!scores || scores.length === 0) {
@@ -417,31 +435,147 @@ function calculateRpbIndexForAll(
   stdDev: number, // Her soru için standart sapma
   scores: number[], // Her öğrencinin toplam puanı
   average: number, // Tüm öğrencilerin toplam puan ortalaması
-  numberOfQuestions: number // Soru sayısı
+  numberOfQuestions: number, // Soru sayısı
+  numberOfStudents: number // Öğrenci sayısı
 ): number[] {
   const itemRpb: number[] = []; // RPB değerlerini tutacak dizi
+
+  // Tablodan p ve O değerlerini eşleştiren bir obje oluştur
+  const pToO: { [key: string]: number } = {
+    "0.01": 0.026,
+    "0.02": 0.049,
+    "0.03": 0.068,
+    "0.04": 0.086,
+    "0.05": 0.102,
+    "0.06": 0.118,
+    "0.07": 0.133,
+    "0.08": 0.148,
+    "0.09": 0.163,
+    "0.10": 0.176,
+    "0.11": 0.187,
+    "0.12": 0.199,
+    "0.13": 0.211,
+    "0.14": 0.223,
+    "0.15": 0.232,
+    "0.16": 0.244,
+    "0.17": 0.254,
+    "0.18": 0.261,
+    "0.19": 0.271,
+    "0.20": 0.28,
+    "0.21": 0.287,
+    "0.22": 0.297,
+    "0.23": 0.303,
+    "0.24": 0.31,
+    "0.25": 0.319,
+    "0.26": 0.325,
+    "0.27": 0.331,
+    "0.28": 0.337,
+    "0.29": 0.343,
+    "0.30": 0.348,
+    "0.31": 0.352,
+    "0.32": 0.357,
+    "0.33": 0.362,
+    "0.34": 0.367,
+    "0.35": 0.37,
+    "0.36": 0.374,
+    "0.37": 0.378,
+    "0.38": 0.38,
+    "0.39": 0.384,
+    "0.40": 0.387,
+    "0.41": 0.389,
+    "0.42": 0.391,
+    "0.43": 0.393,
+    "0.44": 0.394,
+    "0.45": 0.396,
+    "0.46": 0.397,
+    "0.47": 0.398,
+    "0.48": 0.398,
+    "0.49": 0.399,
+    "0.50": 0.399,
+    "0.51": 0.399,
+    "0.52": 0.398,
+    "0.53": 0.398,
+    "0.54": 0.397,
+    "0.55": 0.396,
+    "0.56": 0.394,
+    "0.57": 0.393,
+    "0.58": 0.391,
+    "0.59": 0.389,
+    "0.60": 0.387,
+    "0.61": 0.384,
+    "0.62": 0.38,
+    "0.63": 0.378,
+    "0.64": 0.374,
+    "0.65": 0.37,
+    "0.66": 0.367,
+    "0.67": 0.362,
+    "0.68": 0.357,
+    "0.69": 0.352,
+    "0.70": 0.348,
+    "0.71": 0.343,
+    "0.72": 0.337,
+    "0.73": 0.331,
+    "0.74": 0.325,
+    "0.75": 0.319,
+    "0.76": 0.31,
+    "0.77": 0.303,
+    "0.78": 0.297,
+    "0.79": 0.287,
+    "0.80": 0.28,
+    "0.81": 0.271,
+    "0.82": 0.261,
+    "0.83": 0.254,
+    "0.84": 0.244,
+    "0.85": 0.232,
+    "0.86": 0.223,
+    "0.87": 0.211,
+    "0.88": 0.199,
+    "0.89": 0.187,
+    "0.90": 0.176,
+    "0.91": 0.163,
+    "0.92": 0.148,
+    "0.93": 0.133,
+    "0.94": 0.118,
+    "0.95": 0.102,
+    "0.96": 0.086,
+    "0.97": 0.068,
+    "0.98": 0.049,
+    "0.99": 0.026,
+  };
 
   for (let i = 0; i < numberOfQuestions; i++) {
     // Her soru için öğrencilerin cevaplarını al (0 veya 1)
     const itemScores = studentAnswers01.map((student) => parseInt(student[i]));
 
-    // Doğru yapan öğrencilerin toplam puanlarını al
-    const correctScores = itemScores
-      .map((score, index) => (score === 1 ? scores[index] : 0)) // Doğru yapanların puanlarını al
-      .filter((score) => score !== 0); // Sadece doğru yapanların puanlarını filtrele
-
-    // Doğru yapan kişilerin puan ortalaması
-    const meanCorrect =
-      correctScores.length > 0
-        ? correctScores.reduce((sum, score) => sum + score, 0) /
-          correctScores.length
+    // Puan dizilerini ve ortalamayı hesaplayan fonksiyon
+    const calculateMean = (arr: number[]): number =>
+      arr.length > 0
+        ? arr.reduce((sum, score) => sum + score, 0) / arr.length
         : 0;
 
-    console.log(meanCorrect);
+    // Öğrenci puanlarını ayırma işlemi
+    const { correctScores, inCorrectScores } = itemScores.reduce(
+      (acc, score, index) => {
+        if (score === 1) acc.correctScores.push(scores[index]);
+        else if (score === 0) acc.inCorrectScores.push(scores[index]);
+        return acc;
+      },
+      { correctScores: [] as number[], inCorrectScores: [] as number[] }
+    );
+
+    // Ortalama hesaplamaları
+    const meanCorrect: number = calculateMean(correctScores);
+    const meanInCorrect: number = calculateMean(inCorrectScores);
 
     // Doğru ve yanlış yapanların sayısı
     const correctCount = correctScores.length;
     const incorrectCount = itemScores.length - correctCount;
+
+    const p = correctCount / numberOfStudents; // Doğru yapanların oranı
+    const q = 1 - p;
+
+    const bis =
+      ((meanCorrect - meanInCorrect) / stdDev) * ((p * q) / pToO[p.toFixed(2)]);
 
     // Karekök içindeki oran (doğru / yanlış)
     const sqrtRatio =
@@ -458,8 +592,10 @@ function calculateRpbIndexForAll(
         ? ((meanCorrect - average) / stdDev) * sqrtRatio
         : 0;
 
-    itemRpb.push(parseFloat(rpb.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
+    itemRpb.push(parseFloat(bis.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
   }
+
+  console.log(itemRpb);
 
   return itemRpb;
 }
@@ -622,7 +758,6 @@ function calculateRbIndexForAll(
   return itemRpb;
 }
 
-// Bence Bu Yanlış
 // Madde Ayırt Edicilik İndeksi (%27) Hesaplama
 function calculateDiscriminationIndexForAll(
   studentAnswers: any,
@@ -785,6 +920,7 @@ const ExcelReports = () => {
 
   // States for various calculated metrics
   const [scores, setScores] = useState<number[]>([]);
+  const [poitns, setPoints] = useState<number[]>([]);
   const [average, setAverage] = useState<number>(0);
   const [standardDeviation, setStandardDeviation] = useState<number>(0);
   const [variance, setVariance] = useState<number>(0);
@@ -875,8 +1011,10 @@ const ExcelReports = () => {
       const names = data.file_data.slice(1).map((row) => row[0]); // Extract student names from first column
 
       const calculatedScores = calculateScores(key, answers);
+      const calculatedPoints = calculatePoints(key, answers, key.length);
 
       setScores(calculatedScores);
+      setPoints(calculatedPoints);
       setAnswerKey(key);
       setStudentAnswers(answers);
       setStudentNames(names);
@@ -933,7 +1071,8 @@ const ExcelReports = () => {
       stdDev,
       scores,
       avg,
-      numberOfQuestions
+      numberOfQuestions,
+      numberOfStudents
     );
     const discrimination = calculateDiscriminationIndexForAll(
       studentAnswers,
@@ -989,7 +1128,7 @@ const ExcelReports = () => {
   const getDataForPlot = () => {
     switch (selectedGraficsData) {
       case "Öğrencilerin Puanları":
-        return scores;
+        return poitns;
       case "Öğrenci Puanlarının Frekansları":
         return frekansTable;
       case "Madde Güçlük İndeksi":
