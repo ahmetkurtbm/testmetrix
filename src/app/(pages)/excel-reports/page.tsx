@@ -1173,15 +1173,15 @@ const ExcelReports = () => {
 
   const tempdata = getDataForPlot();
   const labelPrefix =
-    tempdata.length === 30
+    tempdata.length === numberOfStudents
       ? "Öğrenci"
-      : tempdata.length === 50
+      : tempdata.length === numberOfQuestions
       ? "Madde"
       : "Veri";
 
   // Eğer tempdata.length === 30 ise labels, studentNames dizisi olsun
   const labels =
-    tempdata.length === 30
+    tempdata.length === numberOfStudents
       ? studentNames
       : tempdata.map((_, index) => `${labelPrefix} ${index + 1}`);
 
