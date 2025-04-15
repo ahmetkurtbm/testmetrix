@@ -159,6 +159,19 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
           };
         });
       }
+
+      // if (rowIndex % 7 === 2) {
+      //   row.eachCell((cell: any, colNumber: number) => {
+      //     //Burada doğru yanıtları kırmızı yap
+      //     if (colNumber === 8 || colNumber === 7) {
+      //       cell.fill = {
+      //         type: "pattern",
+      //         pattern: "solid",
+      //         fgColor: { argb: "FF0000" }, // Kırmızı renk
+      //       };
+      //     }
+      //   });
+      // }
     });
 
     // Dosyayı İndir

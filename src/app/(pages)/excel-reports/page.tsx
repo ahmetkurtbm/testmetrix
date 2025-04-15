@@ -196,13 +196,19 @@ function calculateSkewness(scores: any) {
     ) / n
   );
 
+  // const skewness =
+  //   (n / ((n - 1) * (n - 2))) *
+  //   scores.reduce(
+  //     (sum: any, score: any) =>
+  //       sum + Math.pow((score - mean) / standardDeviation, 3),
+  //     0
+  //   );
+
   const skewness =
-    (n / ((n - 1) * (n - 2))) *
-    scores.reduce(
-      (sum: any, score: any) =>
-        sum + Math.pow((score - mean) / standardDeviation, 3),
-      0
-    );
+    scores.reduce((sum: number, score: number) => {
+      return sum + Math.pow(score - mean, 3);
+    }, 0) /
+    (scores.length * Math.pow(standardDeviation, 3));
 
   return skewness.toFixed(2);
 }
@@ -430,7 +436,7 @@ function calculateItemDifficultyIndexForAll(
 }
 
 // Rbis
-function calculateRpbIndexForAll(
+function calculateRbIndexForAll(
   studentAnswers01: string[][], // Öğrenci cevapları (0 ve 1'lerden oluşan string dizisi)
   stdDev: number, // Her soru için standart sapma
   scores: number[], // Her öğrencinin toplam puanı
@@ -577,31 +583,13 @@ function calculateRpbIndexForAll(
     const bis =
       ((meanCorrect - meanInCorrect) / stdDev) * ((p * q) / pToO[p.toFixed(2)]);
 
-    // Karekök içindeki oran (doğru / yanlış)
-    const sqrtRatio =
-      incorrectCount === 0
-        ? 0
-        : Math.sqrt(correctCount / 10 / (incorrectCount / 10));
-
-    // Standart sapma kontrolü
-    // const stdDev = stdDevPerItem[i] === 0 ? 0.01 : stdDevPerItem[i];
-
-    // RPB hesaplama
-    const rpb =
-      correctCount > 0 && incorrectCount > 0
-        ? ((meanCorrect - average) / stdDev) * sqrtRatio
-        : 0;
-
     itemRpb.push(parseFloat(bis.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
   }
-
-  console.log(itemRpb);
-
   return itemRpb;
 }
 
 // Prbis
-function calculateRbIndexForAll(
+function calculateRpbIndexForAll(
   studentAnswers01: string[][], // Öğrenci cevapları (0 ve 1'lerden oluşan string dizisi)
   stdDev: number, // Her soru için standart sapma
   scores: number[], // Her öğrencinin toplam puanı
@@ -609,150 +597,42 @@ function calculateRbIndexForAll(
   numberOfQuestions: number // Soru sayısı
 ): number[] {
   const itemRpb: number[] = []; // RPB değerlerini tutacak dizi
-  const totalStudents = studentAnswers01.length; // Toplam öğrenci sayısı
-
-  // Tablodan p ve O değerlerini eşleştiren bir obje oluştur
-  const pToO: { [key: string]: number } = {
-    "0.01": 0.026,
-    "0.02": 0.049,
-    "0.03": 0.068,
-    "0.04": 0.086,
-    "0.05": 0.102,
-    "0.06": 0.118,
-    "0.07": 0.133,
-    "0.08": 0.148,
-    "0.09": 0.163,
-    "0.10": 0.176,
-    "0.11": 0.187,
-    "0.12": 0.199,
-    "0.13": 0.211,
-    "0.14": 0.223,
-    "0.15": 0.232,
-    "0.16": 0.244,
-    "0.17": 0.254,
-    "0.18": 0.261,
-    "0.19": 0.271,
-    "0.20": 0.28,
-    "0.21": 0.287,
-    "0.22": 0.297,
-    "0.23": 0.303,
-    "0.24": 0.31,
-    "0.25": 0.319,
-    "0.26": 0.325,
-    "0.27": 0.331,
-    "0.28": 0.337,
-    "0.29": 0.343,
-    "0.30": 0.348,
-    "0.31": 0.352,
-    "0.32": 0.357,
-    "0.33": 0.362,
-    "0.34": 0.367,
-    "0.35": 0.37,
-    "0.36": 0.374,
-    "0.37": 0.378,
-    "0.38": 0.38,
-    "0.39": 0.384,
-    "0.40": 0.387,
-    "0.41": 0.389,
-    "0.42": 0.391,
-    "0.43": 0.393,
-    "0.44": 0.394,
-    "0.45": 0.396,
-    "0.46": 0.397,
-    "0.47": 0.398,
-    "0.48": 0.398,
-    "0.49": 0.399,
-    "0.50": 0.399,
-    "0.51": 0.399,
-    "0.52": 0.398,
-    "0.53": 0.398,
-    "0.54": 0.397,
-    "0.55": 0.396,
-    "0.56": 0.394,
-    "0.57": 0.393,
-    "0.58": 0.391,
-    "0.59": 0.389,
-    "0.60": 0.387,
-    "0.61": 0.384,
-    "0.62": 0.38,
-    "0.63": 0.378,
-    "0.64": 0.374,
-    "0.65": 0.37,
-    "0.66": 0.367,
-    "0.67": 0.362,
-    "0.68": 0.357,
-    "0.69": 0.352,
-    "0.70": 0.348,
-    "0.71": 0.343,
-    "0.72": 0.337,
-    "0.73": 0.331,
-    "0.74": 0.325,
-    "0.75": 0.319,
-    "0.76": 0.31,
-    "0.77": 0.303,
-    "0.78": 0.297,
-    "0.79": 0.287,
-    "0.80": 0.28,
-    "0.81": 0.271,
-    "0.82": 0.261,
-    "0.83": 0.254,
-    "0.84": 0.244,
-    "0.85": 0.232,
-    "0.86": 0.223,
-    "0.87": 0.211,
-    "0.88": 0.199,
-    "0.89": 0.187,
-    "0.90": 0.176,
-    "0.91": 0.163,
-    "0.92": 0.148,
-    "0.93": 0.133,
-    "0.94": 0.118,
-    "0.95": 0.102,
-    "0.96": 0.086,
-    "0.97": 0.068,
-    "0.98": 0.049,
-    "0.99": 0.026,
-  };
 
   for (let i = 0; i < numberOfQuestions; i++) {
-    // Her soru için öğrencilerin cevaplarını al (0 veya 1)
     const itemScores = studentAnswers01.map((student) => parseInt(student[i]));
 
-    // Doğru yapan öğrencilerin toplam puanlarını al
-    const correctScores = itemScores
-      .map((score, index) => (score === 1 ? scores[index] : 0)) // Doğru yapanların puanlarını al
-      .filter((score) => score !== 0); // Sadece doğru yapanların puanlarını filtrele
-
-    // Doğru yapan kişilerin puan ortalaması
-    const meanCorrect =
-      correctScores.length > 0
-        ? correctScores.reduce((sum, score) => sum + score, 0) /
-          correctScores.length
+    // Puan dizilerini ve ortalamayı hesaplayan fonksiyon
+    const calculateMean = (arr: number[]): number =>
+      arr.length > 0
+        ? arr.reduce((sum, score) => sum + score, 0) / arr.length
         : 0;
+
+    // Öğrenci puanlarını ayırma işlemi
+    const { correctScores, inCorrectScores } = itemScores.reduce(
+      (acc, score, index) => {
+        if (score === 1) acc.correctScores.push(scores[index]);
+        else if (score === 0) acc.inCorrectScores.push(scores[index]);
+        return acc;
+      },
+      { correctScores: [] as number[], inCorrectScores: [] as number[] }
+    );
+
+    // Ortalama hesaplamaları
+    const meanCorrect: number = calculateMean(correctScores);
+    const meanInCorrect: number = calculateMean(inCorrectScores);
 
     // Doğru ve yanlış yapanların sayısı
     const correctCount = correctScores.length;
-    const p = correctCount / totalStudents; // Doğru yapanların oranı
+    const incorrectCount = itemScores.length - correctCount;
 
-    // p değerine en yakın p değerini bul
-    const closestP = Object.keys(pToO).reduce((prev, curr) =>
-      Math.abs(parseFloat(curr) - p) < Math.abs(parseFloat(prev) - p)
-        ? curr
-        : prev
-    );
+    const p = correctCount / scores.length; // Doğru yapanların oranı
+    const q = 1 - p;
 
-    // y değerini tablodan al
-    const y = pToO[closestP];
+    const rBis = ((meanCorrect - meanInCorrect) / stdDev) * Math.sqrt(p * q);
 
-    // RPB hesaplama
-    const rpb =
-      correctCount > 0 && y > 0
-        ? ((meanCorrect - average) / stdDev) *
-          Math.sqrt(correctCount / (totalStudents - correctCount)) *
-          y
-        : 0;
+    console.log(rBis);
 
-    itemRpb.push(parseFloat(rpb.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
+    itemRpb.push(parseFloat(rBis.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
   }
 
   return itemRpb;
@@ -1064,15 +944,15 @@ const ExcelReports = () => {
       stdDev,
       scores,
       avg,
-      numberOfQuestions
+      numberOfQuestions,
+      numberOfStudents
     );
     const prbis = calculateRpbIndexForAll(
       studentAns01,
       stdDev,
       scores,
       avg,
-      numberOfQuestions,
-      numberOfStudents
+      numberOfQuestions
     );
     const discrimination = calculateDiscriminationIndexForAll(
       studentAnswers,

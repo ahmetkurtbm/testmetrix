@@ -32,6 +32,8 @@ const QuestionAnalysis: React.FC<QuestionAnalysisProps> = ({
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Madde İstatistikleri");
 
+    console.log(itemRbis);
+
     // Başlıkları ekle
     worksheet.addRow([
       "Madde Numarası",

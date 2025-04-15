@@ -27,7 +27,7 @@ const StudentAnswers: React.FC<StudentAnswersProps> = ({
     const headers = [
       "Öğrenci Adı-Soyadı",
       "Puan",
-      ...answerKey.map((_, index) => `S${index + 1}`),
+      ...answerKey.map((_, index) => `M${index + 1}`),
     ];
     worksheet.addRow(headers);
 
