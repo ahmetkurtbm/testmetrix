@@ -171,31 +171,37 @@ const ExcelUploadPage = () => {
   const handleSave = async () => {
     try {
       if (arrayData.length !== 0 && folderId !== undefined) {
-        const response = await fetch(`${BACKEND_URL}/excel-upload`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            folder_id: folderId,
-            file_name: fileName || "defaultFile",
-            file_data: arrayData || [],
-          }),
-        });
+        const chunkSize = 100; // her seferde 100 satır gönder
+        for (let i = 0; i < arrayData.length; i += chunkSize) {
+          const chunk = arrayData.slice(i, i + chunkSize);
 
-        const data = await response.json();
+          const response = await fetch(`${BACKEND_URL}/excel-upload`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              folder_id: folderId,
+              file_name: fileName || "defaultFile",
+              file_data: chunk,
+            }),
+          });
 
-        if (response.ok) {
-          successUpload();
-          console.log("Excel Upload Successful");
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        } else {
-          errorUpload();
-          console.error("Upload failed:", data.error);
+          const data = await response.json();
+
+          if (!response.ok) {
+            errorUpload();
+            console.error("Chunk upload failed:", data.error);
+            return;
+          }
         }
+
+        successUpload();
+        console.log("Excel Upload Successful");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         errorUpload();
       }
