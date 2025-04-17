@@ -630,8 +630,6 @@ function calculateRpbIndexForAll(
 
     const rBis = ((meanCorrect - meanInCorrect) / stdDev) * Math.sqrt(p * q);
 
-    console.log(rBis);
-
     itemRpb.push(parseFloat(rBis.toFixed(2))); // Sonucu 2 ondalık basamağa yuvarla
   }
 
