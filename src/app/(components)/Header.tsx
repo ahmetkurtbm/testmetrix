@@ -13,6 +13,8 @@ import { Avatar } from "@/components/ui/avatar";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { Menu } from "lucide-react"; // Import hamburger icon
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 // Token'ın yapısını tanımlayın
 interface DecodedToken {
@@ -66,91 +68,141 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center justify-between px-2 py-1 bg-gray-400 shadow-md">
-      <nav className="flex  w-full space-x-3">
-        <div className="max-w-10">
-          <img src="excel.svg" />
-        </div>
-        <div className="flex w-full justify-between px-2">
-          <div className="flex gap-2">
-            <Link
-              href="/folders"
-              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md "
-            >
-              <span className="">
-                <u>Klasörler</u>
-              </span>
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <nav className="flex h-16 items-center px-4 sm:px-6">
+        <div className="flex w-full items-center justify-between">
+          {/* Logo ve Sol Menü */}
+          <div className="flex items-center gap-6">
+            <Link href="/folders" className="flex items-center">
+              <img src="/logo.png" alt="Logo" className="h-8 sm:h-10 w-auto" />
             </Link>
-            <Link
-              href="/excel-upload"
-              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
-            >
-              <p className="">
-                <u>Dosya Yükle</u>
-              </p>
-            </Link>
-            {isAdmin && (
+
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center gap-1">
               <Link
-                href="/dashboard"
-                className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
+                href="/folders"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
               >
-                <p className="">
-                  <u>Yönetim</u>
-                </p>
+                Klasörler
               </Link>
-            )}
+              <Link
+                href="/excel-upload"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Dosya Yükle
+              </Link>
+              {isAdmin && (
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Yönetim
+                </Link>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Link
-              href="/information"
-              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
-            >
-              <p className="">
-                <u>Hakkımızda</u>
-              </p>
-            </Link>
-            <Link
-              href="/iletisim"
-              className="bg-slate-300 p-2 hover:shadow-md hover:bg-white rounded-md"
-            >
-              <p className="">
-                <u>İletişim</u>
-              </p>
-            </Link>
+
+          {/* Sağ Menü */}
+          <div className="flex items-center gap-2">
+            {/* Desktop Links */}
+            <div className="hidden md:flex items-center gap-1">
+              <Link
+                href="/information"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Hakkımızda
+              </Link>
+              <Link
+                href="/iletisim"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                İletişim
+              </Link>
+            </div>
+
+            <div className="hidden md:block border-l h-6 mx-2 border-gray-200" />
+
+            {/* Mobile Menu Button */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="mr-1">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <nav className="flex flex-col gap-4">
+                  <Link
+                    href="/folders"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Klasörler
+                  </Link>
+                  <Link
+                    href="/excel-upload"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Dosya Yükle
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/dashboard"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      Yönetim
+                    </Link>
+                  )}
+                  <Link
+                    href="/information"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Hakkımızda
+                  </Link>
+                  <Link
+                    href="/iletisim"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    İletişim
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
+
+            {/* Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 hover:bg-gray-50"
+                >
+                  <Avatar className="h-8 w-8 bg-blue-600 text-white">
+                    <span className="text-sm">{mail[0]?.toUpperCase()}</span>
+                  </Avatar>
+                  <span className="hidden sm:block text-sm font-medium text-gray-700">
+                    {mail}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-2">
+                <DropdownMenuItem className="py-2">
+                  <Link href="/profile" className="flex items-center w-full">
+                    <span className="text-sm font-medium text-gray-700">
+                      Profili Görüntüle
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="py-2">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full text-sm font-medium text-red-600 hover:text-red-700"
+                  >
+                    Çıkış Yap
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </nav>
-
-      <div className="relative">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex items-center space-x-2 bg-slate-300 "
-            >
-              <Avatar className="w-8 h-8 bg-blue-500 text-white"></Avatar>
-              <span className="hidden sm:block">{mail}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 mt-2">
-            <DropdownMenuItem>
-              <Link href="/profile" className=" w-full ">
-                <p className="block w-full text-left bg-blue-300 p-3 rounded-md hover:bg-blue-500">
-                  Profili Görüntüle
-                </p>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Button
-                className="block w-full text-left bg-red-600"
-                onClick={handleLogout}
-              >
-                Çıkış Yap
-              </Button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </header>
   );
 };

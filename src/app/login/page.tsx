@@ -12,7 +12,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
@@ -93,100 +92,110 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-center h-screen">
-        <img
-          className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
-          src="login-teacher-student.webp"
-        />
-        <Card className="w-full max-w-lg shadow-lg">
-          <CardHeader>
-            <h1 className="text-2xl font-bold text-center bg-gray-300 rounded-md p-1">
-              Giriş Ekranı
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="flex items-center justify-center h-screen px-4">
+        {/* Arkaplan resmi için düzeltilmiş CSS */}
+        <div className="fixed top-0 left-0 w-full h-full">
+          <img
+            className="w-full h-full object-cover opacity-50"
+            src="/login-teacher-student.webp"
+            alt="Background"
+          />
+        </div>
+
+        <Card className="w-full max-w-md bg-white/95 backdrop-blur-md shadow-xl hover:shadow-2xl transition-shadow duration-300 border-0">
+          <CardHeader className="space-y-4 pb-6">
+            <div className="flex justify-center">
+              {/* Logo eklenebilir */}
+              <img src="logo.png" alt="Logo" className="h-16 w-auto" />
+            </div>
+            <h1 className="text-2xl font-semibold text-center text-gray-800">
+              Eğitim Bilgi Sistemi
             </h1>
           </CardHeader>
-          <CardContent>
+
+          <CardContent className="space-y-6">
             <Tabs
               value={role}
               onValueChange={(value) => setRole(value)}
-              className="mb-4"
+              className="mb-6"
             >
-              <TabsList className="w-full bg-blue-200 ">
+              <TabsList className="w-full h-full bg-gray-200/70 p-2 rounded-lg grid grid-cols-3 gap-2">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={`font-bold  w-full
-                ${role === r ? " text-blue-600" : "text-gray-500"}
-              `}
+                    className={`font-medium rounded-md transition-all duration-300 px-4 py-2.5 ${
+                      role === r
+                        ? "bg-blue-700 text-white shadow-[0_4px_12px_rgba(59,130,246,0.5)] transform scale-105 ring-2 ring-blue-400 ring-offset-2"
+                        : "bg-white/90 text-gray-700 hover:bg-blue-50 hover:text-blue-600 shadow-sm"
+                    }`}
                   >
                     {r}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                E-Posta:
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="E-Posta"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Şifre:
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Şifre"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 w-full"
-              />
-              <div className="flex align-middle mt-2 justify-between">
-                <div className="flex"></div>
-                <p
-                  onClick={() => {
-                    router.push("forgot-password");
-                  }}
-                  className="font-bold text-blue-950 cursor-pointer"
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700"
                 >
-                  Şifremi unuttum
-                </p>
+                  E-Posta Adresi
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="ornek@email.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Şifre
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="••••••••"
+                />
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex-col gap-1 ">
+
+          <CardFooter className="flex flex-col space-y-4 pt-2">
             <Button
               onClick={handleLogin}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-medium rounded-lg transition-colors"
             >
               Giriş Yap
             </Button>
-            <label className="block text-sm font-medium text-gray-700">
-              Hesabınız yok mu ?
-            </label>
-            <Button
-              onClick={navigateRegister}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Kayıt Ol
-            </Button>
+
+            <div className="flex items-center justify-between w-full text-sm">
+              <button
+                onClick={() => router.push("forgot-password")}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Şifremi Unuttum
+              </button>
+              <button
+                onClick={navigateRegister}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Hesap Oluştur
+              </button>
+            </div>
           </CardFooter>
         </Card>
       </div>
@@ -200,7 +209,7 @@ const Login = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme="light"
       />
     </div>
   );

@@ -134,196 +134,174 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-center h-screen">
-        <img
-          className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
-          src="login-teacher-student.webp"
-        />
-        <Card className="w-full max-w-lg shadow-lg">
-          <CardHeader>
-            <h1 className="text-2xl font-bold text-center">Kayıt Ekranı</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="flex items-center justify-center h-screen px-4">
+        {/* Arkaplan resmi için düzeltilmiş CSS */}
+        <div className="fixed top-0 left-0 w-full h-full">
+          <img
+            className="w-full h-full object-cover opacity-50"
+            src="/login-teacher-student.webp"
+            alt="Background"
+          />
+        </div>
+
+        <Card className="w-full max-w-md bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_35px_rgb(0,0,0,0.16)] transition-shadow duration-300 border-0">
+          <CardHeader className="space-y-4 pb-6">
+            <div className="flex justify-center">
+              <img src="/logo.png" alt="Logo" className="h-16 w-auto" />
+            </div>
+            <h1 className="text-2xl font-semibold text-center text-gray-800">
+              Kayıt Ekranı
+            </h1>
           </CardHeader>
-          <CardContent>
+
+          <CardContent className="space-y-6">
             <Tabs
               value={role}
               onValueChange={(value) => setRole(value)}
-              className="mb-4 "
+              className="mb-6"
             >
-              <TabsList className="w-full bg-blue-200">
+              <TabsList className="w-full bg-gray-100/50 p-1.5 rounded-lg grid grid-cols-2 gap-2">
                 {roles.map((r) => (
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={`font-bold w-full
-                ${role === r ? " text-blue-600" : "text-gray-500"}
-              `}
+                    className={`font-medium rounded-md transition-all duration-300 px-4 py-2.5 ${
+                      role === r
+                        ? "bg-blue-700 text-white shadow-[0_4px_12px_rgba(59,130,246,0.5)] transform scale-105 ring-2 ring-blue-400 ring-offset-2"
+                        : "bg-gray-200/70 text-gray-700 hover:bg-blue-50 hover:text-blue-600 shadow-sm"
+                    }`}
                   >
                     {r}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
-            <div className="flex gap-1 w-full">
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Ad:
-                </label>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Ad:</label>
                 <Input
-                  id="name"
-                  type="text"
-                  placeholder="Ad"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Ad"
                 />
               </div>
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="surname"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
                   Soyad:
                 </label>
                 <Input
-                  id="surname"
-                  type="text"
-                  placeholder="Soyad"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Soyad"
                 />
               </div>
-            </div>
-            <div className="flex gap-1 w-full">
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
                   E-Posta:
                 </label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="E-Posta"
                   value={email}
                   onChange={(e) => setEmail(e.target.value.trim())}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="E-Posta"
                 />
               </div>
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="university"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Kurum:
-                </label>
-                <Input
-                  id="university"
-                  type="text"
-                  placeholder="Kurum"
-                  value={university}
-                  onChange={(e) => setUniversity(e.target.value)}
-                  required
-                  className="mt-1 w-full"
-                />
-              </div>
-            </div>
-            <div className="flex gap-1 w-full">
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
                   Telefon:
                 </label>
                 <Input
-                  id="phone"
-                  type="text"
-                  placeholder="Telefon"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Telefon"
                 />
               </div>
-            </div>
-            <div className="flex gap-1 w-full">
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="space-y-2 col-span-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Kurum:
+                </label>
+                <Input
+                  value={university}
+                  onChange={(e) => setUniversity(e.target.value)}
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Kurum"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
                   Şifre:
                 </label>
                 <Input
-                  id="password"
-                  type="password"
-                  placeholder="Şifre"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Şifre"
+                  type="password"
                 />
               </div>
-              <div className="mb-4 w-full">
-                <label
-                  htmlFor="passwordAgain"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
                   Şifre Tekrar:
                 </label>
                 <Input
-                  id="passwordAgain"
-                  type="password"
-                  placeholder="Şifre Tekrar"
                   value={passwordAgain}
                   onChange={(e) => setPasswordAgain(e.target.value)}
-                  required
-                  className="mt-1 w-full"
+                  className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Şifre Tekrar"
+                  type="password"
                 />
               </div>
             </div>
           </CardContent>
-          <CardFooter className="gap-1 flex-col">
-            <label className="text-sm font-medium text-gray-700 align-middle gap-1 flex">
-              <Checkbox checked={KVKK} onCheckedChange={handleKVKK} />
-              <Link href="kvkk-" className="underline font-bold">
-                {" "}
-                KVKK{" "}
-              </Link>
-              ve
-              <Link href="ayditlatma-metni-" className="underline font-bold">
-                {" "}
-                Aydınlatma Metni'ni{" "}
-              </Link>{" "}
-              okudum, onaylıyorum.
-            </label>
+
+          <CardFooter className="flex flex-col space-y-4 pt-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Checkbox
+                checked={KVKK}
+                onCheckedChange={handleKVKK}
+                className="border-gray-300 focus:ring-blue-500"
+              />
+              <div className="flex gap-1">
+                <Link href="kvkk-" className="text-blue-600 hover:underline">
+                  KVKK
+                </Link>
+                <span>ve</span>
+                <Link
+                  href="ayditlatma-metni-"
+                  className="text-blue-600 hover:underline"
+                >
+                  Aydınlatma Metni'ni
+                </Link>
+                <span>okudum, onaylıyorum.</span>
+              </div>
+            </div>
+
             <Button
               onClick={handleRegister}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-medium rounded-lg transition-colors"
             >
               Kayıt Ol
             </Button>
-            <label className="block text-sm font-medium text-gray-700">
-              Zaten Hesabınız var mı ?
-            </label>
-            <Button
-              onClick={navigateLogin}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Giriş Yap
-            </Button>
+
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span className="text-gray-600">Zaten hesabınız var mı?</span>
+              <button
+                onClick={navigateLogin}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Giriş Yap
+              </button>
+            </div>
           </CardFooter>
         </Card>
       </div>
+
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -334,7 +312,7 @@ const Register = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme="light"
       />
     </div>
   );

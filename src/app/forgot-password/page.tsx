@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 export default function ForgotPassword() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -204,61 +211,150 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-screen gap-4">
-      <img
-        className="absolute inset-0 w-full h-full object-cover opacity-50 z-[-1]"
-        src="login-teacher-student.webp"
-      />
-      <div className="flex flex-col rounded-md bg-gray-500 gap-5 p-5 items-center text-center justify-center">
-        <h2 className="text-xl font-bold text-white">Şifre Sıfırlama</h2>
-        {!isVerified ? (
-          <>
-            <Input
-              className="w-15"
-              type="email"
-              placeholder="E-posta adresinizi girin"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isCodeSent}
-            />
-            <Button onClick={sendMail} disabled={isCodeSent}>
-              Kod Gönder
-            </Button>
-            {isCodeSent && (
-              <div className="flex flex-col items-center gap-2">
-                <p>{timer} saniye içinde kodu girin</p>
-                <Input
-                  type="text"
-                  placeholder="Gönderilen kodu girin"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
-                <Button onClick={verifyCode}>Doğrula</Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="flex items-center justify-center h-screen px-4">
+        {/* Arkaplan resmi için düzeltilmiş CSS */}
+        <div className="fixed top-0 left-0 w-full h-full">
+          <img
+            className="w-full h-full object-cover opacity-50"
+            src="/login-teacher-student.webp"
+            alt="Background"
+          />
+        </div>
+
+        {/* Card */}
+        <Card className="w-full max-w-md bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_35px_rgb(0,0,0,0.16)] transition-shadow duration-300 border-0">
+          <CardHeader className="space-y-4 pb-6">
+            <div className="flex justify-center">
+              <img src="/logo.png" alt="Logo" className="h-16 w-auto" />
+            </div>
+            <h1 className="text-2xl font-semibold text-center text-gray-800">
+              Şifre Sıfırlama
+            </h1>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {!isVerified ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    E-Posta Adresi
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="ornek@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isCodeSent}
+                    className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <Button
+                  onClick={sendMail}
+                  disabled={isCodeSent}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-medium rounded-lg transition-colors"
+                >
+                  Kod Gönder
+                </Button>
+
+                {isCodeSent && (
+                  <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <div className="text-center">
+                      <span className="text-sm font-medium text-gray-700">
+                        {timer} saniye içinde kodu girin
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="code"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        Doğrulama Kodu
+                      </Label>
+                      <Input
+                        id="code"
+                        type="text"
+                        placeholder="6 haneli kodu girin"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-center text-lg tracking-widest"
+                        maxLength={6}
+                      />
+                    </div>
+                    <Button
+                      onClick={verifyCode}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-medium rounded-lg transition-colors"
+                    >
+                      Doğrula
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="newPassword"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Yeni Şifre
+                  </Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Yeni Şifre Tekrar
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <Button
+                  onClick={resetPassword}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-medium rounded-lg transition-colors"
+                >
+                  Şifreyi Güncelle
+                </Button>
               </div>
             )}
-          </>
-        ) : (
-          <>
-            <Input
-              className="w-15"
-              type="password"
-              placeholder="Yeni Şifre"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            <Input
-              className="w-15"
-              type="password"
-              placeholder="Yeni Şifre Tekrar"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <Button onClick={resetPassword}>Şifreyi Güncelle</Button>
-          </>
-        )}
+          </CardContent>
+
+          <CardFooter className="flex justify-center pt-2">
+            <Button
+              variant="link"
+              onClick={() => router.push("/login")}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              Giriş sayfasına dön
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
+
       <ToastContainer
-        position="top-right"
+        position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -267,7 +363,7 @@ export default function ForgotPassword() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme="light"
       />
     </div>
   );
