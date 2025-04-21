@@ -309,35 +309,51 @@ export default function Folders() {
   };
 
   return (
-    <div className="h-5/6">
-      <div className="flex p-1 justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
         <img
-          className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
+          className="w-full h-full object-cover opacity-30"
           src="bg-anaekran.jpg"
+          alt="background"
         />
-        <div className="flex gap-2 p-1 w-1/2 align-top">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Klasör Arayın..."
-          />
-          <img src="search.svg" alt="ara" width="25" height="25" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 p-4 space-y-6">
+        {/* Search Bar and Add Folder */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
+          <div className="relative w-full sm:w-2/3">
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Klasör veya dosya arayın..."
+              className="pl-10 pr-4 w-full"
+            />
+            <img
+              src="search.svg"
+              alt="ara"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+            />
+          </div>
           <AddFolder />
         </div>
-      </div>
-      {filteredFolders !== undefined &&
-        filteredFolders !== null &&
-        filteredFolders.map((folder, index) => {
-          return (
-            <Card key={index} className=" m-3 border-black">
+
+        {/* Folders Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto">
+          {filteredFolders?.map((folder, index) => (
+            <Card
+              key={index}
+              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            >
               <CardHeader>
-                <div className="flex w-full justify-between items-center text-center gap-1 bg-slate-300 p-1 rounded-md">
-                  <div className="flex gap-1 items-center">
-                    <h2 className="text-xl font-semibold rounded-md p-1">
+                <div className="flex flex-row justify-between items-center gap-2 bg-slate-100 p-3 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 min-w-0">
+                    <h2 className="text-lg font-semibold text-gray-800 truncate">
                       {folder.folder_name}
                     </h2>
-                    <p className="text-sm text-gray-500 ml-auto">
+                    <p className="text-xs text-gray-500 whitespace-nowrap">
                       {new Date(folder.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -345,65 +361,81 @@ export default function Folders() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="m-0 p-0 bg-slate-300"
+                        className="hover:bg-slate-200 shrink-0"
                       >
-                        <img src="threeDots.svg" alt="Menü" />
+                        <img
+                          src="threeDots.svg"
+                          alt="Menü"
+                          className="h-5 w-5"
+                        />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="p-2 w-48">
+                    <DropdownMenuContent align="end" className="w-72">
                       <DropdownMenuItem
-                        onClick={() => {
-                          router.push("excel-upload");
-                        }}
-                        className="text-black hover:bg-green-500 hover:text-white bg-slate-300 m-1"
+                        onClick={() => router.push("excel-upload")}
+                        className="text-green-600 hover:bg-green-500 hover:text-white"
                       >
                         Dosya Yükle
                       </DropdownMenuItem>
-                      {isEditing ? (
-                        <div className="flex items-center gap-2 p-2">
-                          <Input
-                            value={folder.folder_name}
-                            onChange={(e) => {
-                              e.preventDefault();
-                              const newName = e.target.value;
-                              setFolders((prevFolders) =>
-                                prevFolders.map((f) =>
-                                  f._id === folder._id
-                                    ? { ...f, folder_name: newName }
-                                    : f
-                                )
-                              );
-                            }}
-                            className="h-8 text-sm"
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              handleUpdateFolders(
-                                folder._id,
-                                folder.folder_name
-                              );
-                            }}
-                          >
-                            Kaydet
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          className=" hover:bg-green-500 hover:text-white bg-slate-300 m-1 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsEditing(true);
-                          }}
-                        >
-                          İsmi Düzenle
+
+                      <DropdownMenuItem
+                        onClick={() => setIsEditing(true)}
+                        className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                      >
+                        İsmi Düzenle
+                      </DropdownMenuItem>
+
+                      {isEditing && (
+                        <div className="p-2 border-t">
+                          <div className="flex flex-col gap-2">
+                            <Input
+                              value={folder.folder_name}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                const newName = e.target.value;
+                                setFolders((prevFolders) =>
+                                  prevFolders.map((f) =>
+                                    f._id === folder._id
+                                      ? { ...f, folder_name: newName }
+                                      : f
+                                  )
+                                );
+                              }}
+                              className="h-8 text-sm"
+                              autoFocus
+                            />
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setIsEditing(false)}
+                                className="text-gray-600"
+                              >
+                                İptal
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  handleUpdateFolders(
+                                    folder._id,
+                                    folder.folder_name
+                                  );
+                                  setIsEditing(false);
+                                }}
+                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                Kaydet
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       )}
+
                       <DropdownMenuItem
                         onClick={() => handleDeleteFolders(folder._id)}
-                        className="text-red-500 hover:bg-red-500 hover:text-white bg-slate-300 m-1"
+                        className="text-red-600 hover:bg-red-500 hover:text-white"
                       >
                         Klasörü Sil
                       </DropdownMenuItem>
@@ -411,46 +443,33 @@ export default function Folders() {
                   </DropdownMenu>
                 </div>
               </CardHeader>
+
               <CardContent>
-                <ul className="space-y-2 m-3">
+                <ul className="space-y-3">
                   {excels
-                    .filter((excel) => excel.folder_id === folder._id) // Sadece eşleşenleri al
+                    .filter((excel) => excel.folder_id === folder._id)
                     .map((excel) => (
                       <li
                         key={excel._id}
-                        className="flex justify-between items-center"
+                        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-3 hover:bg-gray-50 rounded-lg border border-gray-100"
                       >
-                        <div>
-                          <span className="font-medium text-blue-700">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-medium text-blue-600 break-all">
                             {excel.file_name}
                           </span>
-                          <span className="text-sm text-gray-400 ml-2">
+                          <span className="text-xs text-gray-400">
                             {new Date(excel.created_at).toLocaleString()}
                           </span>
                         </div>
-                        <TooltipProvider>
-                          <div className="flex gap-1">
+
+                        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                          <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="bg-blue-500 text-white"
-                                  onClick={() => handleUpdate(excel._id)}
-                                >
-                                  Düzenle
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Excel Dosyanızı Düzenleyebilirsiniz
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-green-500 text-white"
+                                  className="bg-green-500 hover:bg-green-600 text-white w-[80px]"
                                   onClick={() => handleRaports(excel._id)}
                                 >
                                   Raporlar
@@ -461,12 +480,29 @@ export default function Folders() {
                                 Görebilirsiniz
                               </TooltipContent>
                             </Tooltip>
+
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="bg-red-500 text-white"
+                                  className="bg-blue-500 hover:bg-blue-600 text-white w-[80px]"
+                                  onClick={() => handleUpdate(excel._id)}
+                                >
+                                  Düzenle
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Excel Dosyanızı Düzenleyebilirsiniz
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-red-500 hover:bg-red-600 text-white w-[80px]"
                                   onClick={() => handleDeleteExcel(excel._id)}
                                 >
                                   Sil
@@ -476,15 +512,17 @@ export default function Folders() {
                                 Excel Dosyanızı Silebilirsiniz
                               </TooltipContent>
                             </Tooltip>
-                          </div>
-                        </TooltipProvider>
+                          </TooltipProvider>
+                        </div>
                       </li>
                     ))}
                 </ul>
               </CardContent>
             </Card>
-          );
-        })}
+          ))}
+        </div>
+      </div>
+
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
