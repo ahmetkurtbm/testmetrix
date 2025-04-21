@@ -187,82 +187,120 @@ const ExcelUpdate = () => {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <img
-        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
-        src="bg-anaekran2.jpg"
-      />
-      <div className="w-full flex justify-between bg-slate-300 p-3 rounded-md">
-        <div>
-          <h1 className="text-2xl font-semibold mb-4">{data?.file_name}</h1>
-          <h4 className="text-sm font-semibold mb-4 text-gray-400">
-            {data?.created_at}
-          </h4>
-        </div>
-        <div className="flex gap-3 ">
-          <ComboboxDemo
-            folderId={folderId}
-            setFolderId={setFolderId}
-          ></ComboboxDemo>
-          <div>
-            <Input value={fileName} onChange={handleFileNameChange} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-sm"></div>
+        <img
+          className="w-full h-full object-cover opacity-30"
+          src="bg-anaekran.jpg"
+          alt="background"
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 space-y-6 max-w-[1400px] mx-auto">
+        {/* Header Section */}
+        <div className="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold text-gray-800">
+                {data?.file_name}
+              </h1>
+              <p className="text-sm text-gray-500">
+                Oluşturulma: {new Date(data?.created_at || "").toLocaleString()}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <ComboboxDemo folderId={folderId} setFolderId={setFolderId} />
+              <div className="flex-1 sm:flex-none">
+                <Input
+                  value={fileName}
+                  onChange={handleFileNameChange}
+                  className="border-gray-200 focus:ring-blue-500"
+                  placeholder="Dosya adı"
+                />
+              </div>
+              <Button
+                onClick={handleUpdate}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              >
+                Değişiklikleri Kaydet
+              </Button>
+            </div>
           </div>
-          <Button onClick={handleUpdate}>Değişiklikleri Kaydet</Button>
+        </div>
+
+        {/* Table Section */}
+        <div className="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-16rem)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th
+                    key="0"
+                    className="p-4 text-left font-semibold text-gray-700 text-sm sticky top-0 bg-gray-50/95 backdrop-blur-sm"
+                  >
+                    {data?.file_data[0][0]}
+                  </th>
+                  {data?.file_data[0]?.slice(1).map((header, index) => (
+                    <th
+                      key={index + 1}
+                      className="p-4 text-left font-semibold text-gray-700 text-sm sticky top-0 bg-gray-50/95 backdrop-blur-sm"
+                    >
+                      M {index + 1} : {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {selectedValues.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    className="border-b border-gray-100 hover:bg-gray-50/50"
+                  >
+                    {row.map((cell, cellIndex) => (
+                      <td key={cellIndex} className="p-4">
+                        {cellIndex === 0 ? (
+                          <span className="text-sm text-gray-600 font-medium">
+                            {cell}
+                          </span>
+                        ) : (
+                          <Select
+                            value={cell || ""}
+                            onValueChange={(newValue) =>
+                              handleSelectChange(rowIndex, cellIndex, newValue)
+                            }
+                          >
+                            <SelectTrigger className="w-32 p-2 text-sm border-gray-200 hover:border-gray-300 focus:ring-blue-500">
+                              <SelectValue placeholder="Seçiniz" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["A", "B", "C", "D", "E", "Boş"].map(
+                                (option, index) => (
+                                  <SelectItem
+                                    key={index}
+                                    value={option}
+                                    className="text-sm"
+                                  >
+                                    {option}
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div className="overflow-x-auto max-w-full max-h-[36rem] overflow-y-auto bg-slate-300 p-4 rounded-md">
-        <table className="border-collapse border border-gray-200 w-full">
-          <thead>
-            <tr className="bg-gray-100">
-              {data?.file_data[0]?.map((header, index) => (
-                <th
-                  key={index}
-                  className="p-4 text-left font-medium text-gray-700 text-xs"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {selectedValues.map((row, rowIndex) => (
-              <tr key={rowIndex} className="border-t">
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="p-4">
-                    {cellIndex === 0 ? (
-                      <span className="text-gray-600 text-xs">{cell}</span>
-                    ) : (
-                      <Select
-                        value={cell || ""}
-                        onValueChange={(newValue) =>
-                          handleSelectChange(rowIndex, cellIndex, newValue)
-                        }
-                      >
-                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md text-xs">
-                          <SelectValue placeholder="Seçiniz" />
-                        </SelectTrigger>
-                        <SelectContent className="text-xs">
-                          {["A", "B", "C", "D", "E", "Boş"].map(
-                            (option, index) => (
-                              <SelectItem
-                                className="text-xs"
-                                key={index}
-                                value={option}
-                              >
-                                {option}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -273,7 +311,7 @@ const ExcelUpdate = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme="light"
       />
     </div>
   );

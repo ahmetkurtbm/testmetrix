@@ -212,7 +212,7 @@ const ExcelUploadPage = () => {
         <div className="w-1/2 flex items-center justify-center">
           <img
             className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
-            src="bg-anaekran2.jpg"
+            src="bg-anaekran.jpg"
           />
           <div className="animate-scale-in">
             <img src="excel.svg" alt="Excel Logo" className="w-320 h-320" />
