@@ -196,14 +196,6 @@ function calculateSkewness(scores: any) {
     ) / n
   );
 
-  // const skewness =
-  //   (n / ((n - 1) * (n - 2))) *
-  //   scores.reduce(
-  //     (sum: any, score: any) =>
-  //       sum + Math.pow((score - mean) / standardDeviation, 3),
-  //     0
-  //   );
-
   const skewness =
     scores.reduce((sum: number, score: number) => {
       return sum + Math.pow(score - mean, 3);
@@ -1159,168 +1151,202 @@ const ExcelReports = () => {
   };
 
   return (
-    <div className="max-h-5/6">
-      <img
-        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
-        src="bg-anaekran2.jpg"
-      />
-      <h2 className="text-3xl font-semibold text-center p-1 m-1 text-green-500">
-        Veri Raporları
-      </h2>
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <img
+          className="w-full h-full object-cover opacity-20"
+          src="bg-anaekran.jpg"
+          alt="background"
+        />
+      </div>
 
-      <div className="p-1 flex gap-1 justify-center">
-        {/* Sol Taraftaki Excelleri İndirme Alanı */}
-        <div className="flex-col gap-1 p-1 bg-slate-500 rounded-md w-1/4">
-          {/* Student Analysis */}
-          <div className="m-3">
-            <StudentAnalysis
-              studentNames={studentNames!}
-              scores={scores}
-              numberOfQuestions={numberOfQuestions!}
-              tScore={tScores}
-              zScore={zScores}
-              succesRates={ranks}
-            />
-          </div>
+      {/* Content */}
+      <div className="relative z-10 h-full p-4">
+        {/* <h2 className="text-3xl font-bold text-center mb-4 text-white">
+          Veri Raporları
+        </h2> */}
 
-          {/* Question Analysis */}
-          <div className="m-3">
-            <QuestionAnalysis
-              correctCount={correctCount}
-              percentageMap={percentageMapPerQuestion}
-              itemVariance={variancePerItem}
-              itemStd={stdDevPerItem}
-              itemDifficulty={difficultyIndex}
-              itemRbis={rbisIndex}
-              itemPrbis={prbisIndex}
-              item27={discriminationIndex}
-              itemReliability={reliabilityIndex}
-            />
-          </div>
-
-          <div className="m-3">
-            <TestAnalysis
-              studentCount={numberOfStudents!}
-              questionCount={numberOfQuestions!}
-              scores={scores}
-              points={poitns}
-              mean={average}
-              median={median}
-              mode={mode}
-              range={range}
-              stdDeviation={standardDeviation}
-              variance={variance}
-              kr20={kr20}
-              kr21={kr21}
-              skewness={skewness}
-              kurtosis={kurtosis}
-              coefficientVariation={relativeCoefficientOfVariation}
-            />
-          </div>
-
-          <div className="m-3">
-            <OptionAnalysis
-              data={optionCounts}
-              scores={scores}
-              studentAnswers={studentAnswers}
-            />
-          </div>
-
-          <div className="m-3">
-            <StudentAnswers
-              studentNames={studentNames!}
-              studentAnswers={studentAnswers!}
-              answerKey={answerKey!}
-              scores={scores}
-            />
-          </div>
-
-          <div className="m-3">
-            <StudentAnswers01
-              studentNames={studentNames!}
-              studentAnswers01={studentAnswer01}
-              answerKey={answerKey!}
-              scores={scores}
-            />
-          </div>
-
-          <div className="m-3">
-            <TestResults
-              studentNames={studentNames!}
-              scores={scores}
-              maxScore={maxScore}
-              minScore={minScore}
-              average={average}
-              standardDeviation={standardDeviation}
-              frequencyTable={frekansTable}
-              median={median}
-              mode={mode}
-              kr20={kr20}
-              successRate={successRate}
-              varyans={variance}
-              kurtosis={kurtosis}
-              skewness={skewness}
-            />
-          </div>
-        </div>
-
-        {/* Orta Taraftaki Grafikler Gösterme Alanı */}
-        <div className="flex-col gap-1 p-2 rounded-md w-1/2">
-          <p className="text-white text-center p-2">Grafikler</p>
-          <div className="flex gap-1">
-            <ComboboxForData
-              value={selectedGraficsData}
-              setValue={setSelectedGraficsData}
-            />
-            <ComboboxForGrafic
-              value={selectedGrafic}
-              setValue={setSelectedGrafic}
-            />
-          </div>
-          <div className="w-full h-full">{renderChart()}</div>
-        </div>
-
-        {/* Sağ Taraftaki Genel Verileri Gösterme Alanı */}
-        <div className="flex flex-col gap-2 p-6 rounded-lg bg-gradient-to-r from-blue-400 to-indigo-500 shadow-xl w-1/4">
-          {[
-            { label: "Öğrenci Sayısı", value: numberOfStudents },
-            { label: "Madde Sayısı", value: numberOfQuestions },
-            { label: "Ortalama Puan", value: average.toFixed(2) },
-            { label: "Standart Sapma", value: standardDeviation.toFixed(2) },
-            { label: "Varyans", value: variance.toFixed(2) },
-            { label: "Ortanca (Median)", value: median },
-            { label: "Mod", value: mode.length > 0 ? mode.join(", ") : "----" },
-            { label: "Maksimum Puan", value: maxScore },
-            { label: "Ranj (Range)", value: range },
-            {
-              label: "Çarpıklık Katsayısı (Skewness)",
-              value: skewness.toFixed(2),
-            },
-            {
-              label: "Basıklık Katsayısı (Kurtosis)",
-              value: kurtosis.toFixed(2),
-            },
-            {
-              label: "Puanların Başarı Yüzdesi",
-              value: `${successRate.toFixed(2)}%`,
-            },
-            { label: "KR-20 Güvenirlik Katsayısı", value: kr20.toFixed(2) },
-            { label: "KR-21 Güvenirlik Katsayısı", value: kr21.toFixed(2) },
-            {
-              label: "Bağıl Değişkenlik Katsayısı",
-              value: relativeCoefficientOfVariation.toFixed(2),
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-[auto_1fr] items-center w-full text-white text-lg"
-            >
-              <strong className="whitespace-nowrap">{item.label}:</strong>
-              <span className="ml-2 text-right">{item.value}</span>
+        <div className="flex gap-4 h-[calc(100%-4rem)]">
+          {/* Left Panel - Downloads */}
+          <div className="w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-3">
+              <div className="space-y-2">
+                {[
+                  {
+                    component: (
+                      <StudentAnalysis
+                        studentNames={studentNames!}
+                        scores={scores}
+                        numberOfQuestions={numberOfQuestions!}
+                        tScore={tScores}
+                        zScore={zScores}
+                        succesRates={ranks}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <QuestionAnalysis
+                        correctCount={correctCount}
+                        percentageMap={percentageMapPerQuestion}
+                        itemVariance={variancePerItem}
+                        itemStd={stdDevPerItem}
+                        itemDifficulty={difficultyIndex}
+                        itemRbis={rbisIndex}
+                        itemPrbis={prbisIndex}
+                        item27={discriminationIndex}
+                        itemReliability={reliabilityIndex}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <TestAnalysis
+                        studentCount={numberOfStudents!}
+                        questionCount={numberOfQuestions!}
+                        scores={scores}
+                        points={poitns}
+                        mean={average}
+                        median={median}
+                        mode={mode}
+                        range={range}
+                        stdDeviation={standardDeviation}
+                        variance={variance}
+                        kr20={kr20}
+                        kr21={kr21}
+                        skewness={skewness}
+                        kurtosis={kurtosis}
+                        coefficientVariation={relativeCoefficientOfVariation}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <OptionAnalysis
+                        data={optionCounts}
+                        scores={scores}
+                        studentAnswers={studentAnswers}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <StudentAnswers
+                        studentNames={studentNames!}
+                        studentAnswers={studentAnswers!}
+                        answerKey={answerKey!}
+                        scores={scores}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <StudentAnswers01
+                        studentNames={studentNames!}
+                        studentAnswers01={studentAnswer01}
+                        answerKey={answerKey!}
+                        scores={scores}
+                      />
+                    ),
+                  },
+                  {
+                    component: (
+                      <TestResults
+                        studentNames={studentNames!}
+                        scores={scores}
+                        maxScore={maxScore}
+                        minScore={minScore}
+                        average={average}
+                        standardDeviation={standardDeviation}
+                        frequencyTable={frekansTable}
+                        median={median}
+                        mode={mode}
+                        kr20={kr20}
+                        successRate={successRate}
+                        varyans={variance}
+                        kurtosis={kurtosis}
+                        skewness={skewness}
+                      />
+                    ),
+                  },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-colors"
+                  >
+                    {item.component}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Center Panel - Charts */}
+          <div className="w-1/2 bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 flex flex-col">
+            <div className="flex gap-4 mb-4 shrink-0">
+              <ComboboxForData
+                value={selectedGraficsData}
+                setValue={setSelectedGraficsData}
+              />
+              <ComboboxForGrafic
+                value={selectedGrafic}
+                setValue={setSelectedGrafic}
+              />
+            </div>
+            <div className="flex-1 min-h-0 bg-slate-900/50 rounded-lg p-4">
+              {renderChart()}
+            </div>
+          </div>
+
+          {/* Right Panel - Stats */}
+          <div className="w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-4">
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { label: "Öğrenci Sayısı", value: numberOfStudents },
+                  { label: "Madde Sayısı", value: numberOfQuestions },
+                  { label: "Ortalama Puan", value: average.toFixed(2) },
+                  {
+                    label: "Standart Sapma",
+                    value: standardDeviation.toFixed(2),
+                  },
+                  { label: "Varyans", value: variance.toFixed(2) },
+                  { label: "Ortanca (Median)", value: median },
+                  { label: "Maksimum Puan", value: maxScore },
+                  { label: "Ranj (Range)", value: range },
+                  { label: "KR-20", value: kr20.toFixed(2) },
+                  { label: "KR-21", value: kr21.toFixed(2) },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors"
+                  >
+                    <div className="text-sm text-gray-300">{item.label}</div>
+                    <div className="text-lg font-semibold text-white">
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={true}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };
