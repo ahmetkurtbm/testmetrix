@@ -12,19 +12,52 @@ import { Svg, Circle, G, Path, Text as SvgText } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 
-// Google Fonts'tan bir font ekleme
-// Font.register({
-//   family: "Roboto",
-//   fonts: [
-//     {
-//       src: "fonts.ttf",
-//     }, // Regular
-//     {
-//       src: "fonts2.ttf",
-//       fontWeight: "bold",
-//     }, // Bold
-//   ],
-// });
+// Font tanımlamasını güncelle
+Font.register({
+  family: "Roboto",
+  fonts: [
+    {
+      src: "https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf",
+      fontWeight: "normal",
+    },
+    {
+      src: "https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAw.ttf",
+      fontWeight: "bold",
+    },
+  ],
+});
+
+// Türkçe metinler için sabitler
+const TEXTS = {
+  header: "Test ve Madde İstatistikleri Öğretmen Raporu",
+  testInfo: {
+    title: "Test Bilgileri",
+    headers: ["Öğretmen", "Okul", "Test Adı", "Sınıf", "Konu", "Test Tarihi"],
+  },
+  statistics: {
+    title: "Test İstatistikleri",
+    headers: [
+      "Öğrenci Sayısı",
+      "En Yüksek Puan",
+      "En Düşük Puan",
+      "Ortalama",
+      "Standart Sapma",
+      "Varyans",
+      "Ortanca",
+      "Mod",
+      "Başarı Yüzdesi",
+      "Çarpıklık Katsayısı",
+      "Basıklık Katsayısı",
+      "Kr-20 Güvenirlik Katsayısı",
+    ],
+  },
+  charts: {
+    successRate: "Başarı Yüzdesi",
+    frequencyTable: "Frekans Tablosu",
+    studentScores: "Öğrenci Puanları",
+    tableHeaders: ["Puan", "F", "%"],
+  },
+};
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -41,21 +74,23 @@ const getColor = (index: number) => colors[index % colors.length];
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    // fontFamily: "Roboto",
-    backgroundColor: "#f8f9fa",
+    fontFamily: "Roboto",
+    backgroundColor: "#ffffff",
   },
   header: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: "center",
-    color: "#333",
-    borderWidth: 1,
+    color: "#1a365d",
+    padding: 10,
+    backgroundColor: "#f8fafc",
+    borderRadius: 5,
   },
   section: {
     marginBottom: 15,
     padding: 10,
-    backgroundColor: "#e2e8f0", // Açık gri arka plan
+    backgroundColor: "#e2e8f0",
     borderRadius: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -112,8 +147,8 @@ const styles = StyleSheet.create({
   tableHeader: {
     fontSize: 9,
     flex: 1,
-    backgroundColor: "#4a5568", // Koyu gri arka plan
-    color: "#fff", // Beyaz yazı rengi
+    backgroundColor: "#4a5568",
+    color: "#fff",
     padding: 2,
     textAlign: "center",
     fontWeight: "bold",
@@ -123,8 +158,8 @@ const styles = StyleSheet.create({
   tableHeaderFreq: {
     fontSize: 6,
     flex: 1,
-    backgroundColor: "#4a5568", // Koyu gri arka plan
-    color: "#fff", // Beyaz yazı rengi
+    backgroundColor: "#4a5568",
+    color: "#fff",
     padding: 2,
     textAlign: "center",
     fontWeight: "bold",
@@ -138,10 +173,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRightWidth: 1,
     borderRightColor: "#000",
-    backgroundColor: "#e2e8f0", // Açık gri arka plan
+    backgroundColor: "#e2e8f0",
   },
   lastCell: {
-    borderRightWidth: 0, // Son hücrenin sağ çizgisini kaldır
+    borderRightWidth: 0,
   },
   tableCellFreq: {
     fontSize: 6,
@@ -150,7 +185,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRightWidth: 1,
     borderRightColor: "#000",
-    backgroundColor: "#e2e8f0", // Açık gri arka plan
+    backgroundColor: "#e2e8f0",
   },
   chartContainer: {
     marginTop: 2,
@@ -188,14 +223,13 @@ const styles = StyleSheet.create({
     minWidth: 50,
     position: "absolute",
     bottom: -50,
-    left: "50%",
-    transform: "translateX(-15%) rotate(-90deg)", // Çapraz hizala
+    transform: "translateX(-15%) rotate(-90deg)",
     fontSize: 8,
     color: "#fff",
-    whiteSpace: "nowrap", // Metni tek satırda tut
+    whiteSpace: "nowrap",
     overflowWrap: "normal",
     wordWrap: "normal",
-    transformOrigin: "0 0", // Dönüş merkezini ayarla
+    transformOrigin: "0 0",
   },
   barValue: {
     position: "absolute",
@@ -231,30 +265,15 @@ const styles = StyleSheet.create({
   pieChart: {},
   pieSlice: {
     padding: 10,
-    width: 100, // Sabit genişlik
-    height: 100, // Sabit yükseklik
+    width: 100,
+    height: 100,
     backgroundColor: getRandomColor(),
-    borderRadius: 100, // Yüzde yerine sabit bir değer kullanın
+    borderRadius: 100,
   },
   pieLabel: {
-    // minWidth: 50,
-    // position: "absolute",
-    // bottom: -50,
-    // left: "50%",
-    // transform: "translateX(-15%) rotate(-90deg)", // Çapraz hizala
-    // fontSize: 8,
-    // whiteSpace: "nowrap", // Metni tek satırda tut
-    // overflowWrap: "normal",
-    // wordWrap: "normal",
-    // transformOrigin: "0 0", // Dönüş merkezini ayarla
     color: "#000",
   },
   pieValue: {
-    // position: "absolute",
-    // top: -8,
-    // left: "50%",
-    // transform: "translateX(-5%)",
-    // fontSize: 5,
     color: "#000",
   },
 });
@@ -263,6 +282,7 @@ const styles = StyleSheet.create({
 interface BarData {
   label: string;
   value: number;
+  displayValue?: string; // Opsiyonel displayValue ekle
 }
 
 // Veri yapısını tanımlama
@@ -281,81 +301,101 @@ interface PieChartProps {
   data: PieData[];
 }
 
-// Çubuk grafik bileşeni
-const BarChart: React.FC<BarChartProps> = ({ data }) => (
-  <View style={styles.barChart}>
-    {data.map((item, index) => (
-      <View
-        key={index}
-        style={[
-          styles.bar,
-          { height: `${item.value}%`, backgroundColor: getRandomColor() },
-        ]}
-      >
-        <Text style={styles.barValue}>{item.value}%</Text> {/* Değer */}
-        <Text style={styles.barLabel}>{item.label}</Text> {/* Etiket */}
-      </View>
-    ))}
-  </View>
-);
+// Geliştirilmiş BarChart bileşeni
+const BarChart: React.FC<BarChartProps> = ({ data }) => {
+  const maxValue = Math.max(...data.map((item) => item.value));
+  return (
+    <View style={[styles.barChart, { height: 200, padding: 10 }]}>
+      {data.map((item, index) => {
+        const heightPercentage = (item.value / maxValue) * 100;
+        return (
+          <View
+            key={index}
+            style={[
+              styles.bar,
+              {
+                height: `${heightPercentage}%`,
+                backgroundColor: getColor(index),
+                minWidth: 20,
+                maxWidth: 40,
+              },
+            ]}
+          >
+            <Text style={[styles.barValue, { color: "#fff", fontSize: 8 }]}>
+              {item.displayValue || item.value}{" "}
+              {/* displayValue varsa onu, yoksa value'yu göster */}
+            </Text>
+            <Text
+              style={[
+                styles.barLabel,
+                {
+                  bottom: -25,
+                  transform: "rotate(-45deg)",
+                  fontSize: 6,
+                  color: "#fff",
+                },
+              ]}
+            >
+              {item.label}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
 
+// Geliştirilmiş PieChart bileşeni
 const PieChart: React.FC<PieChartProps> = ({ data }) => {
   const total = data.reduce((sum, item) => sum + parseFloat(item.value), 0);
   let startAngle = 0;
 
   return (
-    <Svg width={200} height={200}>
-      <G transform="translate(100, 100)">
+    <Svg width={250} height={250}>
+      <G transform="translate(125, 125)">
         {data.map((item, index) => {
-          const angle = (parseFloat(item.value) / total) * 360;
+          const percentage = (parseFloat(item.value) / total) * 100;
+          const angle = (percentage / 100) * 360;
           const endAngle = startAngle + angle;
           const largeArcFlag = angle > 180 ? 1 : 0;
 
-          const x1 = Math.cos((startAngle * Math.PI) / 180) * 50;
-          const y1 = Math.sin((startAngle * Math.PI) / 180) * 50;
-          const x2 = Math.cos((endAngle * Math.PI) / 180) * 50;
-          const y2 = Math.sin((endAngle * Math.PI) / 180) * 50;
+          const radius = 80;
+          const x1 = Math.cos((startAngle * Math.PI) / 180) * radius;
+          const y1 = Math.sin((startAngle * Math.PI) / 180) * radius;
+          const x2 = Math.cos((endAngle * Math.PI) / 180) * radius;
+          const y2 = Math.sin((endAngle * Math.PI) / 180) * radius;
+
+          const labelRadius = radius * 1.2;
+          const midAngle = startAngle + angle / 2;
+          const labelX = Math.cos((midAngle * Math.PI) / 180) * labelRadius;
+          const labelY = Math.sin((midAngle * Math.PI) / 180) * labelRadius;
 
           const path = `
             M 0 0
             L ${x1} ${y1}
-            A 50 50 0 ${largeArcFlag} 1 ${x2} ${y2}
+            A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
             Z
           `;
-
-          // Dilimin orta açısını hesapla
-          const middleAngle = startAngle + angle / 2;
-
-          // Metin konumunu orta açıya göre ayarla
-          const textX = Math.cos((middleAngle * Math.PI) / 180) * 30; // 30, dairenin yarıçapından daha küçük bir değer
-          const textY = Math.sin((middleAngle * Math.PI) / 180) * 30; // 30, dairenin yarıçapından daha küçük bir değer
 
           startAngle = endAngle;
 
           return (
             <G key={index}>
-              <Path d={path} fill={getColor(index)} />
-              {/* Label değerleri dairenin dışına yerleştir */}
+              <Path
+                d={path}
+                fill={getColor(index)}
+                stroke="#fff"
+                strokeWidth={1}
+              />
               <SvgText
-                x={x1 * 1.2}
-                y={y1 * 1.2}
-                fill="#000"
-                font-size={8}
+                x={labelX}
+                y={labelY}
+                fill="#333"
+                fontSize={8}
                 textAnchor="middle"
-                dominantBaseline="middle"
+                alignmentBaseline="middle"
               >
-                {item.label}
-              </SvgText>
-              {/* Value değerleri dilimlerin ortasına yerleştir */}
-              <SvgText
-                x={textX}
-                y={textY}
-                fill="#000"
-                font-size={8}
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {item.value}%
+                {`${item.label} (${percentage.toFixed(1)}%)`}
               </SvgText>
             </G>
           );
@@ -376,7 +416,7 @@ interface TestData {
   highestScore: number;
   lowestScore: number;
   meanScore: number;
-  stdDeviation: number; // number olarak kalmalı
+  stdDeviation: number;
   frequencyTable: { score: number; frequency: number }[];
   median: number;
   mode: number[];
@@ -384,20 +424,20 @@ interface TestData {
   skewness: number;
   kurtosis: number;
   successRate: number;
-  varyans: number; // number olarak kalmalı
+  varyans: number;
 }
 
 interface TestResultsPDFProps {
   data: TestData;
   scores: number[];
-  studentNames: string[]; // studentNames için tür belirtin
+  studentNames: string[];
   maxScore: number;
   minScore: number;
   average: number;
   standardDeviation: number;
-  frequencyTable: { score: number; frequency: number }[]; // frequencyTable için tür belirtin
+  frequencyTable: { score: number; frequency: number }[];
   median: number;
-  mode: number[]; // mode için tür belirtin
+  mode: number[];
   kr20: number;
   skewness: number;
   kurtosis: number;
@@ -418,17 +458,16 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   kr20,
   frequencyTable,
 }) => {
-  // studentNames ve scores dizilerini birleştirerek grafik için uygun veri yapısını oluştur
   const barData = studentNames.map((name, index) => ({
     label: name,
     value: scores[index],
+    displayValue: `%${scores[index].toFixed(0)}`, // Yüzde işareti ve tam sayı formatı
   }));
 
   interface ScoreCounts {
     [key: number]: number;
   }
 
-  // Puanların tekrar sayısını hesapla
   const scoreCounts = scores.reduce((acc: ScoreCounts, score) => {
     acc[score] = (acc[score] || 0) + 1;
     return acc;
@@ -441,55 +480,41 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
     value:
       ((scoreCounts[parseInt(score, 10)] / totalScores) * 100)
         .toFixed(2)
-        .toString() + "%", // Yüzde olarak hesapla
+        .toString() + "%",
   }));
 
-  const X3 =
+  const dagilimTipi =
     skewness === 0
-      ? "normal dağilim"
+      ? "normal dağılım"
       : skewness > 0
-      ? "saga carpik"
-      : "sola carpik";
+      ? "sağa çarpık"
+      : "sola çarpık";
 
-  const X5 =
-    X3 === "normal dağilim"
-      ? "Normal dagilim, merkezi egilim olculerinin birbirine yakin ciktigi durumda ortaya cikar. Carpiklik katsayisi (-1, +1) araliginda oldugundan dagilimin normalden cok uzaklasmadigi varsayilabilir. Grubun aritmetik ortalama cevresinden yigildigi ve cok dusuk ve cok yuksek puanlarda daha az ogrencinin yer aldigi soylenebilir. "
-      : X3 === "saga carpik"
-      ? "Saga carpik dagilim, Mod<Ortanca<Aritmetik Ortalama oldugu durumda veriler sol tarafa yani dusuk puanlara yigildiginda ortaya cikar. Simetriklik bozulmus ve verilerin yaridan fazlasi aritmetik ortalamanin altinda kalmistir. Bir basari testinde sorularin zor oldugu ya da grubun gorece basarisiz oldugu seklinde yorumlanabilir. "
-      : "Sola carpik dagilim, Aritmetik Ortalama<Ortanca<Mod oldugu durumda veriler sag tarafa yani yuksek puanlara yigildiginda ortaya cikar. Simetriklik bozulmus ve verilerin yaridan fazlasi aritmetik ortalamanin ustunde kalmistir. Bir basari testinde sorularin kolay oldugu ya da grubun gorece basarili oldugu seklinde yorumlanabilir. ";
-  const X6 = ((standardDeviation / average) * 100).toFixed(2);
-
-  const X7 = X3 === "normal dağilim" ? "heterojen" : "homojen";
-
-  const X8 = skewness < 1.5 && skewness > -1.5 ? average : median;
-
-  const X9 = skewness > 0 ? "üstünde" : "altinda";
-
-  const X10 = kr20;
-
-  const X11 = kr20 > 0.7 ? "yeterli" : "yetersiz";
-
-  const X12 =
-    kr20 > 0.7
-      ? "Bu durumda testin güvenirliği yeterli kabul edilebilir."
-      : "Bu durumda testin güvenirliği yetersiz kabul edilebilir.";
+  const dagilimAciklamasi =
+    skewness === 0
+      ? `Normal dağılım, merkezi eğilim ölçülerinin birbirine yakın çıktığı durumda ortaya çıkar. 
+         Çarpıklık katsayısı (-1, +1) aralığında olduğundan dağılımın normalden çok uzaklaşmadığı varsayılabilir. 
+         Grubun aritmetik ortalama çevresinden yığıldığı ve çok düşük ve çok yüksek puanlarda daha az öğrencinin yer aldığı söylenebilir.`
+      : skewness > 0
+      ? `Sağa çarpık dağılım, Mod<Ortanca<Aritmetik Ortalama olduğu durumda veriler sol tarafa yani düşük puanlara yığıldığında ortaya çıkar. 
+         Simetriklik bozulmuş ve verilerin yarıdan fazlası aritmetik ortalamanın altında kalmıştır. 
+         Bir başarı testinde soruların zor olduğu ya da grubun görece başarısız olduğu şeklinde yorumlanabilir.`
+      : `Sola çarpık dağılım, Aritmetik Ortalama<Ortanca<Mod olduğu durumda veriler sağ tarafa yani yüksek puanlara yığıldığında ortaya çıkar. 
+         Simetriklik bozulmuş ve verilerin yarıdan fazlası aritmetik ortalamanın üstünde kalmıştır. 
+         Bir başarı testinde soruların kolay olduğu ya da grubun görece başarılı olduğu şeklinde yorumlanabilir.`;
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>
-          {/* 📊 */}
-          Test ve Madde Istatistikleri Ogretmen Raporu
-        </Text>
+        <Text style={styles.header}>{TEXTS.header}</Text>
         <View style={styles.section}>
-          <Text style={styles.boldText}>Test Bilgileri</Text>
+          <Text style={styles.boldText}>{TEXTS.testInfo.title}</Text>
           <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>Ogretmen</Text>
-            <Text style={styles.tableHeader}>Okul</Text>
-            <Text style={styles.tableHeader}>Test Adi</Text>
-            <Text style={styles.tableHeader}>Sinif</Text>
-            <Text style={styles.tableHeader}>Konu</Text>
-            <Text style={styles.tableHeader}>Test Tarihi</Text>
+            {TEXTS.testInfo.headers.map((header, index) => (
+              <Text key={index} style={styles.tableHeader}>
+                {header}
+              </Text>
+            ))}
           </View>
           <View style={styles.tableRow}>
             <Text style={styles.tableCell}>{data.teacher}</Text>
@@ -502,18 +527,14 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         </View>
         <View style={styles.divider} />
         <View style={styles.section}>
-          <Text style={styles.boldText}>
-            {/*📈 */}
-            Test Istatistikleri
-          </Text>
+          <Text style={styles.boldText}>{TEXTS.statistics.title}</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.tableHeader}>Ogrenci Sayisi</Text>
-              <Text style={styles.tableHeader}>En Yüksek Puan</Text>
-              <Text style={styles.tableHeader}>En Düsük Puan</Text>
-              <Text style={styles.tableHeader}>Ortalama</Text>
-              <Text style={styles.tableHeader}>Standart Sapma</Text>
-              <Text style={styles.tableHeader}>Varyans</Text>
+              {TEXTS.statistics.headers.slice(0, 6).map((header, index) => (
+                <Text key={index} style={styles.tableHeader}>
+                  {header}
+                </Text>
+              ))}
             </View>
             <View style={styles.tableRow}>
               <Text style={styles.tableCell}>{data.studentCount}</Text>
@@ -526,16 +547,15 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
           </View>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <Text style={styles.tableHeader}>Ortanca</Text>
-              <Text style={styles.tableHeader}>Mod</Text>
-              <Text style={styles.tableHeader}>Basari Yüzdesi</Text>
-              <Text style={styles.tableHeader}>Çarpiklik Katsayisi</Text>
-              <Text style={styles.tableHeader}>Basiklik Katsayisi</Text>
-              <Text style={styles.tableHeader}>Kr-20 Güvenirlik Katsayisi</Text>
+              {TEXTS.statistics.headers.slice(6).map((header, index) => (
+                <Text key={index} style={styles.tableHeader}>
+                  {header}
+                </Text>
+              ))}
             </View>
             <View style={styles.tableRow}>
               <Text style={styles.tableCell}>{data.median}</Text>
-              <Text style={styles.tableCell}>{data.mode.join(", ")}</Text>{" "}
+              <Text style={styles.tableCell}>{data.mode.join(", ")}</Text>
               <Text style={styles.tableCell}>{data.successRate}</Text>
               <Text style={styles.tableCell}>{data.skewness}</Text>
               <Text style={styles.tableCell}>{data.kurtosis}</Text>
@@ -545,34 +565,52 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         </View>
         <View style={styles.section}>
           <Text style={styles.p}>
-            Testten en dusuk {minScore} puan, en yuksek {maxScore} puan
-            alinmistir. Puanlara iliskin dagilim {X3} olarak elde edilmistir.
-            {X5}.Bagil degiskenlik katsayisi {X6} bulunmustur. Grubun {X7}
-            oldugu belirlenmistir. Bagil degiskenlik katsayisin gore gruplar
-            karsilastirilabilir. Carpiklik ve basiklik katsayisi dikkate
-            alindiginda grubun yigilma noktasini belirlemek amaciyla merkezi
-            egilim olcusu olarak {X8} kullanilmasi onerilmektedir. Grubun
-            yaridan fazlasi aritmetik ortalamanin {X9} yer almaktadir. Testten
-            elde edilen puanlara ait guvenirlik katsayisi {X10} olarak
-            bulunmustur. Bu katsayisinin {X11} oldugu soylenebilir. {X12}.
+            {`Testten en düşük ${minScore} puan, en yüksek ${maxScore} puan alınmıştır. 
+            Puanlara ilişkin dağılım ${dagilimTipi} olarak elde edilmiştir. 
+            ${dagilimAciklamasi}
+            Bağıl değişkenlik katsayısı ${(
+              (standardDeviation / average) *
+              100
+            ).toFixed(2)} bulunmuştur. 
+            Grubun ${
+              dagilimTipi === "normal dağılım" ? "heterojen" : "homojen"
+            } olduğu belirlenmiştir. 
+            Çarpıklık ve basıklık katsayısı dikkate alındığında grubun yığılma noktasını belirlemek amacıyla 
+            merkezi eğilim ölçüsü olarak ${
+              skewness < 1.5 && skewness > -1.5 ? average : median
+            } kullanılması önerilmektedir. 
+            Grubun yarıdan fazlası aritmetik ortalamanın ${
+              skewness > 0 ? "üstünde" : "altında"
+            } yer almaktadır. 
+            Testten elde edilen puanlara ait güvenirlik katsayısı ${kr20} olarak bulunmuştur. 
+            Bu katsayısının ${
+              kr20 > 0.7 ? "yeterli" : "yetersiz"
+            } olduğu söylenebilir. 
+            ${
+              kr20 > 0.7
+                ? "Bu durumda testin güvenirliği yeterli kabul edilebilir."
+                : "Bu durumda testin güvenirliği yetersiz kabul edilebilir."
+            }`}
           </Text>
         </View>
-
         <View style={styles.divider} />
         <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Basari Yüzdesi</Text>
+          <Text style={styles.chartTitle}>{TEXTS.charts.successRate}</Text>
           <BarChart data={barData} />
         </View>
-
         <View style={styles.divider} />
         <View style={styles.bottomSection}>
           <View style={styles.freq}>
-            <Text style={styles.boldTextPie}>Freakans Tablosu</Text>
+            <Text style={styles.boldTextPie}>
+              {TEXTS.charts.frequencyTable}
+            </Text>
             <View style={styles.table}>
               <View style={styles.tableRowFreq}>
-                <Text style={styles.tableHeaderFreq}>Puan</Text>
-                <Text style={styles.tableHeaderFreq}>F</Text>
-                <Text style={styles.tableHeaderFreq}>%</Text>
+                {TEXTS.charts.tableHeaders.map((header, index) => (
+                  <Text key={index} style={styles.tableHeaderFreq}>
+                    {header}
+                  </Text>
+                ))}
               </View>
               {Object.entries(frequencyTable).map(([value, index]) => (
                 <View key={value} style={styles.tableRow}>
@@ -584,7 +622,7 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
             </View>
           </View>
           <View style={styles.pie}>
-            <Text style={styles.boldTextPie}>Ogrenci Puanlari</Text>
+            <Text style={styles.boldTextPie}>{TEXTS.charts.studentScores}</Text>
             <PieChart data={pieData} />
           </View>
         </View>
