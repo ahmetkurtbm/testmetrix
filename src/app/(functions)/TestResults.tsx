@@ -391,9 +391,9 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
                 x={labelX}
                 y={labelY}
                 fill="#333"
-                fontSize={8}
+                font-size={8}
                 textAnchor="middle"
-                alignmentBaseline="middle"
+                alignment-baseline="middle"
               >
                 {`${item.label} (${percentage.toFixed(1)}%)`}
               </SvgText>
