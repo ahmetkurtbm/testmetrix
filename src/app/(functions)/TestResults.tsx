@@ -8,7 +8,14 @@ import {
   pdf,
   Font,
 } from "@react-pdf/renderer";
-import { Svg, Circle, G, Path, Text as SvgText } from "@react-pdf/renderer";
+import {
+  Svg,
+  Circle,
+  G,
+  Path,
+  Text as SvgText,
+  Line,
+} from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 
@@ -190,19 +197,16 @@ const styles = StyleSheet.create({
   chartContainer: {
     marginTop: 2,
     padding: 5,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    marginBottom: 10,
   },
   chartTitle: {
     textAlign: "center",
     fontSize: 14,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#fff",
+    marginBottom: 5,
+    color: "#1a365d",
   },
   barChart: {
     flexDirection: "row",
@@ -240,17 +244,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   bottomSection: {
-    marginBottom: 15,
     padding: 10,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#fff",
     borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 2,
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
   },
   freq: {
     height: 200,
@@ -258,9 +257,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#bbbbbb",
   },
   pie: {
-    height: 200,
+    height: 400,
     width: "100%",
-    backgroundColor: "#bbbbbb",
+    backgroundColor: "#fff",
+    marginTop: 20,
   },
   pieChart: {},
   pieSlice: {
@@ -276,7 +276,59 @@ const styles = StyleSheet.create({
   pieValue: {
     color: "#000",
   },
+  freqTable: {
+    marginTop: 10,
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  freqTableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#2c5282",
+    padding: 8,
+  },
+  freqTableHeaderCell: {
+    flex: 1,
+    color: "#ffffff",
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  freqTableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
+  },
+  freqTableCell: {
+    flex: 1,
+    padding: 8,
+    fontSize: 9,
+    textAlign: "center",
+    color: "#1a365d",
+  },
+  freqTableAltRow: {
+    backgroundColor: "#edf2f7",
+  },
 });
+
+// SVG Charts için yeni stiller ekle
+const svgStyles = {
+  chartContainer: {
+    margin: "20px 0",
+    padding: "10px",
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+  },
+  title: {
+    textAlign: "center",
+    fontSize: "14px",
+    fontWeight: "bold",
+    marginBottom: "10px",
+    color: "#2d3748",
+  },
+};
 
 // Veri yapısını tanımlama
 interface BarData {
@@ -304,95 +356,150 @@ interface PieChartProps {
 // Geliştirilmiş BarChart bileşeni
 const BarChart: React.FC<BarChartProps> = ({ data }) => {
   const maxValue = Math.max(...data.map((item) => item.value));
+  const width = 500;
+  const height = 250;
+  const padding = 40;
+  const barWidth = (width - 2 * padding) / data.length;
+
   return (
-    <View style={[styles.barChart, { height: 200, padding: 10 }]}>
+    <Svg width={width} height={height}>
+      {/* Grid çizgileri */}
+      {Array.from({ length: 11 }).map((_, i) => (
+        <Path
+          key={`grid-${i}`}
+          d={`M ${padding} ${
+            height - padding - (i * (height - 2 * padding)) / 10
+          } 
+             h ${width - 2 * padding}`}
+          stroke="#e2e8f0"
+          strokeWidth={0.5}
+        />
+      ))}
+
+      {/* Y ekseni değerleri */}
+      {Array.from({ length: 11 }).map((_, i) => (
+        <SvgText
+          key={`y-label-${i}`}
+          x={padding - 5}
+          y={height - padding - (i * (height - 2 * padding)) / 10}
+          textAnchor="end"
+          font-size={8}
+          fill="#4a5568"
+        >
+          {i * 10}
+        </SvgText>
+      ))}
+
+      {/* Barlar */}
       {data.map((item, index) => {
-        const heightPercentage = (item.value / maxValue) * 100;
+        const barHeight = (item.value / maxValue) * (height - 2 * padding);
+        const x = padding + index * barWidth;
+        const y = height - padding - barHeight;
+
         return (
-          <View
-            key={index}
-            style={[
-              styles.bar,
-              {
-                height: `${heightPercentage}%`,
-                backgroundColor: getColor(index),
-                minWidth: 20,
-                maxWidth: 40,
-              },
-            ]}
-          >
-            <Text style={[styles.barValue, { color: "#fff", fontSize: 8 }]}>
-              {item.displayValue || item.value}{" "}
-              {/* displayValue varsa onu, yoksa value'yu göster */}
-            </Text>
-            <Text
-              style={[
-                styles.barLabel,
-                {
-                  bottom: -25,
-                  transform: "rotate(-45deg)",
-                  fontSize: 6,
-                  color: "#fff",
-                },
-              ]}
+          <G key={index}>
+            <Path
+              d={`M ${x + 2} ${height - padding} v ${-barHeight}`}
+              stroke={getColor(index)}
+              strokeWidth={barWidth - 4}
+              strokeLinecap="round"
+            />
+            {/* Bar değeri */}
+            <SvgText
+              x={x + barWidth / 2}
+              y={y - 8}
+              font-size={8}
+              fill="#2d3748"
+              textAnchor="middle"
+            >
+              {item.displayValue || item.value}
+            </SvgText>
+            {/* X ekseni etiketi */}
+            <SvgText
+              x={x + barWidth / 2}
+              y={height - padding + 15}
+              font-size={6}
+              fill="#4a5568"
+              textAnchor="middle"
+              transform={`rotate(45, ${x + barWidth / 2}, ${
+                height - padding + 15
+              })`}
             >
               {item.label}
-            </Text>
-          </View>
+            </SvgText>
+          </G>
         );
       })}
-    </View>
+    </Svg>
   );
 };
 
 // Geliştirilmiş PieChart bileşeni
 const PieChart: React.FC<PieChartProps> = ({ data }) => {
-  const total = data.reduce((sum, item) => sum + parseFloat(item.value), 0);
+  const width = 500;
+  const height = 400;
+  const radius = Math.min(width, height) / 2.5;
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  let total = data.reduce((sum, item) => sum + parseFloat(item.value), 0);
   let startAngle = 0;
 
   return (
-    <Svg width={250} height={250}>
-      <G transform="translate(125, 125)">
+    <Svg width={width} height={height}>
+      <G transform={`translate(${centerX}, ${centerY})`}>
         {data.map((item, index) => {
           const percentage = (parseFloat(item.value) / total) * 100;
-          const angle = (percentage / 100) * 360;
+          const angle = (percentage / 100) * 2 * Math.PI;
           const endAngle = startAngle + angle;
-          const largeArcFlag = angle > 180 ? 1 : 0;
 
-          const radius = 80;
-          const x1 = Math.cos((startAngle * Math.PI) / 180) * radius;
-          const y1 = Math.sin((startAngle * Math.PI) / 180) * radius;
-          const x2 = Math.cos((endAngle * Math.PI) / 180) * radius;
-          const y2 = Math.sin((endAngle * Math.PI) / 180) * radius;
+          // Pie dilimi için path hesaplama
+          const x1 = radius * Math.cos(startAngle);
+          const y1 = radius * Math.sin(startAngle);
+          const x2 = radius * Math.cos(endAngle);
+          const y2 = radius * Math.sin(endAngle);
 
-          const labelRadius = radius * 1.2;
-          const midAngle = startAngle + angle / 2;
-          const labelX = Math.cos((midAngle * Math.PI) / 180) * labelRadius;
-          const labelY = Math.sin((midAngle * Math.PI) / 180) * labelRadius;
+          // Büyük yay bayrağı
+          const largeArcFlag = percentage > 50 ? 1 : 0;
 
-          const path = `
+          // Path string
+          const pathData = `
             M 0 0
             L ${x1} ${y1}
             A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
             Z
           `;
 
+          // Etiket pozisyonu
+          const labelAngle = startAngle + angle / 2;
+          const labelRadius = radius * 1.2;
+          const labelX = labelRadius * Math.cos(labelAngle);
+          const labelY = labelRadius * Math.sin(labelAngle);
+
           startAngle = endAngle;
 
           return (
             <G key={index}>
               <Path
-                d={path}
+                d={pathData}
                 fill={getColor(index)}
-                stroke="#fff"
+                stroke="#ffffff"
                 strokeWidth={1}
+              />
+              <Line
+                x1={x2}
+                y1={y2}
+                x2={labelX}
+                y2={labelY}
+                stroke="#4a5568"
+                strokeWidth={0.5}
               />
               <SvgText
                 x={labelX}
                 y={labelY}
-                fill="#333"
                 font-size={8}
-                textAnchor="middle"
+                fill="#2d3748"
+                textAnchor={labelX > 0 ? "start" : "end"}
                 alignment-baseline="middle"
               >
                 {`${item.label} (${percentage.toFixed(1)}%)`}
@@ -402,6 +509,73 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
         })}
       </G>
     </Svg>
+  );
+};
+
+// FrequencyTable interface'ini güncelle
+interface FrequencyData {
+  [key: number]: number[];
+}
+
+// FrequencyTableProps interface'ini güncelle
+interface FrequencyTableProps {
+  frequencyTable: FrequencyData;
+  totalScores: number;
+}
+
+// FrequencyTableSection bileşenini güncelle
+const FrequencyTableSection: React.FC<FrequencyTableProps> = ({
+  frequencyTable,
+  totalScores,
+}) => {
+  const tableData = Object.entries(frequencyTable)
+    .map(([_, row]) => {
+      const [score, freq, perc] = row; // Array destructuring ile değerleri al
+
+      // Calculate cumulative frequency
+      const cumFreq = Object.values(frequencyTable)
+        .filter((r) => r[0] >= score)
+        .reduce((sum, r) => sum + r[1], 0);
+
+      // Calculate cumulative percentage
+      const cumPerc = ((cumFreq / totalScores) * 100).toFixed(1);
+
+      return {
+        score,
+        freq,
+        perc,
+        cumFreq,
+        cumPerc,
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return (
+    <View break style={styles.freqTable}>
+      <Text style={styles.boldTextPie}>Frekans Dağılım Tablosu</Text>
+      <View style={styles.freqTableHeader}>
+        <Text style={styles.freqTableHeaderCell}>Puan</Text>
+        <Text style={styles.freqTableHeaderCell}>f</Text>
+        <Text style={styles.freqTableHeaderCell}>%</Text>
+        <Text style={styles.freqTableHeaderCell}>yf</Text>
+        <Text style={styles.freqTableHeaderCell}>y%</Text>
+      </View>
+      {tableData.map((row, index) => (
+        <View
+          key={`${row.score}-${index}`}
+          style={[
+            styles.freqTableRow,
+            { backgroundColor: index % 2 === 0 ? "#f8fafc" : "#edf2f7" },
+          ]}
+        >
+          <Text style={styles.freqTableCell}>{row.score}</Text>
+          <Text style={styles.freqTableCell}>{row.freq}</Text>
+          <Text style={styles.freqTableCell}>{row.perc.toFixed(2)}%</Text>
+          <Text style={styles.freqTableCell}>{row.cumFreq}</Text>
+          <Text style={styles.freqTableCell}>{row.cumPerc}%</Text>
+        </View>
+      ))}
+    </View>
   );
 };
 
@@ -417,7 +591,7 @@ interface TestData {
   lowestScore: number;
   meanScore: number;
   stdDeviation: number;
-  frequencyTable: { score: number; frequency: number }[];
+  frequencyTable: FrequencyData; // Değişti
   median: number;
   mode: number[];
   kr20: number;
@@ -435,7 +609,7 @@ interface TestResultsPDFProps {
   minScore: number;
   average: number;
   standardDeviation: number;
-  frequencyTable: { score: number; frequency: number }[];
+  frequencyTable: FrequencyData; // Değişti
   median: number;
   mode: number[];
   kr20: number;
@@ -594,38 +768,30 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
           </Text>
         </View>
         <View style={styles.divider} />
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>
+          Test Sonuç Grafikleri ve Frekans Dağılımı
+        </Text>
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>{TEXTS.charts.successRate}</Text>
-          <BarChart data={barData} />
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.bottomSection}>
-          <View style={styles.freq}>
-            <Text style={styles.boldTextPie}>
-              {TEXTS.charts.frequencyTable}
-            </Text>
-            <View style={styles.table}>
-              <View style={styles.tableRowFreq}>
-                {TEXTS.charts.tableHeaders.map((header, index) => (
-                  <Text key={index} style={styles.tableHeaderFreq}>
-                    {header}
-                  </Text>
-                ))}
-              </View>
-              {Object.entries(frequencyTable).map(([value, index]) => (
-                <View key={value} style={styles.tableRow}>
-                  <Text style={styles.tableCellFreq}>{value[0]}</Text>
-                  <Text style={styles.tableCellFreq}>{value[1]}</Text>
-                  <Text style={styles.tableCellFreq}>{value[2]}%</Text>
-                </View>
-              ))}
-            </View>
+          <View style={{ alignItems: "center" }}>
+            <BarChart data={barData} />
           </View>
+        </View>
+        <View style={styles.bottomSection}>
           <View style={styles.pie}>
             <Text style={styles.boldTextPie}>{TEXTS.charts.studentScores}</Text>
             <PieChart data={pieData} />
           </View>
         </View>
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>Frekans Dağılım Tablosu</Text>
+        <FrequencyTableSection
+          frequencyTable={frequencyTable}
+          totalScores={scores.length}
+        />
       </Page>
     </Document>
   );
