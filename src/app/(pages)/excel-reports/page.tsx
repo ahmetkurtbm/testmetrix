@@ -676,7 +676,7 @@ function calculateDiscriminationIndexForAll(
   return itemDiscriminations;
 }
 
-// Madde Güvenirlik İndeksi Hesaplama
+// Madde Güvenilirlik İndeksi Hesaplama
 function calculateReliabilityIndexForAll(studentAnswers: any, answerKey: any) {
   const itemVariances: any = calculateItemVarianceForAll(
     studentAnswers,
@@ -1151,7 +1151,7 @@ const ExcelReports = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
@@ -1163,15 +1163,11 @@ const ExcelReports = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full p-4">
-        {/* <h2 className="text-3xl font-bold text-center mb-4 text-white">
-          Veri Raporları
-        </h2> */}
-
-        <div className="flex gap-4 h-[calc(100%-4rem)]">
+      <div className="relative z-10 h-full p-2 sm:p-4">
+        <div className="flex flex-col lg:flex-row gap-4 min-h-screen">
           {/* Left Panel - Downloads */}
-          <div className="w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
-            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-3">
+          <div className="w-full lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-[400px] lg:h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-3">
               <div className="space-y-2">
                 {[
                   {
@@ -1268,6 +1264,7 @@ const ExcelReports = () => {
                         varyans={variance}
                         kurtosis={kurtosis}
                         skewness={skewness}
+                        correctCount={correctCount}
                       />
                     ),
                   },
@@ -1284,26 +1281,30 @@ const ExcelReports = () => {
           </div>
 
           {/* Center Panel - Charts */}
-          <div className="w-1/2 bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 flex flex-col">
-            <div className="flex gap-4 mb-4 shrink-0">
-              <ComboboxForData
-                value={selectedGraficsData}
-                setValue={setSelectedGraficsData}
-              />
-              <ComboboxForGrafic
-                value={selectedGrafic}
-                setValue={setSelectedGrafic}
-              />
+          <div className="w-full lg:w-1/2 bg-slate-800/80 backdrop-blur-sm rounded-xl p-2 sm:p-4 flex flex-col">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
+              <div className="w-full sm:w-1/2">
+                <ComboboxForData
+                  value={selectedGraficsData}
+                  setValue={setSelectedGraficsData}
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <ComboboxForGrafic
+                  value={selectedGrafic}
+                  setValue={setSelectedGrafic}
+                />
+              </div>
             </div>
-            <div className="flex-1 min-h-0 bg-slate-900/50 rounded-lg p-4">
+            <div className="flex-1 min-h-[500px] bg-slate-900/50 rounded-lg p-2 sm:p-4">
               {renderChart()}
             </div>
           </div>
 
           {/* Right Panel - Stats */}
-          <div className="w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
-            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-4">
-              <div className="grid grid-cols-1 gap-2">
+          <div className="w-full lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-[450px] lg:h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-4">
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
                 {[
                   { label: "Öğrenci Sayısı", value: numberOfStudents },
                   { label: "Madde Sayısı", value: numberOfQuestions },
@@ -1321,10 +1322,12 @@ const ExcelReports = () => {
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors"
+                    className="bg-white/10 p-2 sm:p-3 rounded-lg hover:bg-white/20 transition-colors"
                   >
-                    <div className="text-sm text-gray-300">{item.label}</div>
-                    <div className="text-lg font-semibold text-white">
+                    <div className="text-xs sm:text-sm text-gray-300">
+                      {item.label}
+                    </div>
+                    <div className="text-base sm:text-lg font-semibold text-white">
                       {item.value}
                     </div>
                   </div>
