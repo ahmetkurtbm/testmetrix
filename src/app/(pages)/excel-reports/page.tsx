@@ -1031,7 +1031,7 @@ const ExcelReports = () => {
   const [options, setOptions] = useState({
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: window.innerWidth < 640 ? "y" : "x", // indexAxisID yerine indexAxis kullanılmalı
+    // indexAxis: window.innerWidth < 640 ? "y" : "x", // indexAxisID yerine indexAxis kullanılmalı
     plugins: {
       legend: {
         display: true,
@@ -1082,7 +1082,7 @@ const ExcelReports = () => {
     const handleResize = () => {
       setOptions({
         ...options,
-        indexAxis: window.innerWidth < 640 ? "y" : "x", // Burayı da güncelle
+        // indexAxis: window.innerWidth < 640 ? "y" : "x", // Burayı da güncelle
       });
     };
 
