@@ -19,6 +19,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AddFolder from "@/app/(components)/AddFolder";
 import { ToastContainer, toast } from "react-toastify";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "react-beautiful-dnd";
+import type {
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+} from "react-beautiful-dnd";
 
 interface File {
   _id: string;
@@ -308,6 +319,36 @@ export default function Folders() {
     router.push(`/excel-reports?file-id=${fileId}`);
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(filteredFolders);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setFilteredFolders(items);
+    saveNewOrder(items);
+  };
+
+  const saveNewOrder = async (newOrder: FolderNames[]) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/update-folder-order`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ folders: newOrder }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to save folder order");
+      }
+    } catch (error) {
+      console.error("Error saving folder order:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Background */}
@@ -322,8 +363,8 @@ export default function Folders() {
       {/* Content */}
       <div className="relative z-10 p-4 space-y-6">
         {/* Search Bar and Add Folder */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
-          <div className="relative w-full sm:w-2/3">
+        <div className="flex flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
+          <div className="relative flex-1">
             <Input
               type="text"
               value={searchQuery}
@@ -337,190 +378,246 @@ export default function Folders() {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
             />
           </div>
-          <AddFolder />
+          <div className="shrink-0">
+            <AddFolder />
+          </div>
         </div>
 
-        {/* Folders Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto">
-          {filteredFolders?.map((folder, index) => (
-            <Card
-              key={index}
-              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <CardHeader>
-                <div className="flex flex-row justify-between items-center gap-2 bg-slate-100 p-3 rounded-lg">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 min-w-0">
-                    <h2 className="text-lg font-semibold text-gray-800 truncate">
-                      {folder.folder_name}
-                    </h2>
-                    <p className="text-xs text-gray-500 whitespace-nowrap">
-                      {new Date(folder.created_at).toLocaleString()}
-                    </p>
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:bg-slate-200 shrink-0"
+        {/* Updated Folders Grid with Drag and Drop */}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="folders" isDropDisabled={false}>
+            {(provided: DroppableProvided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto"
+              >
+                {filteredFolders?.map((folder, index) => (
+                  <Draggable
+                    key={folder._id}
+                    draggableId={folder._id}
+                    index={index}
+                  >
+                    {(
+                      dragProvided: DraggableProvided,
+                      snapshot: DraggableStateSnapshot
+                    ) => (
+                      <div
+                        ref={dragProvided.innerRef}
+                        {...dragProvided.draggableProps}
+                        {...dragProvided.dragHandleProps}
+                        className={`${snapshot.isDragging ? "opacity-50" : ""}`}
+                        style={dragProvided.draggableProps.style}
                       >
-                        <img
-                          src="threeDots.svg"
-                          alt="Menü"
-                          className="h-5 w-5"
-                        />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-72">
-                      <DropdownMenuItem
-                        onClick={() => router.push("excel-upload")}
-                        className="text-green-600 hover:bg-green-500 hover:text-white"
-                      >
-                        Dosya Yükle
-                      </DropdownMenuItem>
+                        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <CardHeader>
+                            <div className="flex flex-row justify-between items-center gap-2 bg-slate-100 p-3 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src="/grab.svg"
+                                  alt="Sırala"
+                                  className="w-5 h-5 cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity"
+                                />
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 min-w-0">
+                                  <h2 className="text-lg font-semibold text-gray-800 truncate">
+                                    {folder.folder_name}
+                                  </h2>
+                                  <p className="text-xs text-gray-500 whitespace-nowrap">
+                                    {new Date(
+                                      folder.created_at
+                                    ).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
 
-                      <DropdownMenuItem
-                        onClick={() => setIsEditing(true)}
-                        className="text-blue-600 hover:bg-blue-500 hover:text-white"
-                      >
-                        İsmi Düzenle
-                      </DropdownMenuItem>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="hover:bg-slate-200 shrink-0"
+                                  >
+                                    <img
+                                      src="threeDots.svg"
+                                      alt="Menü"
+                                      className="h-5 w-5"
+                                    />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-72"
+                                >
+                                  <DropdownMenuItem
+                                    onClick={() => router.push("excel-upload")}
+                                    className="text-green-600 hover:bg-green-500 hover:text-white"
+                                  >
+                                    Dosya Yükle
+                                  </DropdownMenuItem>
 
-                      {isEditing && (
-                        <div className="p-2 border-t">
-                          <div className="flex flex-col gap-2">
-                            <Input
-                              value={folder.folder_name}
-                              onChange={(e) => {
-                                e.preventDefault();
-                                const newName = e.target.value;
-                                setFolders((prevFolders) =>
-                                  prevFolders.map((f) =>
-                                    f._id === folder._id
-                                      ? { ...f, folder_name: newName }
-                                      : f
-                                  )
-                                );
-                              }}
-                              className="h-8 text-sm"
-                              autoFocus
-                            />
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setIsEditing(false)}
-                                className="text-gray-600"
-                              >
-                                İptal
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  handleUpdateFolders(
-                                    folder._id,
-                                    folder.folder_name
-                                  );
-                                  setIsEditing(false);
-                                }}
-                                className="bg-blue-500 hover:bg-blue-600 text-white"
-                              >
-                                Kaydet
-                              </Button>
+                                  <DropdownMenuItem
+                                    onClick={() => setIsEditing(true)}
+                                    className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                                  >
+                                    İsmi Düzenle
+                                  </DropdownMenuItem>
+
+                                  {isEditing && (
+                                    <div className="p-2 border-t">
+                                      <div className="flex flex-col gap-2">
+                                        <Input
+                                          value={folder.folder_name}
+                                          onChange={(e) => {
+                                            e.preventDefault();
+                                            const newName = e.target.value;
+                                            setFolders((prevFolders) =>
+                                              prevFolders.map((f) =>
+                                                f._id === folder._id
+                                                  ? {
+                                                      ...f,
+                                                      folder_name: newName,
+                                                    }
+                                                  : f
+                                              )
+                                            );
+                                          }}
+                                          className="h-8 text-sm"
+                                          autoFocus
+                                        />
+                                        <div className="flex gap-2 justify-end">
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setIsEditing(false)}
+                                            className="text-gray-600"
+                                          >
+                                            İptal
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => {
+                                              handleUpdateFolders(
+                                                folder._id,
+                                                folder.folder_name
+                                              );
+                                              setIsEditing(false);
+                                            }}
+                                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                                          >
+                                            Kaydet
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleDeleteFolders(folder._id)
+                                    }
+                                    className="text-red-600 hover:bg-red-500 hover:text-white"
+                                  >
+                                    Klasörü Sil
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                        </div>
-                      )}
+                          </CardHeader>
 
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteFolders(folder._id)}
-                        className="text-red-600 hover:bg-red-500 hover:text-white"
-                      >
-                        Klasörü Sil
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
+                          <CardContent>
+                            <ul className="space-y-3">
+                              {excels
+                                .filter(
+                                  (excel) => excel.folder_id === folder._id
+                                )
+                                .map((excel) => (
+                                  <li
+                                    key={excel._id}
+                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-3 hover:bg-gray-50 rounded-lg border border-gray-100"
+                                  >
+                                    <div className="flex flex-col gap-1">
+                                      <span className="font-medium text-blue-600 break-all">
+                                        {excel.file_name}
+                                      </span>
+                                      <span className="text-xs text-gray-400">
+                                        {new Date(
+                                          excel.created_at
+                                        ).toLocaleString()}
+                                      </span>
+                                    </div>
 
-              <CardContent>
-                <ul className="space-y-3">
-                  {excels
-                    .filter((excel) => excel.folder_id === folder._id)
-                    .map((excel) => (
-                      <li
-                        key={excel._id}
-                        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-3 hover:bg-gray-50 rounded-lg border border-gray-100"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium text-blue-600 break-all">
-                            {excel.file_name}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {new Date(excel.created_at).toLocaleString()}
-                          </span>
-                        </div>
+                                    <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="bg-green-500 hover:bg-green-600 text-white w-[80px]"
+                                              onClick={() =>
+                                                handleRaports(excel._id)
+                                              }
+                                            >
+                                              Raporlar
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Excel Dosyanızın Raporlarını ve
+                                            Grafiklerini Görebilirsiniz
+                                          </TooltipContent>
+                                        </Tooltip>
 
-                        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-green-500 hover:bg-green-600 text-white w-[80px]"
-                                  onClick={() => handleRaports(excel._id)}
-                                >
-                                  Raporlar
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Excel Dosyanızın Raporlarını ve Grafiklerini
-                                Görebilirsiniz
-                              </TooltipContent>
-                            </Tooltip>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="bg-blue-500 hover:bg-blue-600 text-white w-[80px]"
+                                              onClick={() =>
+                                                handleUpdate(excel._id)
+                                              }
+                                            >
+                                              Düzenle
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Excel Dosyanızı Düzenleyebilirsiniz
+                                          </TooltipContent>
+                                        </Tooltip>
 
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-blue-500 hover:bg-blue-600 text-white w-[80px]"
-                                  onClick={() => handleUpdate(excel._id)}
-                                >
-                                  Düzenle
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Excel Dosyanızı Düzenleyebilirsiniz
-                              </TooltipContent>
-                            </Tooltip>
-
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-red-500 hover:bg-red-600 text-white w-[80px]"
-                                  onClick={() => handleDeleteExcel(excel._id)}
-                                >
-                                  Sil
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Excel Dosyanızı Silebilirsiniz
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </li>
-                    ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="bg-red-500 hover:bg-red-600 text-white w-[80px]"
+                                              onClick={() =>
+                                                handleDeleteExcel(excel._id)
+                                              }
+                                            >
+                                              Sil
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Excel Dosyanızı Silebilirsiniz
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  </li>
+                                ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
 
       <ToastContainer

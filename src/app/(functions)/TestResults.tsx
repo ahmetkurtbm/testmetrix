@@ -859,9 +859,17 @@ const TestResults: React.FC<any> = ({
   };
 
   return (
-    <div>
-      <Button className="w-full" onClick={handleDownload}>
-        Test Sonuçları İndir <img src="download-icon.svg" />
+    <div className="space-y-2">
+      <Button
+        className="w-full flex justify-between items-center group"
+        onClick={handleDownload}
+      >
+        <span>Test Sonuçları (.pdf)</span>
+        <img
+          src="/download-icon.svg"
+          alt="İndir"
+          className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform"
+        />
       </Button>
     </div>
   );

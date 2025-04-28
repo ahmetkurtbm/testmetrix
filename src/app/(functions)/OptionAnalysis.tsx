@@ -184,8 +184,16 @@ const OptionAnalysis: React.FC<OptionAnalysisProps> = ({
 
   return (
     <div>
-      <Button className="w-full" onClick={handleDownload}>
-        Seçenek Analizi İndir <img src="download-icon.svg" />
+      <Button
+        className="w-full flex justify-between items-center group"
+        onClick={handleDownload}
+      >
+        <span>Seçenek Analizi (.xlsx)</span>
+        <img
+          src="/download-icon.svg"
+          alt="İndir"
+          className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform"
+        />
       </Button>
     </div>
   );

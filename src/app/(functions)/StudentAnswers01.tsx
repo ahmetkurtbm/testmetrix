@@ -123,9 +123,19 @@ const StudentAnswers01: React.FC<StudentAnswers01Props> = ({
   };
 
   return (
-    <Button className="w-full" onClick={handleDownload}>
-      0-1 Türünden Öğrenci Yanıtları İndir <img src="download-icon.svg" />
-    </Button>
+    <div>
+      <Button
+        className="w-full flex justify-between items-center group"
+        onClick={handleDownload}
+      >
+        <span>0-1 Öğrenci Cevapları (.xlsx)</span>
+        <img
+          src="/download-icon.svg"
+          alt="İndir"
+          className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform"
+        />
+      </Button>
+    </div>
   );
 };
 

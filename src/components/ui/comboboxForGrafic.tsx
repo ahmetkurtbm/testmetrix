@@ -46,8 +46,8 @@ export function ComboboxForGrafic({
   value,
   setValue,
 }: {
-  value: any;
-  setValue: any;
+  value: string;
+  setValue: (value: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -58,19 +58,21 @@ export function ComboboxForGrafic({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[24rem]"
+          className="w-full justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Grafik seçiniz..."}
-          <ChevronsUpDown className="opacity-50" />
+          <span className="truncate">
+            {value
+              ? frameworks.find((framework) => framework.value === value)?.label
+              : "Grafik seçiniz..."}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput placeholder="Grafik ara..." className="h-9" />
           <CommandList>
-            <CommandEmpty>grafik bulunamadı.</CommandEmpty>
+            <CommandEmpty>Grafik bulunamadı.</CommandEmpty>
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem
@@ -84,7 +86,7 @@ export function ComboboxForGrafic({
                   {framework.label}
                   <Check
                     className={cn(
-                      "ml-auto",
+                      "ml-auto h-4 w-4",
                       value === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />

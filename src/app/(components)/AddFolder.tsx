@@ -6,9 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ToastContainer, toast } from "react-toastify";
+import { FolderPlus } from "lucide-react";
 
 export default function FolderAdder() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -44,7 +48,24 @@ export default function FolderAdder() {
       theme: "dark",
     });
 
+  const emptyError = () =>
+    toast.warning("Klasör adı boş bırakılamaz!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
   const handleSave = async () => {
+    if (!folderName.trim()) {
+      emptyError();
+      return;
+    }
+
     try {
       const response = await fetch(`${BACKEND_URL}/upload-folder`, {
         method: "POST",
@@ -77,19 +98,31 @@ export default function FolderAdder() {
   };
 
   return (
-    <div className="flex gap-1">
-      <Button onClick={handleAddFolder}>Klasör Ekle</Button>
-
+    <div className="flex gap-1 rounded">
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogTrigger asChild onClick={() => setOpen(true)}>
+          <Button>
+            <FolderPlus className="w-4 h-4 mr-2" />
+            Klasör Ekle
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="w-[90vw] sm:max-w-[425px] p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Klasör İsmi Gir</DialogTitle>
+            <DialogTitle>Yeni Klasör Ekle</DialogTitle>
+            <DialogDescription>
+              Lütfen oluşturmak istediğiniz klasör adını giriniz.
+            </DialogDescription>
           </DialogHeader>
-          <Input
-            placeholder="Klasör adı..."
-            value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
-          />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Input
+                placeholder="Klasör adı..."
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                className="col-span-4"
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
               İptal

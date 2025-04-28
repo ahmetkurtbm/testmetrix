@@ -126,9 +126,19 @@ const StudentAnalysis: React.FC<StudentAnalysisProps> = ({
   };
 
   return (
-    <Button className="w-full" onClick={handleDownload}>
-      Öğrenci İstatistikleri İndir <img src="download-icon.svg" />
-    </Button>
+    <div>
+      <Button
+        className="w-full flex justify-between items-center group"
+        onClick={handleDownload}
+      >
+        <span>Öğrenci Analizi (.xlsx)</span>
+        <img
+          src="/download-icon.svg"
+          alt="İndir"
+          className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform"
+        />
+      </Button>
+    </div>
   );
 };
 

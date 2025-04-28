@@ -78,8 +78,8 @@ export function ComboboxForData({
   value,
   setValue,
 }: {
-  value: any;
-  setValue: any;
+  value: string;
+  setValue: (value: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -90,15 +90,17 @@ export function ComboboxForData({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[32rem]"
+          className="w-full justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Veri seçiniz..."}
-          <ChevronsUpDown className="opacity-50" />
+          <span className="truncate">
+            {value
+              ? frameworks.find((framework) => framework.value === value)?.label
+              : "Veri seçiniz..."}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput placeholder="Veri ara..." className="h-9" />
           <CommandList>
@@ -113,10 +115,10 @@ export function ComboboxForData({
                     setOpen(false);
                   }}
                 >
-                  {framework.label}
+                  <span className="truncate">{framework.label}</span>
                   <Check
                     className={cn(
-                      "ml-auto",
+                      "ml-auto h-4 w-4",
                       value === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />

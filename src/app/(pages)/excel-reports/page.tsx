@@ -1028,18 +1028,67 @@ const ExcelReports = () => {
     }
   };
 
+  const [options, setOptions] = useState({
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: window.innerWidth < 640 ? "y" : "x", // indexAxisID yerine indexAxis kullanılmalı
+    plugins: {
+      legend: {
+        display: true,
+        position: "top" as const,
+        labels: {
+          color: "#fff",
+          font: { size: 14 },
+        },
+      },
+      title: {
+        display: true,
+        text: `📊 ${selectedGraficsData}`,
+        color: "#fff",
+        font: { size: 20 },
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: "#333",
+        titleFont: { size: 16 },
+        bodyFont: { size: 14 },
+      },
+    },
+    scales: {
+      y: {
+        ticks: {
+          color: "#fff",
+          font: { size: 12 },
+          autoSkip: true,
+          maxRotation: window.innerWidth < 640 ? 0 : 45,
+          minRotation: 0,
+        },
+        grid: { color: "rgba(200, 200, 200, 0.2)" },
+      },
+      x: {
+        ticks: {
+          color: "#fff",
+          font: { size: 12 },
+          autoSkip: true,
+          maxRotation: window.innerWidth < 640 ? 0 : 45,
+        },
+        grid: { color: "rgba(200, 200, 200, 0.2)" },
+      },
+    },
+  });
+
+  // Resize listener'ı da güncellememiz gerekiyor
   useEffect(() => {
-    if (selectedGraficsData === "Öğrenci Puanlarının Frekansları") {
-      const freqData = calculateFrekans(scores);
-      setXValues(freqData.map(([_, count]) => count)); // 📌 X ekseni için frekansları al
-      setYValues(freqData.map(([score]) => "" + score)); // 📌 Y ekseni için puanları al
-    } else {
-      setXValues(getDataForPlot()); // 📌 Veriyi direkt X eksenine al
-      setYValues(
-        Array.from({ length: getDataForPlot().length }, (_, i) => i + 1) // 📌 Sıralamayı Y ekseni için kullan
-      );
-    }
-  }, [scores, selectedGraficsData]);
+    const handleResize = () => {
+      setOptions({
+        ...options,
+        indexAxis: window.innerWidth < 640 ? "y" : "x", // Burayı da güncelle
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [options]);
 
   const tempdata = getDataForPlot();
   const labelPrefix =
@@ -1094,46 +1143,6 @@ const ExcelReports = () => {
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-        position: "top" as const,
-        labels: {
-          color: "#fff",
-          font: { size: 14 },
-        },
-      },
-      title: {
-        display: true,
-        text: `📊 ${selectedGraficsData}`,
-        color: "#fff",
-        font: { size: 20 },
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: "#333",
-        titleFont: { size: 16 },
-        bodyFont: { size: 14 },
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: "#fff",
-          font: { size: 14 },
-          autoSkip: false,
-        },
-        grid: { color: "rgba(200, 200, 200, 0.2)" },
-      },
-      y: {
-        ticks: { color: "#fff", font: { size: 14 } },
-        grid: { color: "rgba(200, 200, 200, 0.2)" },
-      },
-    },
-  };
-
   // Seçilen grafik türüne göre bileşeni belirle
   const renderChart = () => {
     switch (selectedGrafic) {
@@ -1151,10 +1160,10 @@ const ExcelReports = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="h-screen overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
         <img
           className="w-full h-full object-cover opacity-20"
           src="bg-anaekran.jpg"
@@ -1164,10 +1173,56 @@ const ExcelReports = () => {
 
       {/* Content */}
       <div className="relative z-10 h-full p-2 sm:p-4">
-        <div className="flex flex-col lg:flex-row gap-4 min-h-screen">
-          {/* Left Panel - Downloads */}
-          <div className="w-full lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
-            <div className="h-[400px] lg:h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-3">
+        <div className="flex flex-col lg:flex-row gap-4 h-full">
+          {/* Stats Panel */}
+          <div className="w-full order-1 lg:order-3 lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-[320px] lg:h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-4">
+              {/* Add heading with same styling */}
+              <div className="mb-2 pb-1 border-b border-white/20">
+                <h2 className="text-xl font-bold text-center text-white">
+                  📈 Değerler
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-1">
+                {[
+                  { label: "Öğrenci Sayısı", value: numberOfStudents },
+                  { label: "Madde Sayısı", value: numberOfQuestions },
+                  { label: "Ortalama Puan", value: average.toFixed(2) },
+                  {
+                    label: "Standart Sapma",
+                    value: standardDeviation.toFixed(2),
+                  },
+                  { label: "Varyans", value: variance.toFixed(2) },
+                  { label: "Ortanca (Median)", value: median },
+                  { label: "Maksimum Puan", value: maxScore },
+                  { label: "Ranj (Range)", value: range },
+                  { label: "KR-20", value: kr20.toFixed(2) },
+                  { label: "KR-21", value: kr21.toFixed(2) },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white/10 p-1 sm:p-1 rounded-lg hover:bg-white/20 transition-colors"
+                  >
+                    <div className="text-xs sm:text-sm text-gray-300">
+                      {item.label}
+                    </div>
+                    <div className="text-base sm:text-lg font-semibold text-white">
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Downloads Panel */}
+          <div className="w-full order-2 lg:order-1 lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
+            <div className="h-[560px] lg:h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-3">
+              <div className="mb-2 pb-1 border-b border-white/20">
+                <h2 className="text-xl font-bold text-center text-white">
+                  📊 Raporlar
+                </h2>
+              </div>
               <div className="space-y-2">
                 {[
                   {
@@ -1280,59 +1335,26 @@ const ExcelReports = () => {
             </div>
           </div>
 
-          {/* Center Panel - Charts */}
-          <div className="w-full lg:w-1/2 bg-slate-800/80 backdrop-blur-sm rounded-xl p-2 sm:p-4 flex flex-col">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
-              <div className="w-full sm:w-1/2">
-                <ComboboxForData
-                  value={selectedGraficsData}
-                  setValue={setSelectedGraficsData}
-                />
-              </div>
-              <div className="w-full sm:w-1/2">
-                <ComboboxForGrafic
-                  value={selectedGrafic}
-                  setValue={setSelectedGrafic}
-                />
+          {/* Charts Panel */}
+          <div className="w-full order-3 lg:order-2 lg:w-1/2 bg-slate-800/80 backdrop-blur-sm rounded-xl p-2 sm:p-4 flex flex-col">
+            <div className="flex flex-col gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="w-full sm:w-1/2">
+                  <ComboboxForData
+                    value={selectedGraficsData}
+                    setValue={setSelectedGraficsData}
+                  />
+                </div>
+                <div className="w-full sm:w-1/2">
+                  <ComboboxForGrafic
+                    value={selectedGrafic}
+                    setValue={setSelectedGrafic}
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex-1 min-h-[500px] bg-slate-900/50 rounded-lg p-2 sm:p-4">
+            <div className="flex-1 min-h-[600px] lg:h-[calc(100vh-10rem)] bg-slate-900/50 rounded-lg p-2 sm:p-4">
               {renderChart()}
-            </div>
-          </div>
-
-          {/* Right Panel - Stats */}
-          <div className="w-full lg:w-1/4 bg-slate-800/80 backdrop-blur-sm rounded-xl">
-            <div className="h-[450px] lg:h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 sm:p-4">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                {[
-                  { label: "Öğrenci Sayısı", value: numberOfStudents },
-                  { label: "Madde Sayısı", value: numberOfQuestions },
-                  { label: "Ortalama Puan", value: average.toFixed(2) },
-                  {
-                    label: "Standart Sapma",
-                    value: standardDeviation.toFixed(2),
-                  },
-                  { label: "Varyans", value: variance.toFixed(2) },
-                  { label: "Ortanca (Median)", value: median },
-                  { label: "Maksimum Puan", value: maxScore },
-                  { label: "Ranj (Range)", value: range },
-                  { label: "KR-20", value: kr20.toFixed(2) },
-                  { label: "KR-21", value: kr21.toFixed(2) },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white/10 p-2 sm:p-3 rounded-lg hover:bg-white/20 transition-colors"
-                  >
-                    <div className="text-xs sm:text-sm text-gray-300">
-                      {item.label}
-                    </div>
-                    <div className="text-base sm:text-lg font-semibold text-white">
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>

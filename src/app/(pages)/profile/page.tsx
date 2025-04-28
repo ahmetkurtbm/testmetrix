@@ -229,7 +229,7 @@ const Profile = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { label: "İsim", name: "name" },
               { label: "Soyisim", name: "surname" },
