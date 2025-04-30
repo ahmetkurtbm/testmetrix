@@ -195,11 +195,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#e2e8f0",
   },
   chartContainer: {
-    marginTop: 2,
-    padding: 5,
-    backgroundColor: "#fff",
+    margin: "10px auto",
+    padding: 10,
+    backgroundColor: "#ffffff",
     borderRadius: 5,
-    marginBottom: 10,
+    width: "95%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   chartTitle: {
     textAlign: "center",
@@ -257,10 +260,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#bbbbbb",
   },
   pie: {
-    height: 400,
     width: "100%",
+    height: "90%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#fff",
-    marginTop: 20,
   },
   pieChart: {},
   pieSlice: {
@@ -277,8 +282,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   freqTable: {
-    marginTop: 10,
-    width: "100%",
+    width: "90%",
     backgroundColor: "#ffffff",
     borderRadius: 8,
     overflow: "hidden",
@@ -310,6 +314,26 @@ const styles = StyleSheet.create({
   },
   freqTableAltRow: {
     backgroundColor: "#edf2f7",
+  },
+  // Add new styles for the info section
+  infoContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f8fafc",
+    borderRadius: 5,
+  },
+  infoTitle: {
+    fontSize: 14, // Increased from 12
+    fontWeight: "bold",
+    color: "#1a365d",
+    marginBottom: 8, // Increased from 5
+    textAlign: "center", // Added center alignment
+  },
+  infoText: {
+    fontSize: 12, // Increased from 10
+    color: "#4a5568",
+    marginBottom: 5, // Increased from 3
+    lineHeight: 1.4, // Added line height
   },
 });
 
@@ -355,90 +379,106 @@ interface PieChartProps {
 
 // Geliştirilmiş BarChart bileşeni
 const BarChart: React.FC<BarChartProps> = ({ data }) => {
-  const maxValue = Math.max(...data.map((item) => item.value));
-  const width = 500;
-  const height = 250;
-  const padding = 40;
+  const width = 600;
+  const height = 500;
+  const padding = 30;
   const barWidth = (width - 2 * padding) / data.length;
 
   return (
-    <Svg width={width} height={height}>
-      {/* Grid çizgileri */}
-      {Array.from({ length: 11 }).map((_, i) => (
-        <Path
-          key={`grid-${i}`}
-          d={`M ${padding} ${
-            height - padding - (i * (height - 2 * padding)) / 10
-          } 
-             h ${width - 2 * padding}`}
-          stroke="#e2e8f0"
-          strokeWidth={0.5}
-        />
-      ))}
+    <Svg width={height} height={width}>
+      <G transform={`translate(${height}, 0) rotate(90)`}>
+        {/* Grid lines */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <Path
+            key={`grid-${i}`}
+            d={`M ${padding} ${
+              height - padding - (i * (height - 2 * padding)) / 10
+            } 
+               h ${width - 2 * padding}`}
+            stroke="#e2e8f0"
+            strokeWidth={0.2}
+          />
+        ))}
+        {/* Y axis values */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <SvgText
+            key={`y-label-${i}`}
+            x={padding - 5}
+            y={height - padding - (i * (height - 2 * padding)) / 10}
+            textAnchor="end"
+            font-size={8}
+            fill="#4a5568"
+          >
+            {i * 10}
+          </SvgText>
+        ))}
+        {/* Bars and labels */}
+        {data.map((item, index) => {
+          const barHeight =
+            (item.value / Math.max(...data.map((item) => item.value))) *
+            (height - 2 * padding);
+          const x = padding + index * barWidth + 10;
+          const y = height - padding - barHeight;
 
-      {/* Y ekseni değerleri */}
-      {Array.from({ length: 11 }).map((_, i) => (
-        <SvgText
-          key={`y-label-${i}`}
-          x={padding - 5}
-          y={height - padding - (i * (height - 2 * padding)) / 10}
-          textAnchor="end"
-          font-size={8}
-          fill="#4a5568"
-        >
-          {i * 10}
-        </SvgText>
-      ))}
+          return (
+            <G key={index}>
+              {/* Bar */}
+              <Path
+                d={`M ${x + 2} ${height - padding} v ${-barHeight}`}
+                stroke={getColor(index)}
+                strokeWidth={barWidth - 8}
+                strokeLinecap="round"
+              />
 
-      {/* Barlar */}
-      {data.map((item, index) => {
-        const barHeight = (item.value / maxValue) * (height - 2 * padding);
-        const x = padding + index * barWidth;
-        const y = height - padding - barHeight;
+              {/* Value label - Fixed position and rotation */}
+              <SvgText
+                x={x + barWidth / 2 - 4}
+                y={y - 11}
+                font-size={8}
+                fill="#2d3748"
+                textAnchor="end"
+              >
+                {`%${item.value}`}
+              </SvgText>
 
-        return (
-          <G key={index}>
-            <Path
-              d={`M ${x + 2} ${height - padding} v ${-barHeight}`}
-              stroke={getColor(index)}
-              strokeWidth={barWidth - 4}
-              strokeLinecap="round"
-            />
-            {/* Bar değeri */}
-            <SvgText
-              x={x + barWidth / 2}
-              y={y - 8}
-              font-size={8}
-              fill="#2d3748"
-              textAnchor="middle"
-            >
-              {item.displayValue || item.value}
-            </SvgText>
-            {/* X ekseni etiketi */}
-            <SvgText
-              x={x + barWidth / 2}
-              y={height - padding + 15}
-              font-size={6}
-              fill="#4a5568"
-              textAnchor="middle"
-              transform={`rotate(45, ${x + barWidth / 2}, ${
-                height - padding + 15
-              })`}
-            >
-              {item.label}
-            </SvgText>
-          </G>
-        );
-      })}
+              {/* Student name */}
+              {/* <SvgText
+                x={x + barWidth - 20}
+                y={height - padding - 5}
+                fontSize={7}
+                fill="#4a5568"
+                transform={`rotate(-45, ${x + barWidth - 20}, ${
+                  height - padding - 5
+                })`} // Doğru merkez noktası
+                textAnchor="end"
+              >
+                {item.label}
+              </SvgText> */}
+              <SvgText
+                x={x + barWidth - 30}
+                y={height - padding - 5}
+                font-size={7}
+                fill="#4a5568"
+                // transform={`rotate(-45, ${x + barWidth - 20}, ${
+                //   height - padding - 5
+                // })`} // Doğru merkez noktası
+                // textAnchor="end"
+              >
+                {index + 1}.
+              </SvgText>
+            </G>
+          );
+        })}
+      </G>
     </Svg>
   );
 };
 
 // Geliştirilmiş PieChart bileşeni
 const PieChart: React.FC<PieChartProps> = ({ data }) => {
-  const width = 500;
-  const height = 400;
-  const radius = Math.min(width, height) / 2.5;
+  const width = 500; // Reduced width
+  const height = 400; // Square aspect ratio
+  const radius = Math.min(width, height) / 3;
   const centerX = width / 2;
   const centerY = height / 2;
 
@@ -500,7 +540,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
                 font-size={8}
                 fill="#2d3748"
                 textAnchor={labelX > 0 ? "start" : "end"}
-                alignment-baseline="middle"
+                alignment-Baseline="middle"
               >
                 {`${item.label} (${percentage.toFixed(1)}%)`}
               </SvgText>
@@ -631,6 +671,7 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   skewness,
   kr20,
   frequencyTable,
+  successRate,
 }) => {
   const barData = studentNames.map((name, index) => ({
     label: name,
@@ -679,6 +720,7 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
 
   return (
     <Document>
+      {/* First page remains the same */}
       <Page size="A4" style={styles.page}>
         <Text style={styles.header}>{TEXTS.header}</Text>
         <View style={styles.section}>
@@ -769,29 +811,60 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         </View>
         <View style={styles.divider} />
       </Page>
+
+      {/* Bar Chart page - Force landscape orientation */}
       <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>
-          Test Sonuç Grafikleri ve Frekans Dağılımı
-        </Text>
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>{TEXTS.charts.successRate}</Text>
-          <View style={{ alignItems: "center" }}>
-            <BarChart data={barData} />
-          </View>
+        <Text style={styles.header}>Öğrenci Başarı Grafiği</Text>
+        <View style={[styles.chartContainer, { height: "85%", margin: 10 }]}>
+          <BarChart data={barData} />
         </View>
-        <View style={styles.bottomSection}>
+      </Page>
+
+      {/* Pie Chart and Frequency Table on same page */}
+      <Page size="A4" style={styles.page}>
+        <View style={{ height: "60%" }}>
+          <Text style={styles.header}>Puan Dağılım Grafiği</Text>
           <View style={styles.pie}>
-            <Text style={styles.boldTextPie}>{TEXTS.charts.studentScores}</Text>
             <PieChart data={pieData} />
           </View>
         </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoTitle}>Daire Grafik</Text>
+          <Text style={styles.infoText}>
+            • Bu daire grafik, öğrencilerin aldıkları puanların dağılımını
+            göstermektedir.
+          </Text>
+          <Text style={styles.infoText}>
+            • Her dilim farklı bir puan değerini temsil eder ve yüzdelik olarak
+            gösterilmiştir.
+          </Text>
+          <Text style={styles.infoText}>
+            • En yüksek yüzdeye sahip dilim (
+            {Math.max(...pieData.map((d) => parseFloat(d.value)))}%), en çok
+            alınan puanı göstermektedir.
+          </Text>
+          <Text style={styles.infoText}>
+            • Ortalama puan: {average.toFixed(2)}
+          </Text>
+          <Text style={styles.infoText}>
+            • Puan aralığı: {minScore} - {maxScore}
+          </Text>
+          <Text style={styles.infoText}>
+            • Toplam öğrenci sayısı: {scores.length}
+          </Text>
+          <Text style={styles.infoText}>
+            • Başarı oranı: %{successRate.toFixed(2)}
+          </Text>
+        </View>
       </Page>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>Frekans Dağılım Tablosu</Text>
-        <FrequencyTableSection
-          frequencyTable={frequencyTable}
-          totalScores={scores.length}
-        />
+        <View style={{ height: "100%" }}>
+          <FrequencyTableSection
+            frequencyTable={frequencyTable}
+            totalScores={scores.length}
+          />
+        </View>
       </Page>
     </Document>
   );
