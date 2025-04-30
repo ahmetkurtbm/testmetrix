@@ -699,7 +699,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
             key={`y-label-${i}`}
             x={padding - 5}
             y={height - padding - (i * (height - 2 * padding)) / 10}
-            fontSize={8}
+            font-size={8}
             fill="#4a5568"
             textAnchor="end"
           >
@@ -738,7 +738,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
               <SvgText
                 x={x + barWidth / 2}
                 y={height - 10}
-                fontSize={8}
+                font-size={8}
                 fill="#4a5568"
                 textAnchor="middle"
               >
@@ -749,7 +749,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
               <SvgText
                 x={x + barWidth / 2}
                 y={y - barHeight - 10}
-                fontSize={8}
+                font-size={8}
                 fill="#1a365d"
                 textAnchor="middle"
               >
