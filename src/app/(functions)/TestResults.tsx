@@ -657,8 +657,220 @@ interface TestResultsPDFProps {
   kurtosis: number;
   successRate: number;
   varyans: number;
+  itemAnalysis: ItemAnalysis;
 }
 
+// Add new interface for item analysis
+interface ItemAnalysis {
+  difficulty: number[];
+  discrimination: number[];
+  correctProbability: number[]; // Eklendi
+}
+
+// Yeni CorrectProbabilityChart bileşeni
+const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
+  correctProbability,
+}) => {
+  const width = 600;
+  const height = 200;
+  const padding = 30;
+  const barWidth = (width - 2 * padding) / correctProbability.length;
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.boldText}>Doğru Yanıtlanma Olasılığı</Text>
+      <Svg width={width} height={height}>
+        {/* Grid lines */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <Path
+            key={`grid-${i}`}
+            d={`M ${padding} ${
+              height - padding - (i * (height - 2 * padding)) / 10
+            } 
+               h ${width - 2 * padding}`}
+            stroke="#e2e8f0"
+            strokeWidth={0.2}
+          />
+        ))}
+
+        {/* Y axis values */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <SvgText
+            key={`y-label-${i}`}
+            x={padding - 5}
+            y={height - padding - (i * (height - 2 * padding)) / 10}
+            fontSize={8}
+            fill="#4a5568"
+            textAnchor="end"
+          >
+            {i * 10}%
+          </SvgText>
+        ))}
+
+        {/* Bars */}
+        {correctProbability.map((prob, index) => {
+          const barHeight = (height - 2 * padding) * prob;
+          const x = padding + index * barWidth;
+          const y = height - padding;
+
+          return (
+            <G key={index}>
+              {/* Doğru yanıtlanma (Mavi) */}
+              <Path
+                d={`M ${x + 2} ${y} v ${-barHeight}`}
+                stroke="#1a365d"
+                strokeWidth={barWidth - 4}
+                strokeLinecap="round"
+              />
+              {/* Yanlış yanıtlanma (Kırmızı) */}
+              <Path
+                d={`M ${x + 2} ${y - barHeight} v ${-(
+                  height -
+                  2 * padding -
+                  barHeight
+                )}`}
+                stroke="#dc2626"
+                strokeWidth={barWidth - 4}
+                strokeLinecap="round"
+              />
+
+              {/* Madde numarası */}
+              <SvgText
+                x={x + barWidth / 2}
+                y={height - 10}
+                fontSize={8}
+                fill="#4a5568"
+                textAnchor="middle"
+              >
+                {`M${index + 1}`}
+              </SvgText>
+
+              {/* Yüzde değeri */}
+              <SvgText
+                x={x + barWidth / 2}
+                y={y - barHeight - 10}
+                fontSize={8}
+                fill="#1a365d"
+                textAnchor="middle"
+              >
+                {`%${(prob * 100).toFixed(0)}`}
+              </SvgText>
+            </G>
+          );
+        })}
+      </Svg>
+    </View>
+  );
+};
+
+// Add DifficultyLevelTable component
+const DifficultyLevelTable: React.FC<{ itemAnalysis: ItemAnalysis }> = ({
+  itemAnalysis,
+}) => {
+  const categories = itemAnalysis.difficulty.reduce(
+    (acc: any, diff, index) => {
+      const itemName = `M${index + 1}`;
+      if (diff >= 0.8) acc.veryEasy.push(itemName);
+      else if (diff >= 0.65) acc.easy.push(itemName);
+      else if (diff >= 0.35) acc.moderate.push(itemName);
+      else if (diff >= 0.2) acc.difficult.push(itemName);
+      else acc.veryDifficult.push(itemName);
+      return acc;
+    },
+    { veryEasy: [], easy: [], moderate: [], difficult: [], veryDifficult: [] }
+  );
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.boldText}>Madde Güçlük İndeksi Analizi</Text>
+      <View style={styles.table}>
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Ölçüt</Text>
+          <Text style={[styles.tableHeader, { flex: 2 }]}>Maddeler</Text>
+        </View>
+        {[
+          {
+            label: "Çok Kolay Maddeler (0.80-1.00)",
+            items: categories.veryEasy,
+          },
+          { label: "Kolay Maddeler (0.65-0.79)", items: categories.easy },
+          {
+            label: "Orta Güçlükte Maddeler (0.35-0.64)",
+            items: categories.moderate,
+          },
+          { label: "Zor Maddeler (0.20-0.34)", items: categories.difficult },
+          {
+            label: "Oldukça Zor Maddeler (0.00-0.19)",
+            items: categories.veryDifficult,
+          },
+        ].map((category, index) => (
+          <View key={index} style={styles.tableRow}>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {category.label}
+            </Text>
+            <Text style={[styles.tableCell, { flex: 2 }]}>
+              {category.items.length > 0 ? category.items.join(", ") : "-"}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// Add DiscriminationLevelTable component
+const DiscriminationLevelTable: React.FC<{ itemAnalysis: ItemAnalysis }> = ({
+  itemAnalysis,
+}) => {
+  const categories = itemAnalysis.discrimination.reduce(
+    (acc: any, disc, index) => {
+      const itemName = `M${index + 1}`;
+      if (disc >= 0.4) acc.excellent.push(itemName);
+      else if (disc >= 0.3) acc.good.push(itemName);
+      else if (disc >= 0.2) acc.acceptable.push(itemName);
+      else if (disc >= 0.0) acc.poor.push(itemName);
+      else acc.negative.push(itemName);
+      return acc;
+    },
+    { excellent: [], good: [], acceptable: [], poor: [], negative: [] }
+  );
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.boldText}>Madde Ayırt Edicilik İndeksi Analizi</Text>
+      <View style={styles.table}>
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Ölçüt</Text>
+          <Text style={[styles.tableHeader, { flex: 2 }]}>Maddeler</Text>
+        </View>
+        {[
+          {
+            label: "Çok İyi Maddeler (0.40-1.00)",
+            items: categories.excellent,
+          },
+          { label: "İyi Maddeler (0.30-0.39)", items: categories.good },
+          {
+            label: "Orta Düzey Maddeler (0.20-0.29)",
+            items: categories.acceptable,
+          },
+          { label: "Zayıf Maddeler (0.00-0.19)", items: categories.poor },
+          { label: "Çok Zayıf Maddeler (negatif)", items: categories.negative },
+        ].map((category, index) => (
+          <View key={index} style={styles.tableRow}>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {category.label}
+            </Text>
+            <Text style={[styles.tableCell, { flex: 2 }]}>
+              {category.items.length > 0 ? category.items.join(", ") : "-"}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// Update TestResultsPDF page
 const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   data,
   scores,
@@ -666,12 +878,16 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
   maxScore,
   minScore,
   average,
-  median,
   standardDeviation,
-  skewness,
-  kr20,
   frequencyTable,
+  median,
+  mode,
+  kr20,
+  skewness,
+  kurtosis,
   successRate,
+  varyans,
+  itemAnalysis,
 }) => {
   const barData = studentNames.map((name, index) => ({
     label: name,
@@ -858,6 +1074,8 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
           </Text>
         </View>
       </Page>
+
+      {/* Add new page for frequency table */}
       <Page size="A4" style={styles.page}>
         <View style={{ height: "100%" }}>
           <FrequencyTableSection
@@ -866,7 +1084,51 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
           />
         </View>
       </Page>
+
+      {/* Madde analizi sayfası güncellemesi */}
+      <Page size="A4" style={styles.page}>
+        <View>
+          <Text style={styles.header}>Madde Analizi Sonuçları</Text>
+          <CorrectProbabilityChart
+            correctProbability={itemAnalysis.difficulty}
+          />
+          <DifficultyLevelTable itemAnalysis={itemAnalysis} />
+          <DiscriminationLevelTable itemAnalysis={itemAnalysis} />
+          <ItemAnalysisTable itemAnalysis={itemAnalysis} />
+        </View>
+      </Page>
     </Document>
+  );
+};
+
+// Add ItemAnalysisTable component
+const ItemAnalysisTable: React.FC<{ itemAnalysis: ItemAnalysis }> = ({
+  itemAnalysis,
+}) => {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.boldText}>Madde Analiz Tablosu</Text>
+      <View style={styles.table}>
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Madde No</Text>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Güçlük İndeksi</Text>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>
+            Ayırt Edicilik İndeksi
+          </Text>
+        </View>
+        {itemAnalysis.difficulty.map((_, index) => (
+          <View key={index} style={styles.tableRow}>
+            <Text style={[styles.tableCell, { flex: 1 }]}>M{index + 1}</Text>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {itemAnalysis.difficulty[index].toFixed(2)}
+            </Text>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {itemAnalysis.discrimination[index].toFixed(2)}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 };
 
@@ -885,6 +1147,9 @@ const TestResults: React.FC<any> = ({
   kr20,
   kurtosis,
   skewness,
+  itemDifficulty,
+  itemDiscrimination,
+  itemCorrectProbability,
 }) => {
   const testData: TestData = {
     teacher: "Mehmet Yilmaz",
@@ -908,6 +1173,12 @@ const TestResults: React.FC<any> = ({
     skewness: skewness,
   };
 
+  const itemAnalysis: ItemAnalysis = {
+    difficulty: itemDifficulty,
+    discrimination: itemDiscrimination,
+    correctProbability: itemCorrectProbability,
+  };
+
   const handleDownload = async () => {
     const blob = await pdf(
       <TestResultsPDF
@@ -926,6 +1197,7 @@ const TestResults: React.FC<any> = ({
         varyans={varyans}
         kurtosis={kurtosis}
         skewness={skewness}
+        itemAnalysis={itemAnalysis}
       />
     ).toBlob();
     saveAs(blob, "Test_Sonuclari.pdf");

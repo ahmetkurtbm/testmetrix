@@ -1320,6 +1320,10 @@ const ExcelReports = () => {
                         kurtosis={kurtosis}
                         skewness={skewness}
                         correctCount={correctCount}
+                        itemAnalysis={{ difficultyIndex, discriminationIndex }}
+                        itemDifficulty={difficultyIndex}
+                        itemDiscrimination={discriminationIndex}
+                        itemCorrectProbability={correctCount}
                       />
                     ),
                   },
