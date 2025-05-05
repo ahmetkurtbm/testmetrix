@@ -95,8 +95,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   section: {
-    marginBottom: 15,
-    padding: 10,
+    marginBottom: 10,
+    padding: 7,
     backgroundColor: "#e2e8f0",
     borderRadius: 5,
     shadowColor: "#000",
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   infoContainer: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#edf2f7",
     borderRadius: 5,
   },
   infoTitle: {
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
     marginBottom: 5, // Increased from 3
     lineHeight: 1.4, // Added line height
   },
+  fontSize: { fontSize: 8 }, // Font size for text in charts
 });
 
 // SVG Charts için yeni stiller ekle
@@ -405,8 +406,8 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
             key={`y-label-${i}`}
             x={padding - 5}
             y={height - padding - (i * (height - 2 * padding)) / 10}
+            style={styles.fontSize}
             textAnchor="end"
-            font-size={8}
             fill="#4a5568"
           >
             {i * 10}
@@ -419,6 +420,9 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
             (height - 2 * padding);
           const x = padding + index * barWidth + 10;
           const y = height - padding - barHeight;
+          const barX = x; // çubuğun başlangıç X pozisyonu
+          const centerX = barX + barWidth / 2; // metin ortalanacaksa
+          const textY = height - padding + 12; // çubuğun hemen altına yazı
 
           return (
             <G key={index}>
@@ -434,7 +438,7 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
               <SvgText
                 x={x + barWidth / 2 - 4}
                 y={y - 11}
-                font-size={8}
+                style={styles.fontSize}
                 fill="#2d3748"
                 textAnchor="end"
               >
@@ -443,26 +447,21 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
 
               {/* Student name */}
               {/* <SvgText
-                x={x + barWidth - 20}
-                y={height - padding - 5}
-                fontSize={7}
+                transform={`translate(${height}, 0) rotate(90)`}
+                key={index}
+                x={centerX}
+                y={textY}
+                style={styles.fontSize}
                 fill="#4a5568"
-                transform={`rotate(-45, ${x + barWidth - 20}, ${
-                  height - padding - 5
-                })`} // Doğru merkez noktası
-                textAnchor="end"
+                textAnchor="middle"
               >
                 {item.label}
               </SvgText> */}
               <SvgText
                 x={x + barWidth - 30}
                 y={height - padding - 5}
-                font-size={7}
+                style={styles.fontSize}
                 fill="#4a5568"
-                // transform={`rotate(-45, ${x + barWidth - 20}, ${
-                //   height - padding - 5
-                // })`} // Doğru merkez noktası
-                // textAnchor="end"
               >
                 {index + 1}.
               </SvgText>
@@ -537,7 +536,7 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
               <SvgText
                 x={labelX}
                 y={labelY}
-                font-size={8}
+                style={styles.fontSize}
                 fill="#2d3748"
                 textAnchor={labelX > 0 ? "start" : "end"}
                 alignment-Baseline="middle"
@@ -699,7 +698,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
             key={`y-label-${i}`}
             x={padding - 5}
             y={height - padding - (i * (height - 2 * padding)) / 10}
-            font-size={8}
+            style={styles.fontSize}
             fill="#4a5568"
             textAnchor="end"
           >
@@ -738,7 +737,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
               <SvgText
                 x={x + barWidth / 2}
                 y={height - 10}
-                font-size={8}
+                style={styles.fontSize}
                 fill="#4a5568"
                 textAnchor="middle"
               >
@@ -749,7 +748,7 @@ const CorrectProbabilityChart: React.FC<{ correctProbability: number[] }> = ({
               <SvgText
                 x={x + barWidth / 2}
                 y={y - barHeight - 10}
-                font-size={8}
+                style={styles.fontSize}
                 fill="#1a365d"
                 textAnchor="middle"
               >
@@ -1085,45 +1084,68 @@ const TestResultsPDF: React.FC<TestResultsPDFProps> = ({
         </View>
       </Page>
 
+      <Page size="A4" style={styles.page}>
+        <View>
+          <ItemAnalysisTable itemAnalysis={itemAnalysis} />
+          <DifficultyLevelTable itemAnalysis={itemAnalysis} />
+          <DiscriminationLevelTable itemAnalysis={itemAnalysis} />
+        </View>
+      </Page>
+
       {/* Madde analizi sayfası güncellemesi */}
       <Page size="A4" style={styles.page}>
         <View>
-          <Text style={styles.header}>Madde Analizi Sonuçları</Text>
           <CorrectProbabilityChart
             correctProbability={itemAnalysis.difficulty}
           />
-          <DifficultyLevelTable itemAnalysis={itemAnalysis} />
-          <DiscriminationLevelTable itemAnalysis={itemAnalysis} />
-          <ItemAnalysisTable itemAnalysis={itemAnalysis} />
         </View>
       </Page>
     </Document>
   );
 };
 
-// Add ItemAnalysisTable component
+// Update ItemAnalysisTable component
 const ItemAnalysisTable: React.FC<{ itemAnalysis: ItemAnalysis }> = ({
   itemAnalysis,
 }) => {
+  const itemCount = itemAnalysis.difficulty.length;
+  const halfLength = Math.ceil(itemCount / 2);
+
   return (
     <View style={styles.section}>
       <Text style={styles.boldText}>Madde Analiz Tablosu</Text>
       <View style={styles.table}>
         <View style={styles.tableRow}>
-          <Text style={[styles.tableHeader, { flex: 1 }]}>Madde No</Text>
+          {/* First half headers */}
+          <Text style={[styles.tableHeader, { flex: 0.5 }]}>Madde No</Text>
           <Text style={[styles.tableHeader, { flex: 1 }]}>Güçlük İndeksi</Text>
-          <Text style={[styles.tableHeader, { flex: 1 }]}>
-            Ayırt Edicilik İndeksi
-          </Text>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Ayırt Edicilik</Text>
+          {/* Second half headers */}
+          <Text style={[styles.tableHeader, { flex: 0.5 }]}>Madde No</Text>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Güçlük İndeksi</Text>
+          <Text style={[styles.tableHeader, { flex: 1 }]}>Ayırt Edicilik</Text>
         </View>
-        {itemAnalysis.difficulty.map((_, index) => (
-          <View key={index} style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 1 }]}>M{index + 1}</Text>
+
+        {Array.from({ length: halfLength }).map((_, i) => (
+          <View key={i} style={styles.tableRow}>
+            {/* First half data */}
+            <Text style={[styles.tableCell, { flex: 0.5 }]}>M{i + 1}</Text>
             <Text style={[styles.tableCell, { flex: 1 }]}>
-              {itemAnalysis.difficulty[index].toFixed(2)}
+              {itemAnalysis.difficulty[i]?.toFixed(2) || "-"}
             </Text>
             <Text style={[styles.tableCell, { flex: 1 }]}>
-              {itemAnalysis.discrimination[index].toFixed(2)}
+              {itemAnalysis.discrimination[i]?.toFixed(2) || "-"}
+            </Text>
+
+            {/* Second half data */}
+            <Text style={[styles.tableCell, { flex: 0.5 }]}>
+              {i + halfLength < itemCount ? `M${i + halfLength + 1}` : "-"}
+            </Text>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {itemAnalysis.difficulty[i + halfLength]?.toFixed(2) || "-"}
+            </Text>
+            <Text style={[styles.tableCell, { flex: 1 }]}>
+              {itemAnalysis.discrimination[i + halfLength]?.toFixed(2) || "-"}
             </Text>
           </View>
         ))}
