@@ -49,70 +49,108 @@ export default function UsersPage() {
     return <p className="text-center text-xl font-semibold">Loading...</p>;
   }
 
-  // Öğretmen ve öğrencileri ayırma
-  const teachers = users.filter((user) => user.role === "teacher");
-  const students = users.filter((user) => user.role === "student");
-
   return (
-    <div className="container mx-auto p-6 ">
+    <div className="min-h-screen bg-gradient-to-br py-8 px-4 sm:px-6 lg:px-8">
       <img
-        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
-        src="bg-anaekran2.jpg"
+        className="fixed inset-0 w-full h-full object-cover opacity-10 z-[-1]"
+        src="bg-anaekran.jpg"
+        alt="background"
       />
-      <h1 className="text-2xl font-bold mb-4 text-white text-center">
-        Kullanıcılar
-      </h1>
 
-      {/* Kullanıcı Tablosu */}
-      <table className="w-full border-collapse border border-gray-300 rounded-md bg-slate-500">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border border-gray-300 p-2">Name</th>
-            <th className="border border-gray-300 p-2">Surname</th>
-            <th className="border border-gray-300 p-2">Email</th>
-            <th className="border border-gray-300 p-2">Phone</th>
-            <th className="border border-gray-300 p-2">University</th>
-            <th className="border border-gray-300 p-2">Role</th>
-            <th className="border border-gray-300 p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-400 ">
-              <td className="border border-gray-300 p-2 text-white">
-                {user.name}
-              </td>
-              <td className="border border-gray-300 p-2  text-white">
-                {user.surname}
-              </td>
-              <td className="border border-gray-300 p-2  text-white">
-                {user.email}
-              </td>
-              <td className="border border-gray-300 p-2  text-white">
-                {user.phone}
-              </td>
-              <td className="border border-gray-300 p-2  text-white">
-                {user.university}
-              </td>
-              <td className="border border-gray-300 p-2 font-semibold">
-                {user.role === "Öğretmen"
-                  ? "Öğretmen"
-                  : user.role === "Yönetici"
-                  ? "Yönetici"
-                  : "Öğrenci"}
-              </td>
-              <td className="border border-gray-300 p-2 flex gap-2">
-                <Button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 w-full">
-                  Düzenle
-                </Button>
-                <Button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 w-full">
-                  Sil
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="max-w-7xl mx-auto">
+        <div className="sm:flex sm:items-center sm:justify-between mb-8">
+          <h1 className="text-3xl font-bold text-black mb-4 sm:mb-0">
+            Kullanıcılar
+          </h1>
+          <div className="flex gap-3">
+            <Button className="bg-indigo-600 hover:bg-indigo-700">
+              Yeni Kullanıcı
+            </Button>
+            <Button className="bg-emerald-600 hover:bg-emerald-700">
+              Excel İndir
+            </Button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg shadow">
+          <div className="align-middle inline-block min-w-full">
+            <div className="overflow-hidden sm:rounded-lg bg-white/10 backdrop-blur-sm">
+              <table className="min-w-full divide-y divide-gray-600">
+                <thead>
+                  <tr className="bg-gray-800/50">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      İsim
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      Soyisim
+                    </th>
+                    <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="hidden md:table-cell px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      Telefon
+                    </th>
+                    <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      Üniversite
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-black uppercase tracking-wider">
+                      Rol
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-medium text-black uppercase tracking-wider">
+                      İşlemler
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-600">
+                  {users.map((user) => (
+                    <tr
+                      key={user.id}
+                      className="hover:bg-gray-700/50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
+                        {user.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
+                        {user.surname}
+                      </td>
+                      <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-black">
+                        {user.email}
+                      </td>
+                      <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-black">
+                        {user.phone}
+                      </td>
+                      <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-black">
+                        {user.university}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.role === "teacher"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {user.role === "teacher" ? "Öğretmen" : "Öğrenci"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2">
+                          <Button className="bg-blue-600 hover:bg-blue-700 px-3 py-1 text-xs">
+                            Düzenle
+                          </Button>
+                          <Button className="bg-red-600 hover:bg-red-700 px-3 py-1 text-xs">
+                            Sil
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
