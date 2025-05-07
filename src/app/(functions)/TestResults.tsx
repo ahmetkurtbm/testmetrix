@@ -446,22 +446,27 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
               </SvgText>
 
               {/* Student name */}
-              {/* <SvgText
-                transform={`translate(${height}, 0) rotate(90)`}
+              <SvgText
                 key={index}
-                x={centerX}
-                y={textY}
+                x={barWidth - 30}
+                y={height - padding - 15}
                 style={styles.fontSize}
                 fill="#4a5568"
                 textAnchor="middle"
+                transform={`translate(${
+                  -410 + index * barWidth
+                }, ${430}) rotate(270)`}
               >
                 {item.label}
-              </SvgText> */}
+              </SvgText>
               <SvgText
-                x={x + barWidth - 30}
-                y={height - padding - 5}
+                x={barWidth - 65}
+                y={height - padding - 15}
                 style={styles.fontSize}
                 fill="#4a5568"
+                transform={`translate(${
+                  -410 + index * barWidth
+                }, ${430}) rotate(270)`}
               >
                 {index + 1}.
               </SvgText>
