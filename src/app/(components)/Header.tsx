@@ -53,7 +53,7 @@ const Header = () => {
         router.push("/login");
       }
     };
-    checkAuth();
+    //checkAuth();
   }, []);
 
   const handleLogout = async () => {

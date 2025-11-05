@@ -114,7 +114,7 @@ const Profile = () => {
       }
     };
 
-    checkAuth();
+    //checkAuth();
   }, []);
 
   const handleSaveProfile = async () => {

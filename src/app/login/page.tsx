@@ -62,7 +62,7 @@ const Login = () => {
         router.push("/folders");
       }
     };
-    checkAuth();
+    ////checkAuth();
   }, []);
 
   const handleLogin = async () => {

@@ -75,7 +75,7 @@ const ExcelUploadPage = () => {
         router.push("/login");
       }
     };
-    checkAuth();
+    //checkAuth();
     const handleGetFolders = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/folders`, {

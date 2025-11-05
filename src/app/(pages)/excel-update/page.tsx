@@ -47,7 +47,7 @@ const ExcelUpdate = () => {
       }
     };
 
-    checkAuth();
+    //checkAuth();
   }, []);
 
   const [data, setData] = useState<File | null>(null);

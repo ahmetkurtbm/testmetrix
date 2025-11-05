@@ -778,7 +778,7 @@ const ExcelReports = () => {
       }
     };
 
-    checkAuth();
+    //checkAuth();
   }, []);
 
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
