@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
+import { cookies } from "next/headers";
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
@@ -52,23 +53,16 @@ const Login = () => {
 
   // Token kontrolü
   useEffect(() => {
-
-    const test = async () => {
-      const response = await fetch(`${BACKEND_URL}/test`, {
-        method: "GET",
-      });
-
-      if (response.ok) {
-        window.alert("Backend bağlantısı başarılı.!");
-      }
-    };
-
-    test();
-
-
     const checkAuth = async () => {
+      const token = (await cookies()).get("token")?.value;
+      
+      if (!token) return;
+
       const response = await fetch(`${BACKEND_URL}/user-authentication`, {
         method: "GET",
+        headers: {
+          Authorization: token,
+        },
         credentials: "include",
       });
 
@@ -81,11 +75,13 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/login`, {
+      const cookie = (await cookies()).get("token")?.value;
+      if (cookie) {
+        const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {Authorization:cookie, "Content-Type": "application/json" },
         body: JSON.stringify({ email, role, password }),
-        credentials: "include", // Çerezlerin backend'e kaydedilmesini sağlar
+        credentials: "include", 
       });
 
       if (response.ok) {
@@ -96,6 +92,9 @@ const Login = () => {
         console.error("Giriş başarısız:", data.error);
         error();
       }
+        
+      }
+      
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
     }
