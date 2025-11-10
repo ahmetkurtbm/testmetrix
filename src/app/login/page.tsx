@@ -56,7 +56,6 @@ const Login = () => {
     const test = async () => {
       const response = await fetch(`${BACKEND_URL}/test`, {
         method: "GET",
-        credentials: "include",
       });
 
       if (response.ok) {
