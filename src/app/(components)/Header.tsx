@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { Menu } from "lucide-react"; // Import hamburger icon
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { deleteCookie } from "@/lib/my-utils";
 
 // Token'ın yapısını tanımlayın
 interface DecodedToken {
@@ -57,17 +58,18 @@ const Header = () => {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/logout`, {
-        method: "POST",
-        credentials: "include", // Çerezleri backend'e gönderir
-      });
+    // try {
+    //   await fetch(`${BACKEND_URL}/logout`, {
+    //     method: "GET",
+    //   });
 
-      router.push("/login"); // Sayfayı yönlendir
-      window.location.reload(); // Sayfayı yenileyerek çerezi tamamen temizle
-    } catch (error) {
-      console.error("Çıkış yaparken hata oluştu:", error);
-    }
+    //   router.push("/login"); // Sayfayı yönlendir
+    //   window.location.reload(); // Sayfayı yenileyerek çerezi tamamen temizle
+    // } catch (error) {
+    //   console.error("Çıkış yaparken hata oluştu:", error);
+    // }
+    deleteCookie();
+    router.push("/login");
   };
 
   return (
