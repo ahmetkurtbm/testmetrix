@@ -52,6 +52,21 @@ const Login = () => {
 
   // Token kontrolü
   useEffect(() => {
+
+    const test = async () => {
+      const response = await fetch(`${BACKEND_URL}/test`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        window.alert("Backend bağlantısı başarılı!");
+      }
+    };
+
+    test();
+
+
     const checkAuth = async () => {
       const response = await fetch(`${BACKEND_URL}/user-authentication`, {
         method: "GET",
@@ -62,7 +77,7 @@ const Login = () => {
         router.push("/folders");
       }
     };
-    ////checkAuth();
+    checkAuth();
   }, []);
 
   const handleLogin = async () => {
