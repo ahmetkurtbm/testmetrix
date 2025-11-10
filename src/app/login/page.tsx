@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
 import { get } from "http";
-import { getCookie } from "@/lib/utils";
+import { getCookie } from "@/lib/my-utils";
 
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
