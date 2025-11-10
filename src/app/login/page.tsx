@@ -60,7 +60,7 @@ const Login = () => {
       });
 
       if (response.ok) {
-        window.alert("Backend bağlantısı başarılı!");
+        window.alert("Backend bağlantısı başarılı.!");
       }
     };
 
