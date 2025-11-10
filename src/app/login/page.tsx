@@ -77,13 +77,10 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const cookie = await getCookie();
-      if (cookie) {
         const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
-        headers: {Authorization:cookie, "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json" },
         body: JSON.stringify({ email, role, password }),
-        credentials: "include", 
       });
 
       if (response.ok) {
@@ -93,8 +90,6 @@ const Login = () => {
         const data = await response.json();
         console.error("Giriş başarısız:", data.error);
         error();
-      }
-        
       }
       
     } catch (error) {
