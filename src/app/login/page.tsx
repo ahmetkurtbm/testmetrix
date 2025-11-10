@@ -12,7 +12,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
-import { cookies } from "next/headers";
+import { get } from "http";
+import { getCookie } from "@/lib/utils";
+
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
 
@@ -54,7 +56,7 @@ const Login = () => {
   // Token kontrolü
   useEffect(() => {
     const checkAuth = async () => {
-      const token = (await cookies()).get("token")?.value;
+      const token = await getCookie();
       
       if (!token) return;
 
@@ -75,7 +77,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const cookie = (await cookies()).get("token")?.value;
+      const cookie = await getCookie();
       if (cookie) {
         const response = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
