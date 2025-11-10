@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
 import { get } from "http";
-import { getCookie } from "@/lib/my-utils";
+import { getCookie, setCookie } from "@/lib/my-utils";
 
 
 const roles = ["Yönetici", "Öğretmen", "Öğrenci"];
@@ -84,6 +84,9 @@ const Login = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        console.log("Giriş başarılı:", data);
+        setCookie(data.token);
         router.push("/folders");
         success();
       } else {
