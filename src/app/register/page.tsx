@@ -108,20 +108,12 @@ const Register = () => {
         warnPassword();
         return;
       }
-
-      const token = await getCookie();
-      if (!token) {
-        return;
-      }
-
       const response = await fetch(`${BACKEND_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token,
         },
         body: JSON.stringify(userData),
-        credentials: "include",
       });
 
       if (response.ok) {
