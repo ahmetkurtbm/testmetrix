@@ -79,28 +79,34 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      if (!email || !password) {
-        return;
-      }
-      
-      const response = await fetch(`${BACKEND_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Giriş başarılı:", data);
-        setCookie(data.token);
-        router.push("/folders");
-        success();
+      if (email === "" || password === "") {
+        window.alert("Lütfen tüm alanları doldurun.");
       } else {
-        const data = await response.json();
-        console.error("Giriş başarısız:", data.error);
-        error();
-      }
 
+        const response = await fetch(`${BACKEND_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, role, password }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.code === 200) {
+            setCookie(data.token);
+            console.log("Giriş başarılı:", data);
+            router.push("/folders");
+            success();
+          }
+          else {
+            console.error("Giriş başarısız:", data.content);
+            error();
+          }
+        } else {
+          const data = await response.json();
+          console.error("Giriş başarısız:", data.content);
+          error();
+        }
+      }
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
     }
@@ -145,8 +151,8 @@ const Login = () => {
                     key={r}
                     value={r}
                     className={`font-medium rounded-md transition-all duration-300 px-4 py-2.5 ${role === r
-                        ? "bg-blue-700 text-white shadow-[0_4px_12px_rgba(59,130,246,0.5)] transform scale-105 ring-2 ring-blue-400 ring-offset-2"
-                        : "bg-white/90 text-gray-700 hover:bg-blue-50 hover:text-blue-600 shadow-sm"
+                      ? "bg-blue-700 text-white shadow-[0_4px_12px_rgba(59,130,246,0.5)] transform scale-105 ring-2 ring-blue-400 ring-offset-2"
+                      : "bg-white/90 text-gray-700 hover:bg-blue-50 hover:text-blue-600 shadow-sm"
                       }`}
                   >
                     {r}
