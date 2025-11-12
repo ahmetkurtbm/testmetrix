@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToastContainer, toast } from "react-toastify";
 import { FolderPlus } from "lucide-react";
+import { getCookie } from "@/lib/my-utils";
 
 export default function FolderAdder() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -67,10 +68,14 @@ export default function FolderAdder() {
     }
 
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/upload-folder`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify({
           folderName: folderName,

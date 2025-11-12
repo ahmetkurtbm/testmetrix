@@ -23,6 +23,7 @@ import {
 import TableContainer from "@/app/(components)/TableContainer";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 import { ToastContainer, toast } from "react-toastify";
+import { getCookie } from "@/lib/my-utils";
 
 const ExcelUploadPage = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -59,10 +60,19 @@ const ExcelUploadPage = () => {
   // Token Kontrolü
   useEffect(() => {
     const checkAuth = async () => {
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       try {
         const response = await fetch(`${BACKEND_URL}/user-authentication`, {
           method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
+          headers: {
+            Authorization: token,
+          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -75,13 +85,19 @@ const ExcelUploadPage = () => {
         router.push("/login");
       }
     };
-    //checkAuth();
+
+    checkAuth();
+
     const handleGetFolders = async () => {
       try {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/folders`, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", Authorization: token,
           },
           credentials: "include",
         });
@@ -171,10 +187,14 @@ const ExcelUploadPage = () => {
   const handleSave = async () => {
     try {
       if (arrayData.length !== 0 && folderId !== undefined) {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/excel-upload`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", Authorization: token,
           },
           credentials: "include",
           body: JSON.stringify({

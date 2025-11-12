@@ -10,21 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { Menu } from "lucide-react"; // Import hamburger icon
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { deleteCookie } from "@/lib/my-utils";
-
-// Token'ın yapısını tanımlayın
-interface DecodedToken {
-  role: string;
-  email: string;
-  userId?: string;
-  exp?: number;
-  iat?: number;
-}
+import { deleteCookie, getCookie } from "@/lib/my-utils";
 
 const Header = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -32,14 +21,21 @@ const Header = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [mail, setMail] = useState("Profil");
-
-  // Add state for sheet open/close
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/user-authentication`, {
         method: "GET",
+        headers: {
+          Authorization: token,
+        },
         credentials: "include",
       });
 
@@ -54,20 +50,10 @@ const Header = () => {
         router.push("/login");
       }
     };
-    //checkAuth();
+    checkAuth();
   }, []);
 
   const handleLogout = async () => {
-    // try {
-    //   await fetch(`${BACKEND_URL}/logout`, {
-    //     method: "GET",
-    //   });
-
-    //   router.push("/login"); // Sayfayı yönlendir
-    //   window.location.reload(); // Sayfayı yenileyerek çerezi tamamen temizle
-    // } catch (error) {
-    //   console.error("Çıkış yaparken hata oluştu:", error);
-    // }
     deleteCookie();
     router.push("/login");
   };

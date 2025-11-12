@@ -51,6 +51,7 @@ import { ComboboxForGrafic } from "@/components/ui/comboboxForGrafic";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import TestResults from "@/app/(functions)/TestResults";
+import { getCookie } from "@/lib/my-utils";
 
 // Öğrenci yanıtlarının 0-1 üzerinden skorlarını hesaplar
 function calculateStudentAnswers01(studentAnswers: any, answerKey: any) {
@@ -224,7 +225,7 @@ function calculateKurtosis(scores: any) {
         sum + Math.pow((score - mean) / standardDeviation, 4),
       0
     ) /
-      n -
+    n -
     3;
 
   return kurtosis.toFixed(2);
@@ -763,10 +764,20 @@ const ExcelReports = () => {
   // Token Kontrolü
   useEffect(() => {
     const checkAuth = async () => {
+
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       try {
         const response = await fetch(`${BACKEND_URL}/user-authentication`, {
           method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
+          headers: {
+            Authorization: token,
+          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -778,7 +789,7 @@ const ExcelReports = () => {
       }
     };
 
-    //checkAuth();
+    checkAuth();
   }, []);
 
   const [data, setData] = useState<ExcelUpdateProps | null>(null);
@@ -843,10 +854,14 @@ const ExcelReports = () => {
 
       if (fileId) {
         try {
+          const token = await getCookie();
+          if (!token) {
+            return;
+          }
           const response = await fetch(`${BACKEND_URL}/excel`, {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "application/json", Authorization: token,
             },
             body: JSON.stringify({ fileId }),
             credentials: "include",
@@ -1095,8 +1110,8 @@ const ExcelReports = () => {
     tempdata.length === numberOfStudents
       ? "Öğrenci"
       : tempdata.length === numberOfQuestions
-      ? "Madde"
-      : "Veri";
+        ? "Madde"
+        : "Veri";
 
   // Eğer tempdata.length === 30 ise labels, studentNames dizisi olsun
   const labels =
@@ -1117,8 +1132,8 @@ const ExcelReports = () => {
     tempdata.length === 30
       ? "Öğrenci"
       : tempdata.length === 50
-      ? "Madde"
-      : "Değer";
+        ? "Madde"
+        : "Değer";
 
   const graficdata = {
     labels:

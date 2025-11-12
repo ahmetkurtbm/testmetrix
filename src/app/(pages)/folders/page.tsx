@@ -30,6 +30,7 @@ import type {
   DraggableStateSnapshot,
   DroppableProvided,
 } from "react-beautiful-dnd";
+import { getCookie } from "@/lib/my-utils";
 
 interface File {
   _id: string;
@@ -156,11 +157,15 @@ export default function Folders() {
   useEffect(() => {
     async function fetchFolders() {
       try {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/folders`, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+          "Content-Type": "application/json", Authorization: token,
+        },
           credentials: "include",
         });
 
@@ -173,11 +178,15 @@ export default function Folders() {
     }
     async function fetchExcels() {
       try {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/excels`, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+          "Content-Type": "application/json", Authorization: token,
+        },
           credentials: "include",
         });
 
@@ -189,10 +198,19 @@ export default function Folders() {
     }
 
     const checkAuth = async () => {
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       try {
         const response = await fetch(`${BACKEND_URL}/user-authentication`, {
           method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
+          headers: {
+            Authorization: token,
+          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -207,7 +225,7 @@ export default function Folders() {
       }
     };
 
-    //checkAuth();
+    checkAuth();
   }, []);
 
   useEffect(() => {
@@ -227,10 +245,14 @@ export default function Folders() {
 
   const handleUpdateFolders = async (folderId: any, newName: string) => {
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/update-folder`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify({ id: folderId, folder_name: newName }),
         credentials: "include",
@@ -259,10 +281,14 @@ export default function Folders() {
 
   const handleDeleteFolders = async (folderId: any) => {
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/delete-folder`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify({ id: folderId }),
         credentials: "include",
@@ -285,11 +311,15 @@ export default function Folders() {
 
   const handleDeleteExcel = async (fileId: any) => {
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/excel-delete`, {
         method: "DELETE",
         body: JSON.stringify({ fileId }),
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         credentials: "include",
       });
@@ -332,10 +362,14 @@ export default function Folders() {
 
   const saveNewOrder = async (newOrder: FolderNames[]) => {
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/update-folder-order`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify({ folders: newOrder }),
         credentials: "include",
@@ -474,9 +508,9 @@ export default function Folders() {
                                               prevFolders.map((f) =>
                                                 f._id === folder._id
                                                   ? {
-                                                      ...f,
-                                                      folder_name: newName,
-                                                    }
+                                                    ...f,
+                                                    folder_name: newName,
+                                                  }
                                                   : f
                                               )
                                             );

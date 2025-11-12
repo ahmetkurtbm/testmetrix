@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { Pencil } from "lucide-react";
 import {
@@ -24,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { deleteCookie, getCookie } from "@/lib/my-utils";
 
 const Profile = () => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
@@ -99,10 +99,19 @@ const Profile = () => {
   // Token Kontrolü
   useEffect(() => {
     const checkAuth = async () => {
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       try {
         const response = await fetch(`${BACKEND_URL}/user-authentication`, {
           method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
+          headers: {
+            Authorization: token,
+          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -114,7 +123,7 @@ const Profile = () => {
       }
     };
 
-    //checkAuth();
+    checkAuth();
   }, []);
 
   const handleSaveProfile = async () => {
@@ -124,10 +133,14 @@ const Profile = () => {
     }
 
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/user`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify(formData),
         credentials: "include",
@@ -150,10 +163,14 @@ const Profile = () => {
     }
 
     try {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/user`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", Authorization: token,
         },
         body: JSON.stringify({ password: formData.currentPassword }),
         credentials: "include",
@@ -165,7 +182,7 @@ const Profile = () => {
       }
 
       successDelete();
-      Cookies.remove("token");
+      deleteCookie();
 
       router.push("/login");
 
@@ -192,9 +209,13 @@ const Profile = () => {
 
   useEffect(() => {
     async function fetchUser() {
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
       const response = await fetch(`${BACKEND_URL}/user`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: token },
         credentials: "include",
       });
       const userData = await response.json();
@@ -246,11 +267,10 @@ const Profile = () => {
                   name={field.name}
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleInputChange}
-                  className={`mt-1 w-full ${
-                    isEditing
+                  className={`mt-1 w-full ${isEditing
                       ? "bg-white"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  }`}
+                    }`}
                   disabled={!isEditing}
                 />
               </div>

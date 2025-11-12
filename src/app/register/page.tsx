@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
+import { getCookie } from "@/lib/my-utils";
 
 const roles = ["Öğretmen", "Öğrenci"];
 
@@ -108,10 +109,16 @@ const Register = () => {
         return;
       }
 
+      const token = await getCookie();
+      if (!token) {
+        return;
+      }
+
       const response = await fetch(`${BACKEND_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: token,
         },
         body: JSON.stringify(userData),
         credentials: "include",
@@ -166,11 +173,10 @@ const Register = () => {
                   <TabsTrigger
                     key={r}
                     value={r}
-                    className={`font-medium rounded-md transition-all duration-300 px-4 py-2.5 ${
-                      role === r
+                    className={`font-medium rounded-md transition-all duration-300 px-4 py-2.5 ${role === r
                         ? "bg-blue-700 text-white shadow-[0_4px_12px_rgba(59,130,246,0.5)] transform scale-105 ring-2 ring-blue-400 ring-offset-2"
                         : "bg-gray-200/70 text-gray-700 hover:bg-blue-50 hover:text-blue-600 shadow-sm"
-                    }`}
+                      }`}
                   >
                     {r}
                   </TabsTrigger>

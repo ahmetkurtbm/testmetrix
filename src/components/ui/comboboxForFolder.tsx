@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { getCookie } from "@/lib/my-utils";
 
 export function ComboboxDemo({
   folderId,
@@ -37,11 +38,15 @@ export function ComboboxDemo({
   React.useEffect(() => {
     const handleGetFolders = async () => {
       try {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/folders`, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+          "Content-Type": "application/json", Authorization: token,
+        },
           credentials: "include",
         });
         const data = await response.json();

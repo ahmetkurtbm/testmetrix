@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { produce } from "immer";
 import { unstable_batchedUpdates } from "react-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { getCookie } from "@/lib/my-utils";
 
 interface File {
   id: string;
@@ -32,10 +33,18 @@ const ExcelUpdate = () => {
   // Token Kontrolü
   useEffect(() => {
     const checkAuth = async () => {
+      const token = await getCookie();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
       try {
         const response = await fetch(`${BACKEND_URL}/user-authentication`, {
           method: "GET",
-          credentials: "include", // Çerezleri otomatik ekler
+          headers: {
+            Authorization: token,
+          },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -47,7 +56,7 @@ const ExcelUpdate = () => {
       }
     };
 
-    //checkAuth();
+    checkAuth();
   }, []);
 
   const [data, setData] = useState<File | null>(null);
@@ -105,9 +114,15 @@ const ExcelUpdate = () => {
 
       if (fileId) {
         try {
+          const token = await getCookie();
+          if (!token) {
+            return;
+          }
           const response = await fetch(`${BACKEND_URL}/excel`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json", Authorization: token,
+            },
             body: JSON.stringify({ fileId }),
             credentials: "include",
           });
@@ -161,9 +176,15 @@ const ExcelUpdate = () => {
 
     if (fileId) {
       try {
+        const token = await getCookie();
+        if (!token) {
+          return;
+        }
         const response = await fetch(`${BACKEND_URL}/excel-update`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json", Authorization: token,
+          },
           body: JSON.stringify({
             id: fileId,
             folder_id: folderId,
