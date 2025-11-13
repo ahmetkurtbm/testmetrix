@@ -17,6 +17,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import AddFolder from "@/app/(components)/AddFolder";
 import { ToastContainer, toast } from "react-toastify";
 import {
@@ -24,12 +31,12 @@ import {
   Draggable,
   Droppable,
   DropResult,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DroppableProvided,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 import { getCookie } from "@/lib/my-utils";
 
 interface File {
@@ -145,9 +152,35 @@ export default function Folders() {
       theme: "dark",
     });
 
+  const successReorderFolder = () =>
+    toast.success("Klasör Sıralaması Güncellendi!", {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
+  const errorReorderFolder = () =>
+    toast.error("Klasör Sıralaması Güncellenemedi!", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+
   const [excels, setExcels] = useState<File[]>([]);
   const [folders, setFolders] = useState<FolderNames[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingModal, setIsEditingModal] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<FolderNames | null>(null);
+  const [editingFolderName, setEditingFolderName] = useState("");
   const [filteredExcels, setFilteredExcels] = useState<File[]>([]);
   const [filteredFolders, setFilteredFolders] = useState<FolderNames[]>([]);
 
@@ -268,7 +301,9 @@ export default function Folders() {
               : folder
           )
         );
-        setIsEditing(false);
+        setIsEditingModal(false);
+        setEditingFolder(null);
+        setEditingFolderName("");
       } else {
         errorUpdateFolder();
         console.error("Güncelleme başarısız");
@@ -299,8 +334,6 @@ export default function Folders() {
         setFolders((prevFolders) =>
           prevFolders.filter((folder) => folder._id !== folderId)
         );
-
-        setIsEditing(false);
       } else {
         console.error("Silme başarısız");
       }
@@ -357,6 +390,7 @@ export default function Folders() {
     items.splice(result.destination.index, 0, reorderedItem);
 
     setFilteredFolders(items);
+    setFolders(items);
     saveNewOrder(items);
   };
 
@@ -416,7 +450,6 @@ export default function Folders() {
             <AddFolder />
           </div>
         </div>
-
         {/* Updated Folders Grid with Drag and Drop */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="folders" isDropDisabled={false}>
@@ -490,60 +523,15 @@ export default function Folders() {
                                   </DropdownMenuItem>
 
                                   <DropdownMenuItem
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={() => {
+                                      setEditingFolder(folder);
+                                      setEditingFolderName(folder.folder_name);
+                                      setIsEditingModal(true);
+                                    }}
                                     className="text-blue-600 hover:bg-blue-500 hover:text-white"
                                   >
                                     İsmi Düzenle
                                   </DropdownMenuItem>
-
-                                  {isEditing && (
-                                    <div className="p-2 border-t">
-                                      <div className="flex flex-col gap-2">
-                                        <Input
-                                          value={folder.folder_name}
-                                          onChange={(e) => {
-                                            e.preventDefault();
-                                            const newName = e.target.value;
-                                            setFolders((prevFolders) =>
-                                              prevFolders.map((f) =>
-                                                f._id === folder._id
-                                                  ? {
-                                                    ...f,
-                                                    folder_name: newName,
-                                                  }
-                                                  : f
-                                              )
-                                            );
-                                          }}
-                                          className="h-8 text-sm"
-                                          autoFocus
-                                        />
-                                        <div className="flex gap-2 justify-end">
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setIsEditing(false)}
-                                            className="text-gray-600"
-                                          >
-                                            İptal
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            onClick={() => {
-                                              handleUpdateFolders(
-                                                folder._id,
-                                                folder.folder_name
-                                              );
-                                              setIsEditing(false);
-                                            }}
-                                            className="bg-blue-500 hover:bg-blue-600 text-white"
-                                          >
-                                            Kaydet
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
 
                                   <DropdownMenuItem
                                     onClick={() =>
@@ -653,6 +641,65 @@ export default function Folders() {
           </Droppable>
         </DragDropContext>
       </div>
+
+      {/* Klasör İsmi Düzenleme Modal */}
+      <Dialog open={isEditingModal} onOpenChange={setIsEditingModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center">
+              Klasör İsmini Düzenle
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Mevcut İsim:
+              </label>
+              <div className="p-2 bg-gray-100 rounded text-gray-600 text-sm">
+                {editingFolder?.folder_name}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Yeni İsim:
+              </label>
+              <Input
+                value={editingFolderName}
+                onChange={(e) => setEditingFolderName(e.target.value)}
+                placeholder="Yeni klasör ismini girin..."
+                className="w-full"
+                autoFocus
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditingModal(false);
+                setEditingFolder(null);
+                setEditingFolderName("");
+              }}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingFolder && editingFolderName.trim()) {
+                  handleUpdateFolders(editingFolder._id, editingFolderName.trim());
+                }
+              }}
+              disabled={!editingFolderName.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ToastContainer
         position="bottom-right"

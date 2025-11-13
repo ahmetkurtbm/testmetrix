@@ -237,20 +237,32 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex m-2 justify-center items-center align-middle">
-      <img
-        className="absolute inset-0 w-full h-full object-cover opacity-100 z-[-1]"
-        src="profil-bg.jpg"
-      />
-      <Card className="w-full max-w-2xl shadow-lg p-4">
-        <CardHeader className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Profil</h1>
-          <Button variant="ghost" onClick={() => setIsEditing(!isEditing)}>
-            <Pencil className="w-5 h-5" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="h-full flex justify-center items-center p-4 relative">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <img
+          className="w-full h-full object-cover opacity-30"
+          src="profil-bg.jpg"
+          alt="background"
+        />
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-2xl">
+        <Card className="shadow-xl border border-gray-200 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="flex flex-row justify-between items-center pb-4">
+            <h1 className="text-2xl font-bold text-gray-800">Profil</h1>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+              className="hover:bg-gray-100"
+            >
+              <Pencil className="w-5 h-5" />
+            </Button>
+          </CardHeader>
+          <CardContent className="px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { label: "İsim", name: "name" },
               { label: "Soyisim", name: "surname" },
@@ -258,7 +270,7 @@ const Profile = () => {
               { label: "Kurum", name: "university" },
               { label: "Telefon", name: "phone" },
             ].map((field) => (
-              <div key={field.name}>
+              <div key={field.name} className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   {field.label}:
                 </label>
@@ -267,62 +279,66 @@ const Profile = () => {
                   name={field.name}
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleInputChange}
-                  className={`mt-1 w-full ${isEditing
-                      ? "bg-white"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  className={`w-full transition-colors ${isEditing
+                      ? "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      : "bg-gray-100 text-gray-600 cursor-not-allowed border-gray-200"
                     }`}
                   disabled={!isEditing}
                 />
               </div>
             ))}
-          </div>
+            </div>
+            
+            {isEditing && (
+              <div className="mt-8 space-y-6 border-t pt-6">
+                <h3 className="text-lg font-medium text-gray-800">Şifre Değiştir</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Mevcut Şifre:
+                    </label>
+                    <Input
+                      type="password"
+                      name="currentPassword"
+                      onChange={handleInputChange}
+                      className="w-full focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Mevcut şifrenizi girin"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Yeni Şifre:
+                    </label>
+                    <Input
+                      type="password"
+                      name="newPassword"
+                      onChange={handleInputChange}
+                      className="w-full focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Yeni şifrenizi girin"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+          
           {isEditing && (
-            <>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Mevcut Şifre:
-                </label>
-                <Input
-                  type="password"
-                  name="currentPassword"
-                  onChange={handleInputChange}
-                  className="mt-1 w-full"
-                />
-              </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Yeni Şifre:
-                </label>
-                <Input
-                  type="password"
-                  name="newPassword"
-                  onChange={handleInputChange}
-                  className="mt-1 w-full"
-                />
-              </div>
-            </>
+            <CardFooter className="flex flex-col sm:flex-row gap-4 px-6 py-6 bg-gray-50 border-t">
+              <Button
+                onClick={() => setShowConfirm("update")}
+                className="w-full sm:w-1/2 bg-blue-600 text-white hover:bg-blue-700 font-medium py-2.5"
+              >
+                Profili Güncelle
+              </Button>
+              <Button
+                onClick={() => setShowConfirm("delete")}
+                className="w-full sm:w-1/2 bg-red-600 text-white hover:bg-red-700 font-medium py-2.5"
+              >
+                Profili Kaldır
+              </Button>
+            </CardFooter>
           )}
-        </CardContent>
-        {isEditing && (
-          <CardFooter className="gap-1 flex my-2">
-            {/* Güncelleme Butonu */}
-            <Button
-              onClick={() => setShowConfirm("update")}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Profili Güncelle
-            </Button>
-
-            {/* Silme Butonu */}
-            <Button
-              onClick={() => setShowConfirm("delete")}
-              className="w-full bg-red-600 text-white hover:bg-red-700"
-            >
-              Profili Kaldır
-            </Button>
-          </CardFooter>
-        )}
-      </Card>
+        </Card>
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -366,6 +382,7 @@ const Profile = () => {
           </AlertDialogContent>
         </AlertDialog>
       )}
+      </div>
     </div>
   );
 };
