@@ -1,0 +1,185 @@
+// TestMetrix veri modeli.
+//
+// Bu şema, GateHub ile AYNI Postgres veritabanında ama ayrı bir `testmetrix`
+// schema'sında yaşar (Supabase ücretsiz kademe 2 projeyle sınırlı olduğu için).
+// Schema seçimi: Prisma CLI için bağlantı dizesindeki `?schema=testmetrix`,
+// çalışma zamanında PrismaPg adapter'ına geçilen `{ schema: "testmetrix" }`.
+//
+// Ayrı schema'nın güvenlik faydası: Supabase Data API varsayılan olarak yalnızca
+// `public` ve `graphql_public` schema'larını yayınlar, bu tablolar PostgREST'e
+// hiç açılmaz.
+//
+// Kimlik doğrulama tablosu YOK: giriş GateHub üzerinden OIDC ile yapılıyor ve
+// Auth.js JWT session stratejisi kullanıyor. `app_user` yalnızca GateHub
+// kimliğinin yerel aynası — foreign key ve cascade silme için.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7'de bağlantı URL'i şemada değil, prisma.config.ts'te tanımlanır.
+datasource db {
+  provider = "postgresql"
+}
+
+/// Rol yalnızca sunucu tarafında atanır. Eski Express backend'inde `role`
+/// doğrudan register isteğinin gövdesinden okunuyordu; herkes kendini
+/// "Yönetici" yapabiliyordu.
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum AnswerOption {
+  A
+  B
+  C
+  D
+  E
+  BOS
+}
+
+/// GateHub kimliğinin yerel aynası. Her girişte `signIn` callback'inde
+/// upsert edilir; `id` GateHub'ın `sub` değeridir.
+model AppUser {
+  id             String    @id
+  email          String    @unique
+  name           String
+  image          String?
+  university     String?
+  phone          String?
+  role           Role      @default(TEACHER)
+  kvkkAcceptedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  folders Folder[]
+  exams   Exam[]
+
+  @@map("app_user")
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  ownerId   String
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner AppUser @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  exams Exam[]
+
+  @@index([ownerId, sortOrder])
+  @@map("folder")
+}
+
+model Exam {
+  id            String   @id @default(cuid())
+  folderId      String
+  ownerId       String
+  name          String
+  questionCount Int
+  studentCount  Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  folder     Folder      @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  owner      AppUser     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  answerKeys AnswerKey[]
+  students   Student[]
+  answers    Answer[]
+  stat       ExamStat?
+  itemStats  ItemStat[]
+
+  @@index([ownerId])
+  @@index([folderId])
+  @@map("exam")
+}
+
+model AnswerKey {
+  examId        String
+  questionNo    Int
+  correctOption AnswerOption
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@id([examId, questionNo])
+  @@map("answer_key")
+}
+
+model Student {
+  id       String @id @default(cuid())
+  examId   String
+  fullName String
+  rowNo    Int
+
+  exam    Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@unique([examId, rowNo])
+  @@map("student")
+}
+
+/// Sınavın ham cevap matrisi. Eski sürümde tüm Excel tek bir JSON alanına
+/// (`file_data`) yazılıyordu; bu hem Mongo'nun 16MB belge limitine hem de
+/// Vercel'in 4.5MB istek gövdesi limitine takılıyor, üstelik hiçbir sorgu
+/// yazılmasına izin vermiyordu.
+model Answer {
+  examId     String
+  studentId  String
+  questionNo Int
+  option     AnswerOption
+
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([examId, studentId, questionNo])
+  @@index([examId, questionNo])
+  @@map("answer")
+}
+
+/// Hesaplanmış test istatistikleri önbelleği. Kaynak doğruluk her zaman
+/// `answer` + `answer_key`; buradaki değerler `analyzeExam` çıktısıdır.
+/// Hesaplanamayan değerler NULL (eskiden NaN üretilip 0 olarak gösteriliyordu).
+model ExamStat {
+  examId               String   @id
+  mean                 Float
+  median               Float?
+  minScore             Float?
+  maxScore             Float?
+  range                Float?
+  variance             Float
+  stdDeviation         Float
+  skewness             Float?
+  kurtosis             Float?
+  coefficientVariation Float?
+  successRate          Float?
+  kr20                 Float?
+  kr21                 Float?
+  computedAt           DateTime @default(now())
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@map("exam_stat")
+}
+
+model ItemStat {
+  examId           String
+  questionNo       Int
+  difficulty       Float
+  correctCount     Int
+  variance         Float
+  stdDeviation     Float
+  discrimination   Float
+  rbis             Float?
+  prbis            Float?
+  reliabilityIndex Float?
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@id([examId, questionNo])
+  @@map("item_stat")
+}
