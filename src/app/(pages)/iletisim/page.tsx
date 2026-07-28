@@ -1,84 +1,50 @@
 import type { Metadata } from "next";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mail, MapPin, Clock } from "lucide-react";
+import { Card, PageHeader, PageShell, SectionTitle } from "@/features/ui/primitives";
 
-export const metadata: Metadata = {
-  title: "İletişim — TestMetrix",
-};
+export const metadata: Metadata = { title: "İletişim" };
 
 const CONTACT_EMAIL = "ahmetkurtk2@gmail.com";
 
 /**
- * İletişim sayfası.
+ * İletişim.
  *
- * Buradaki form kaldırıldı. Eski hali, backend'deki `/send-mail` uç noktasına
+ * Buradaki form kaldırıldı. Eski hali backend'deki `/send-mail` uç noktasına
  * POST atıyordu; o uç nokta kimlik doğrulaması ve hız sınırı olmadan, gövdeden
  * gelen adresi `from` alanına koyarak projenin kendi Gmail hesabından mail
- * gönderiyordu — yani internete açık bir mail relay'di. Spam için kullanılsaydı
- * hesabın kapanmasıyla sonuçlanabilirdi.
- *
- * Yerine doğrudan `mailto:` bağlantısı kondu: yeni saldırı yüzeyi açmıyor ve
- * kullanıcının kendi mail istemcisini kullanıyor. Gerçek bir form gerekirse
- * hız sınırlı bir uç noktayla sonradan eklenebilir.
+ * gönderiyordu — internete açık bir mail relay'di.
  */
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">İletişim</h1>
-          <p className="text-gray-600">
-            Soru, öneri ve hata bildirimleriniz için bize ulaşın.
-          </p>
-        </div>
+    <PageShell>
+      <PageHeader
+        title="İletişim"
+        meta="Soru, öneri ve hata bildirimleri için"
+      />
 
-        <Card className="bg-white/95 shadow-sm">
-          <CardContent className="p-8 space-y-6">
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-                "TestMetrix — "
-              )}`}
-              className="flex items-start gap-4 p-4 rounded-lg hover:bg-blue-50 transition-colors group"
-            >
-              <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                <Mail className="w-5 h-5 text-blue-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">E-posta</h2>
-                <p className="text-blue-600 break-all">{CONTACT_EMAIL}</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Tıklayarak doğrudan mail gönderebilirsiniz.
-                </p>
-              </div>
-            </a>
+      <Card>
+        <SectionTitle title="E-posta" />
+        <a
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("TestMetrix — ")}`}
+          className="text-sm text-[var(--viz-series)] hover:underline break-all"
+        >
+          {CONTACT_EMAIL}
+        </a>
+        <p className="mt-2 text-xs text-[var(--viz-text-secondary)]">
+          Bağlantıya tıklayınca kendi e-posta uygulamanız açılır.
+        </p>
+      </Card>
 
-            <div className="flex items-start gap-4 p-4">
-              <div className="p-3 bg-gray-100 rounded-lg">
-                <Clock className="w-5 h-5 text-gray-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Yanıt Süresi</h2>
-                <p className="text-gray-600">
-                  Mesajlar genellikle birkaç iş günü içinde yanıtlanır.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 p-4">
-              <div className="p-3 bg-gray-100 rounded-lg">
-                <MapPin className="w-5 h-5 text-gray-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Proje Hakkında</h2>
-                <p className="text-gray-600">
-                  TestMetrix, çoktan seçmeli sınavlar için madde ve test analizi
-                  yapan bir platformdur.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      <Card>
+        <SectionTitle title="Hata bildirirken" />
+        <ul className="list-disc pl-5 space-y-1 text-sm text-[var(--viz-text-secondary)]">
+          <li>Hangi ekranda olduğunuzu ve ne yapmaya çalıştığınızı yazın.</li>
+          <li>
+            Bir sınavla ilgiliyse öğrenci ve madde sayısını belirtin; sorun
+            genellikle dosya düzeninden kaynaklanır.
+          </li>
+          <li>Ekran görüntüsü varsa ekleyin.</li>
+        </ul>
+      </Card>
+    </PageShell>
   );
 }

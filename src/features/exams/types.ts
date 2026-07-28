@@ -25,6 +25,12 @@ export type ExamSummary = {
   questionCount: number;
   studentCount: number;
   createdAt: string;
+  /** Önbellekten gelen özet; hesaplanamayan değerler `null`. */
+  stat: {
+    mean: number;
+    kr20: number | null;
+    successRate: number | null;
+  } | null;
 };
 
 export type ExamDetail = {

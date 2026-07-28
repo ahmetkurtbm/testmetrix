@@ -1,19 +1,27 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdminId } from "@/lib/session";
+import { fmtDate } from "@/lib/format";
 import { UserActions } from "./UserActions";
+import {
+  Card,
+  PageHeader,
+  PageShell,
+  SectionTitle,
+  StatTile,
+  TableShell,
+  Th,
+} from "@/features/ui/primitives";
 
 /**
  * Yönetim ekranı.
  *
- * Yetki kontrolü SUNUCUDA ve sayfanın ilk satırında. Eski sürümde bu sayfa
- * hiçbir kontrol yapmıyordu: `fetch("http://localhost:5000/users")` ile sabit
- * bir adrese istek atıyordu (üstelik backend 8080'deydi, yani üretimde tamamen
- * kırıktı) ve arkadaki uç nokta da rol kontrolü yapmadığı için giriş yapmış
- * herkes tüm kullanıcı listesini çekebiliyordu.
+ * Yetki kontrolü SUNUCUDA ve ilk satırda. Eski sürüm hiçbir kontrol yapmıyor,
+ * sabit `localhost:5000` adresine istek atıyordu; arkadaki uç nokta da rol
+ * kontrolü yapmadığı için giriş yapmış herkes tüm kullanıcı listesini
+ * çekebiliyordu.
  *
- * Yetkisiz kullanıcıya 403 yerine 404 gösteriliyor: sayfanın varlığını bile
- * sızdırmamak için.
+ * Yetkisize 403 değil 404 gösteriliyor: sayfanın varlığı bile sızmasın.
  */
 export default async function DashboardPage() {
   let adminId: string;
@@ -23,89 +31,102 @@ export default async function DashboardPage() {
     notFound();
   }
 
-  const users = await prisma.appUser.findMany({
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      university: true,
-      phone: true,
-      role: true,
-      createdAt: true,
-      _count: { select: { folders: true, exams: true } },
-    },
-  });
+  const [users, examCount, studentSum] = await Promise.all([
+    prisma.appUser.findMany({
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        university: true,
+        role: true,
+        createdAt: true,
+        _count: { select: { folders: true, exams: true } },
+      },
+    }),
+    prisma.exam.count(),
+    prisma.exam.aggregate({ _sum: { studentCount: true } }),
+  ]);
+
+  const admins = users.filter((u) => u.role === "ADMIN").length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Kullanıcılar</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Kimlik doğrulama GateHub üzerinden yapılır. Buradan yalnızca
-            testmetrix içindeki roller yönetilir.
-          </p>
-        </div>
+    <PageShell>
+      <PageHeader
+        title="Yönetim"
+        meta="Kimlik doğrulama GateHub üzerinden yapılır; buradan yalnızca TestMetrix rolleri yönetilir."
+      />
 
-        <div className="overflow-x-auto rounded-lg shadow bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {["Ad", "E-posta", "Üniversite", "Klasör", "Sınav"].map((header) => (
-                  <th
-                    key={header}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
-                  >
-                    {header}
-                  </th>
-                ))}
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol / İşlem
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {user.name}
-                    {user.id === adminId && (
-                      <span className="ml-2 text-xs text-blue-600">(siz)</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.university ?? "—"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user._count.folders}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user._count.exams}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <UserActions
-                      userId={user.id}
-                      role={user.role}
-                      email={user.email}
-                      isSelf={user.id === adminId}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {users.length === 0 && (
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Henüz kullanıcı yok.
-          </p>
-        )}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <StatTile label="Kullanıcı" value={String(users.length)} />
+        <StatTile label="Yönetici" value={String(admins)} />
+        <StatTile label="Toplam sınav" value={String(examCount)} />
+        <StatTile
+          label="Öğrenci kaydı"
+          value={String(studentSum._sum.studentCount ?? 0)}
+        />
       </div>
-    </div>
+
+      <Card>
+        <SectionTitle
+          title="Kullanıcılar"
+          hint="Rolü değiştirebilir veya hesabı silebilirsiniz. Kendi yetkinizi kaldıramazsınız."
+        />
+
+        <TableShell>
+          <thead className="bg-[var(--viz-surface)] text-[var(--viz-text-secondary)]">
+            <tr>
+              <Th>Ad</Th>
+              <Th>E-posta</Th>
+              <Th>Kurum</Th>
+              <Th align="right">Klasör</Th>
+              <Th align="right">Sınav</Th>
+              <Th align="right">Kayıt</Th>
+              <Th align="right">Rol / İşlem</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr
+                key={user.id}
+                className="border-t border-black/5 dark:border-white/10 hover:bg-[var(--viz-surface)] transition-colors"
+              >
+                <td className="px-3 py-2 font-medium text-[var(--viz-text)]">
+                  {user.name}
+                  {user.id === adminId && (
+                    <span className="ml-2 text-xs text-[var(--viz-series)]">
+                      (siz)
+                    </span>
+                  )}
+                </td>
+                <td className="px-3 py-2 text-[var(--viz-text-secondary)]">
+                  {user.email}
+                </td>
+                <td className="px-3 py-2 text-[var(--viz-text-secondary)]">
+                  {user.university ?? "—"}
+                </td>
+                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
+                  {user._count.folders}
+                </td>
+                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
+                  {user._count.exams}
+                </td>
+                <td className="px-3 py-2 text-right text-[var(--viz-text-secondary)]">
+                  {fmtDate(user.createdAt)}
+                </td>
+                <td className="px-3 py-2">
+                  <UserActions
+                    userId={user.id}
+                    role={user.role}
+                    email={user.email}
+                    isSelf={user.id === adminId}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </TableShell>
+      </Card>
+    </PageShell>
   );
 }

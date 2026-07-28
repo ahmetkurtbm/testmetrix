@@ -1,122 +1,127 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Book, Users, Target, Mail } from "lucide-react";
-import Link from "next/link";
+import type { Metadata } from "next";
+import {
+  Card,
+  GhostButton,
+  PageHeader,
+  PageShell,
+  SectionTitle,
+} from "@/features/ui/primitives";
+
+export const metadata: Metadata = { title: "Hakkında" };
+
+/**
+ * Hakkında sayfası.
+ *
+ * Eski hali gerçekte olmayan özellikler vaat ediyordu: "İşbirliği ve Paylaşım —
+ * meslektaşlarınızla verilerinizi paylaşın" (paylaşım özelliği yok) ve
+ * "7/24 teknik destek" (böyle bir destek yok). Bunlar kaldırıldı; sayfa artık
+ * yalnızca uygulamanın gerçekten yaptığı işi anlatıyor.
+ */
+const METRICS = [
+  {
+    title: "Madde güçlüğü (p)",
+    body: "Maddeyi doğru yanıtlayanların oranı. 1'e yakın değer maddenin çok kolay, 0'a yakın değer çok zor olduğunu gösterir.",
+  },
+  {
+    title: "Ayırt edicilik indeksi",
+    body: "Üst %27 ile alt %27'lik dilimin doğru yanıtlama farkı. Düşük değer, maddenin başarılı ve başarısız öğrenciyi ayırmadığı anlamına gelir.",
+  },
+  {
+    title: "Biserial ve point-biserial korelasyon",
+    body: "Maddenin test toplam puanıyla ilişkisi. Herkesin doğru ya da herkesin yanlış yaptığı maddelerde tanımsızdır ve “—” olarak gösterilir.",
+  },
+  {
+    title: "KR-20 ve KR-21",
+    body: "Testin iç tutarlılığı. En az iki madde ve puanlarda değişkenlik gerektirir; hesaplanamadığında sıfır değil, hesaplanamadı olarak raporlanır.",
+  },
+  {
+    title: "Çeldirici analizi",
+    body: "Madde başına hangi şıkkı kimin işaretlediği, üst ve alt grup karşılaştırmalı. Çeldiricinin işe yarayıp yaramadığını gösterir.",
+  },
+  {
+    title: "Öğrenci istatistikleri",
+    body: "Puan, başarı yüzdesi, Z ve T puanı, başarı sırası. Eşit puan alanlar eşit sıra alır.",
+  },
+];
 
 export default function InformationPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-sm"></div>
-        <img
-          className="w-full h-full object-cover opacity-30"
-          src="bg-anaekran.jpg"
-          alt="background"
-        />
-      </div>
+    <PageShell>
+      <PageHeader
+        title="TestMetrix hakkında"
+        meta="Çoktan seçmeli sınavlar için madde ve test analizi"
+        actions={<GhostButton href="/excel-upload">Sınav yükle</GhostButton>}
+      />
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-12">
-          {/* Header Section */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-gray-800">
-              Eğitimde Yenilikçi Çözümler
-            </h1>
-            <p className="text-xl text-gray-600">
-              Öğretmenler için özel olarak tasarlanmış, veri odaklı eğitim
-              yönetim platformu
-            </p>
-          </div>
+      <Card>
+        <SectionTitle title="Ne yapar?" />
+        <p className="text-sm text-[var(--viz-text-secondary)] leading-relaxed">
+          Cevap anahtarını ve öğrenci yanıtlarını içeren bir Excel dosyası
+          yüklersiniz; uygulama klasik test kuramına dayalı madde ve test
+          istatistiklerini hesaplar, hangi maddelerin gözden geçirilmesi
+          gerektiğini işaretler ve sonuçları Excel ile PDF olarak dışa aktarır.
+        </p>
+      </Card>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/90 backdrop-blur">
-              <CardContent className="p-6 space-y-4">
-                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Book className="h-6 w-6 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Kolay Veri Yönetimi
-                </h2>
-                <p className="text-gray-600">
-                  Excel dosyalarınızı kolayca yükleyin, düzenleyin ve analiz
-                  edin. Öğrenci verilerini tek bir platformda yönetin.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/90 backdrop-blur">
-              <CardContent className="p-6 space-y-4">
-                <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                  <Target className="h-6 w-6 text-green-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Detaylı Analizler
-                </h2>
-                <p className="text-gray-600">
-                  Öğrenci performansını grafikler ve raporlarla takip edin. Veri
-                  odaklı kararlar alın.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/90 backdrop-blur">
-              <CardContent className="p-6 space-y-4">
-                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-purple-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">
-                  İşbirliği ve Paylaşım
-                </h2>
-                <p className="text-gray-600">
-                  Meslektaşlarınızla verilerinizi güvenle paylaşın. Okul
-                  genelinde koordinasyonu artırın.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/90 backdrop-blur">
-              <CardContent className="p-6 space-y-4">
-                <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <Mail className="h-6 w-6 text-orange-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Destek ve İletişim
-                </h2>
-                <p className="text-gray-600">
-                  7/24 teknik destek ve eğitim desteği. Sorularınız için her
-                  zaman yanınızdayız.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* CTA Section */}
-          <div className="text-center space-y-6 bg-white/80 backdrop-blur p-8 rounded-2xl shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800">Hemen Başlayın</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Eğitim süreçlerinizi dijitalleştirin, veri odaklı kararlar alın ve
-              öğrencilerinizin başarısını artırın.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Link href="/excel-upload">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2">
-                  Hemen Başla
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/iletisim">
-                <Button variant="outline" className="px-8 py-2">
-                  İletişime Geç
-                </Button>
-              </Link>
-            </div>
-          </div>
+      <Card>
+        <SectionTitle title="Dosya biçimi" />
+        <div className="space-y-2 text-sm text-[var(--viz-text-secondary)]">
+          <p>Tek sayfalık bir .xlsx dosyası:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong className="text-[var(--viz-text)]">İlk satır</strong> cevap
+              anahtarı — ilk hücre etiket, sonrakiler doğru şıklar.
+            </li>
+            <li>
+              <strong className="text-[var(--viz-text)]">Sonraki satırlar</strong>{" "}
+              öğrenciler — ilk hücre ad soyad, sonrakiler işaretlenen şıklar.
+            </li>
+            <li>
+              Geçerli şıklar A–E. Boş bırakılan ve tanınmayan hücreler “boş”
+              sayılır; büyük/küçük harf ve baştaki-sondaki boşluk göz ardı edilir.
+            </li>
+          </ul>
+          <p className="pt-1">
+            Yükleme ekranından örnek dosyayı indirerek beklenen düzeni
+            görebilirsiniz.
+          </p>
         </div>
-      </div>
-    </div>
+      </Card>
+
+      <Card>
+        <SectionTitle title="Hesaplanan değerler" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          {METRICS.map((metric) => (
+            <div key={metric.title}>
+              <h3 className="text-sm font-medium text-[var(--viz-text)]">
+                {metric.title}
+              </h3>
+              <p className="mt-1 text-xs text-[var(--viz-text-secondary)] leading-relaxed">
+                {metric.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle title="Veriler ve gizlilik" />
+        <ul className="list-disc pl-5 space-y-1 text-sm text-[var(--viz-text-secondary)]">
+          <li>Yüklediğiniz sınavlar yalnızca sizin hesabınıza bağlıdır.</li>
+          <li>
+            Giriş işlemleri GateHub üzerinden yapılır; TestMetrix parolanızı
+            saklamaz.
+          </li>
+          <li>
+            Hesabınızı profil sayfasından silebilirsiniz; klasörleriniz ve
+            sınavlarınız da birlikte silinir.
+          </li>
+          <li>
+            Tanıtım sayfasındaki deneme aracında seçtiğiniz dosya sunucuya
+            gönderilmez, hesaplama tarayıcınızda yapılır.
+          </li>
+        </ul>
+      </Card>
+    </PageShell>
   );
 }

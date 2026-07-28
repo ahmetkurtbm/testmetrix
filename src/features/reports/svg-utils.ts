@@ -56,8 +56,6 @@ export function niceTicks(max: number, count = 4, integerOnly = false): number[]
   return ticks;
 }
 
-/** Sayıyı gösterime hazırlar; hesaplanamayan değerler "—". */
-export function fmt(value: number | null | undefined, digits = 2): string {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
-  return value.toFixed(digits);
-}
+// Biçimlendirme tüm ekranlarda ortak; buradan yeniden dışa aktarılıyor ki
+// grafik bileşenleri tek bir yerden import etsin.
+export { fmt } from "@/lib/format";

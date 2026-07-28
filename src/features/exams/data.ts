@@ -102,6 +102,12 @@ export function listExams(userId: string, folderId?: string) {
       questionCount: true,
       studentCount: true,
       createdAt: true,
+      // Önbellekten okunuyor: listeleme ekranında her sınav için tam analiz
+      // çalıştırmadan ortalama ve güvenirlik gösterilebilsin diye
+      // `exam_stat` tablosu tam olarak bu iş için var.
+      stat: {
+        select: { mean: true, kr20: true, successRate: true },
+      },
     },
   });
 }

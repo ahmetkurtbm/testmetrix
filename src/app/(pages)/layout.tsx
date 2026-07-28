@@ -4,8 +4,11 @@ import Header from "../(components)/Header";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 
+// `title` bilerek yok: kök layout'ta `default: "TestMetrix"` +
+// `template: "%s — TestMetrix"` tanımlı. Burada tekrar "TestMetrix" yazmak
+// şablonu tetikleyip "TestMetrix — TestMetrix" üretiyordu. Kendi başlığını
+// veren sayfalar (Hakkında, İletişim) şablonu doğru şekilde kullanıyor.
 export const metadata: Metadata = {
-  title: "TestMetrix",
   description:
     "Test ve madde analizi platformu — psikometrik istatistikler ve raporlama",
   icons: {

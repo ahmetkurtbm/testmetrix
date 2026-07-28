@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getSessionUser } from "@/lib/session";
 
+// Kök layout'taki `template: "%s — TestMetrix"` soneki kendisi ekliyor;
+// burada tekrar yazmak "Giriş — TestMetrix — TestMetrix" üretiyordu.
 export const metadata: Metadata = {
-  title: "Giriş — TestMetrix",
+  title: "Giriş",
 };
 
 /**
