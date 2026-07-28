@@ -24,7 +24,11 @@ export const config = {
    * sayfa otomatik olarak korumalı olur. Eski koddaki en büyük sorun, korumanın
    * her yere elle kopyalanması ve bazı yerlerde unutulmasıydı.
    */
+  /**
+   * `$` ilk sırada: kök adres (`/`) public tanıtım sayfası olduğu için
+   * korumanın dışında. Diğer her şey varsayılan olarak korumalı.
+   */
   matcher: [
-    "/((?!api/auth|login|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
+    "/((?!$|api/auth|login|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
   ],
 };

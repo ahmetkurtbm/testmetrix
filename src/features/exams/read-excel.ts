@@ -1,4 +1,7 @@
-import ExcelJS from "exceljs";
+// Yalnızca tip olarak import ediliyor (derlemede siliniyor); çalışma zamanında
+// ExcelJS aşağıda dinamik olarak yükleniyor. Statik import, kullanıcı dosya
+// seçmese bile ~190 kB'lık kütüphaneyi sayfa açılışında indiriyordu.
+import type ExcelJSTypes from "exceljs";
 
 /**
  * Tarayıcıda Excel dosyasını ham matrise çevirir.
@@ -20,7 +23,7 @@ import ExcelJS from "exceljs";
 
 type Cell = string | number | boolean | null;
 
-function normalizeCell(value: ExcelJS.CellValue): Cell {
+function normalizeCell(value: ExcelJSTypes.CellValue): Cell {
   if (value === null || value === undefined) return null;
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return value;
@@ -29,7 +32,7 @@ function normalizeCell(value: ExcelJS.CellValue): Cell {
 
   if (typeof value === "object") {
     // Formül hücresi: hesaplanmış sonucu al
-    if ("result" in value) return normalizeCell(value.result as ExcelJS.CellValue);
+    if ("result" in value) return normalizeCell(value.result as ExcelJSTypes.CellValue);
     // Zengin metin: parçaları birleştir
     if ("richText" in value && Array.isArray(value.richText)) {
       return value.richText.map((part) => part.text).join("");
@@ -42,6 +45,8 @@ function normalizeCell(value: ExcelJS.CellValue): Cell {
 }
 
 export async function readExcelMatrix(file: File): Promise<Cell[][]> {
+  const { default: ExcelJS } = await import("exceljs");
+
   const buffer = await file.arrayBuffer();
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer);
