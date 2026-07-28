@@ -48,6 +48,15 @@ export const createExamSchema = z.object({
     .max(MAX_STUDENTS + 1),
 });
 
+export const updateExamSchema = z.object({
+  name: trimmedName.optional(),
+  folderId: z.string().min(1).optional(),
+  matrix: z
+    .array(z.array(z.unknown()).max(MAX_QUESTIONS + 1))
+    .min(2, "Dosyada cevap anahtarı ve en az bir öğrenci satırı olmalı")
+    .max(MAX_STUDENTS + 1),
+});
+
 export const updateProfileSchema = z.object({
   university: z.string().trim().max(160).nullish(),
   phone: z.string().trim().max(32).nullish(),

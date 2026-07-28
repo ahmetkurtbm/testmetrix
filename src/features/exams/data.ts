@@ -228,6 +228,91 @@ export async function createExam(
 }
 
 /**
+ * Sınavın cevap verisini tamamen değiştirir (düzenleme ekranı).
+ *
+ * Satır satır fark almak yerine sil-yeniden yaz yapılıyor: cevap matrisi zaten
+ * bir bütün olarak geliyor ve öğrenci sayısı/soru sayısı da değişebiliyor.
+ * Tamamı tek transaction içinde, yani yarım kalmış bir güncelleme mümkün değil.
+ */
+export async function replaceExamData(
+  userId: string,
+  examId: string,
+  input: { name?: string; folderId?: string; data: ExamData }
+) {
+  await requireExam(userId, examId);
+  if (input.folderId) await requireFolder(userId, input.folderId);
+
+  const { data } = input;
+  const analysis = analyzeExam(data);
+  const studentIds = data.studentNames.map(() => randomUUID());
+
+  await prisma.$transaction(
+    async (tx) => {
+      // answer → student sırası önemli değil, cascade zaten var; yine de
+      // açıkça siliyoruz ki bağımlılık sırası okunur olsun.
+      await tx.answer.deleteMany({ where: { examId } });
+      await tx.student.deleteMany({ where: { examId } });
+      await tx.answerKey.deleteMany({ where: { examId } });
+      await tx.itemStat.deleteMany({ where: { examId } });
+      await tx.examStat.deleteMany({ where: { examId } });
+
+      await tx.exam.update({
+        where: { id: examId },
+        data: {
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.folderId ? { folderId: input.folderId } : {}),
+          questionCount: data.answerKey.length,
+          studentCount: data.studentNames.length,
+        },
+      });
+
+      await tx.answerKey.createMany({
+        data: data.answerKey.map((correctOption, index) => ({
+          examId,
+          questionNo: index + 1,
+          correctOption,
+        })),
+      });
+
+      await tx.student.createMany({
+        data: data.studentNames.map((fullName, index) => ({
+          id: studentIds[index],
+          examId,
+          fullName,
+          rowNo: index,
+        })),
+      });
+
+      await tx.answer.createMany({
+        data: data.responses.flatMap((row, studentIndex) =>
+          row.map((option, questionIndex) => ({
+            examId,
+            studentId: studentIds[studentIndex],
+            questionNo: questionIndex + 1,
+            option,
+          }))
+        ),
+      });
+
+      await tx.examStat.create({ data: buildExamStat(examId, analysis) });
+
+      const itemRows = buildItemStats(examId, analysis);
+      if (itemRows.length > 0) {
+        await tx.itemStat.createMany({ data: itemRows });
+      }
+    },
+    { timeout: 30_000, maxWait: 10_000 }
+  );
+
+  return { id: examId };
+}
+
+/** Hesabı ve ona bağlı her şeyi siler (klasörler, sınavlar, cevaplar cascade). */
+export async function deleteAccount(userId: string) {
+  await prisma.appUser.delete({ where: { id: userId } });
+}
+
+/**
  * İstatistik önbelleği satırlarını üreten saf yardımcılar.
  * Prisma istemci tipine bağlı olmadıkları için transaction içinde de dışında da
  * kullanılabilir ve doğrudan test edilebilirler.

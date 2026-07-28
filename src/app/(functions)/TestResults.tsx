@@ -18,6 +18,7 @@ import {
 } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
+import type { ExamAnalysis } from "@/features/analysis";
 
 // Font tanımlamasını güncelle
 Font.register({
@@ -1159,51 +1160,78 @@ const ItemAnalysisTable: React.FC<{ itemAnalysis: ItemAnalysis }> = ({
   );
 };
 
-const TestResults: React.FC<any> = ({
-  scores,
+/**
+ * PDF raporu sarmalayıcısı.
+ *
+ * İki hata düzeltildi:
+ *
+ * 1. Rapor başlığı sabit sahte verilerle dolduruluyordu ("Mehmet Yilmaz",
+ *    "Kocaeli Atilim Lisesi", "Matematik", "08.08.2024") — hangi sınav
+ *    indirilirse indirilsin PDF'te bu yazıyordu. Artık gerçek sınav adı ve
+ *    tarihi kullanılıyor.
+ * 2. `correctProbability` alanına doğru yanıt SAYILARI geçiriliyordu; grafik
+ *    olasılık beklerken ham sayı çiziyordu. Artık madde güçlük indeksi (p)
+ *    geçiliyor.
+ *
+ * Bileşen `React.FC<any>` olarak yazıldığı için bu uyuşmazlıkların hiçbiri
+ * derleme hatası vermiyordu; prop tipleri artık açık.
+ */
+const TestResults = ({
+  analysis,
   studentNames,
-  maxScore,
-  minScore,
-  average,
-  standardDeviation,
-  frequencyTable,
-  median,
-  mode,
-  varyans,
-  successRate,
-  kr20,
-  kurtosis,
-  skewness,
-  itemDifficulty,
-  itemDiscrimination,
-  itemCorrectProbability,
+  examName,
+  examDate,
+}: {
+  analysis: ExamAnalysis;
+  studentNames: string[];
+  examName: string;
+  examDate: string;
 }) => {
+  const { descriptive: d, reliability, students, items, frequency } = analysis;
+
+  // PDF bileşenleri sayı bekliyor; hesaplanamayan değerler için 0'a düşülüyor.
+  const orZero = (value: number | null) => value ?? 0;
+
   const testData: TestData = {
-    teacher: "Mehmet Yilmaz",
-    school: "Kocaeli Atilim Lisesi",
-    testName: "Matematik",
-    class: "2",
-    subject: "Modüler Aritmetik",
-    date: "08.08.2024 / 16:00",
+    teacher: "",
+    school: "",
+    testName: examName,
+    class: "",
+    subject: "",
+    date: new Date(examDate).toLocaleString("tr"),
     studentCount: studentNames.length,
-    highestScore: maxScore,
-    lowestScore: minScore,
-    meanScore: average,
-    stdDeviation: standardDeviation.toFixed(2),
-    frequencyTable: frequencyTable,
-    median: median,
-    mode: mode,
-    varyans: varyans.toFixed(2),
-    successRate: successRate,
-    kr20: kr20,
-    kurtosis: kurtosis,
-    skewness: skewness,
-  };
+    highestScore: orZero(d.max),
+    lowestScore: orZero(d.min),
+    meanScore: d.mean,
+    stdDeviation: d.stdDeviation.toFixed(2),
+    frequencyTable: frequency.map((f) => [f.score, f.count, f.percentage]),
+    median: orZero(d.median),
+    mode: d.mode,
+    varyans: d.variance.toFixed(2),
+    successRate: orZero(d.successRate),
+    kr20: orZero(reliability.kr20),
+    kurtosis: orZero(d.kurtosis),
+    skewness: orZero(d.skewness),
+  } as TestData;
+
+  const scores = students.scores;
+  const maxScore = orZero(d.max);
+  const minScore = orZero(d.min);
+  const average = d.mean;
+  const standardDeviation = d.stdDeviation;
+  const frequencyTable = testData.frequencyTable;
+  const median = orZero(d.median);
+  const mode = d.mode;
+  const varyans = d.variance;
+  const successRate = orZero(d.successRate);
+  const kr20 = orZero(reliability.kr20);
+  const kurtosis = orZero(d.kurtosis);
+  const skewness = orZero(d.skewness);
 
   const itemAnalysis: ItemAnalysis = {
-    difficulty: itemDifficulty,
-    discrimination: itemDiscrimination,
-    correctProbability: itemCorrectProbability,
+    difficulty: items.difficulty,
+    discrimination: items.discrimination,
+    correctProbability: items.difficulty,
   };
 
   const handleDownload = async () => {
@@ -1227,7 +1255,8 @@ const TestResults: React.FC<any> = ({
         itemAnalysis={itemAnalysis}
       />
     ).toBlob();
-    saveAs(blob, "Test_Sonuclari.pdf");
+    const safeName = examName.replace(/[\\/:*?"<>|]/g, "-").trim() || "sinav";
+    saveAs(blob, `${safeName}_Test_Sonuclari.pdf`);
   };
 
   return (

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { deleteAccount } from "@/features/exams/data";
 import { updateProfileSchema } from "@/features/exams/schemas";
 import { handle, NotFoundError } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
@@ -22,6 +23,18 @@ export async function GET() {
     });
     if (!user) throw new NotFoundError("Kullanıcı bulunamadı");
     return user;
+  });
+}
+
+/**
+ * Hesabı siler. Klasörler, sınavlar ve tüm cevap satırları cascade ile gider.
+ * GateHub'daki hesap etkilenmez — orası ayrı bir sistem.
+ */
+export async function DELETE() {
+  return handle(async () => {
+    const userId = await requireUserId();
+    await deleteAccount(userId);
+    return { ok: true };
   });
 }
 

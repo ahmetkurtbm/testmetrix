@@ -13,10 +13,28 @@ import { prisma } from "@/lib/prisma";
  * mümkün kılıyor.
  */
 export async function requireUserId(): Promise<string> {
+  const user = await getSessionUser();
+  if (!user) throw new UnauthorizedError();
+  return user.id;
+}
+
+/**
+ * Oturumdaki kullanıcı — yoksa `null`.
+ *
+ * "Giriş yapılmış mı?" sorusunun TEK cevabı burası. Daha önce bu soru üç ayrı
+ * yerde üç farklı şekilde soruluyordu (`auth?.user`, `session?.user`,
+ * `session?.user?.id`) ve karşılıklı yönlendirme yapan iki taraf farklı cevap
+ * verdiği için `/login` ⇄ `/folders` sonsuz döngüsü oluşuyordu.
+ */
+export async function getSessionUser() {
   const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) throw new UnauthorizedError();
-  return userId;
+  const id = session?.user?.id;
+  if (!id) return null;
+  return {
+    id,
+    email: session.user.email ?? null,
+    name: session.user.name ?? null,
+  };
 }
 
 /**

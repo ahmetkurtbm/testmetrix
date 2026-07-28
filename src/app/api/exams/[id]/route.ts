@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
-import { analyzeExam } from "@/features/analysis";
-import { deleteExam, getExamData } from "@/features/exams/data";
-import { handle } from "@/lib/api";
+import { analyzeExam, parseExamMatrix } from "@/features/analysis";
+import { deleteExam, getExamData, replaceExamData } from "@/features/exams/data";
+import { updateExamSchema } from "@/features/exams/schemas";
+import { handle, ValidationError } from "@/lib/api";
 import { requireUserId } from "@/lib/session";
 
 type Params = { params: Promise<{ id: string }> };
@@ -31,8 +32,30 @@ export async function GET(_request: NextRequest, { params }: Params) {
       },
       studentNames: data.studentNames,
       answerKey: data.answerKey,
+      // Düzenleme ekranı ham cevapları gösteriyor; analiz çıktısı yalnızca
+      // 0/1 matrisi içerdiği için hangi şıkkın işaretlendiği oradan çıkarılamaz.
+      responses: data.responses,
       analysis: analyzeExam(data),
     };
+  });
+}
+
+/** Düzenleme ekranından gelen tam matris. Normalizasyon yine sunucuda. */
+export async function PUT(request: NextRequest, { params }: Params) {
+  return handle(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const { name, folderId, matrix } = updateExamSchema.parse(await request.json());
+
+    const data = parseExamMatrix(matrix as unknown[][]);
+    if (data.answerKey.length === 0) {
+      throw new ValidationError("Cevap anahtarı okunamadı");
+    }
+    if (data.studentNames.length === 0) {
+      throw new ValidationError("Geçerli öğrenci satırı bulunamadı");
+    }
+
+    return replaceExamData(userId, id, { name, folderId, data });
   });
 }
 

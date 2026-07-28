@@ -1,8 +1,8 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Header from "../(components)/Header";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "TestMetrix",
@@ -17,25 +17,24 @@ export const metadata: Metadata = {
 /**
  * Korumalı sayfaların ortak düzeni.
  *
- * Oturum ve rol burada, sunucuda okunuyor. Eskiden bu iş Header içinde
- * `useEffect` ile yapılıyordu: sayfa render edildikten sonra backend'e sorulup
- * gerekirse `/login`'e atılıyordu — yani içerik bir an görünüyordu. Artık
- * middleware isteği zaten sayfaya ulaşmadan kesiyor; buradaki kontrol ikinci
- * savunma katmanı.
+ * Buradan `/login`'e yönlendirme YAPILMAZ. Route koruması tek bir yerde,
+ * `middleware.ts`'te; istek buraya ulaştıysa middleware onu zaten geçirmiştir.
+ * Oturum yine de okunamıyorsa `notFound()` denir — yönlendirme olmadığı için
+ * `/login` ⇄ `/folders` döngüsü oluşamaz.
  */
 const PagesLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) notFound();
 
   const user = await prisma.appUser.findUnique({
-    where: { id: session.user.id },
+    where: { id: sessionUser.id },
     select: { email: true, role: true },
   });
 
   return (
     <div>
       <Header
-        email={user?.email ?? session.user.email ?? "Profil"}
+        email={user?.email ?? sessionUser.email ?? "Profil"}
         isAdmin={user?.role === "ADMIN"}
       />
       {children}

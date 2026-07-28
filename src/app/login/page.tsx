@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import Link from "next/link";
 import { signInWithGateHub } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getSessionUser } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Giriş — TestMetrix",
@@ -12,14 +12,16 @@ export const metadata: Metadata = {
 /**
  * Giriş ekranı.
  *
- * Tek düğme: kimlik doğrulamanın tamamı GateHub'da. Burada parola alanı,
- * "hesap oluştur" ve "şifremi unuttum" bağlantıları bilerek yok — bunların
- * hepsi GateHub'ın sorumluluğunda ve orada rate limit, e-posta doğrulama,
- * 2FA ve parola geçmişi kontrolüyle birlikte geliyor.
+ * Bu sayfa hiçbir koşulda başka bir yere YÖNLENDİRMEZ. Oturum açıkken buraya
+ * gelinirse sadece "Panele dön" bağlantısı gösterilir. Karşılıklı yönlendirmenin
+ * bir ucu kesik olduğu için sonsuz döngü oluşması matematiksel olarak imkânsız.
+ *
+ * Tek düğme: kimlik doğrulamanın tamamı GateHub'da. Parola alanı, "hesap oluştur"
+ * ve "şifremi unuttum" bilerek yok — hepsi GateHub'ın sorumluluğunda ve orada
+ * rate limit, e-posta doğrulama, 2FA ve parola geçmişi kontrolüyle geliyor.
  */
 export default async function LoginPage() {
-  const session = await auth();
-  if (session?.user) redirect("/folders");
+  const sessionUser = await getSessionUser();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
@@ -46,19 +48,35 @@ export default async function LoginPage() {
           </CardHeader>
 
           <CardContent className="space-y-4 pt-4">
-            <form action={signInWithGateHub}>
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-medium rounded-lg"
-              >
-                GateHub ile Giriş Yap
-              </Button>
-            </form>
+            {sessionUser ? (
+              <>
+                <p className="text-sm text-center text-gray-700">
+                  <span className="font-medium">{sessionUser.email}</span> olarak
+                  giriş yapılmış.
+                </p>
+                <Link href="/folders" className="block">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-medium rounded-lg">
+                    Panele Dön
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <form action={signInWithGateHub}>
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-medium rounded-lg"
+                  >
+                    GateHub ile Giriş Yap
+                  </Button>
+                </form>
 
-            <p className="text-xs text-center text-gray-500 leading-relaxed">
-              Giriş işlemi GateHub üzerinden yapılır. Hesap oluşturma ve şifre
-              işlemleri de oradan yönetilir.
-            </p>
+                <p className="text-xs text-center text-gray-500 leading-relaxed">
+                  Giriş işlemi GateHub üzerinden yapılır. Hesap oluşturma ve şifre
+                  işlemleri de oradan yönetilir.
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

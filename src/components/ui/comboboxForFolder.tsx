@@ -18,59 +18,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getCookie } from "@/lib/my-utils";
+import { apiGet } from "@/lib/api-client";
+import type { FolderSummary } from "@/features/exams/types";
 
 export function ComboboxDemo({
   folderId,
   setFolderId,
 }: {
-  folderId: any;
-  setFolderId: (_id: any) => void;
+  folderId: string | undefined;
+  setFolderId: (id: string | undefined) => void;
 }) {
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
-
   const [open, setOpen] = React.useState(false);
-  const [folderName, setFolderName] = React.useState("");
-  const [folders, setFolders] = React.useState<
-    { _id: string; folder_name: string; created_at: string }[]
-  >([]);
+  const [folders, setFolders] = React.useState<FolderSummary[]>([]);
 
   React.useEffect(() => {
-    const handleGetFolders = async () => {
-      try {
-        const token = await getCookie();
-        if (!token) {
-          return;
-        }
-        const response = await fetch(`${BACKEND_URL}/folders`, {
-          method: "GET",
-          headers: {
-          "Content-Type": "application/json", Authorization: token,
-        },
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setFolders(data);
-          // Set initial folder name if folderId exists
-          const selectedFolder = data.find((f: any) => f._id === folderId);
-          if (selectedFolder) {
-            setFolderName(selectedFolder.folder_name);
-          }
-        } else {
-          console.error("Klasörler yüklenemedi:", data.error);
-        }
-      } catch (error) {
-        console.error("Klasör getirme hatası:", error);
-      }
-    };
-    handleGetFolders();
-  }, [BACKEND_URL, folderId]);
+    apiGet<FolderSummary[]>("/api/folders")
+      .then(setFolders)
+      .catch((error) => console.error("Klasörler yüklenemedi:", error));
+  }, []);
 
-  const handleChange = (folderId: string, folderName: string) => {
-    setFolderId(folderId);
-    setFolderName(folderName);
-  };
+  const selectedName = folders.find((f) => f.id === folderId)?.name;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -81,7 +48,7 @@ export function ComboboxDemo({
           aria-expanded={open}
           className="w-full justify-between bg-orange-500 text-white"
         >
-          <span className="truncate">{folderName || "Klasör Seçin..."}</span>
+          <span className="truncate">{selectedName || "Klasör Seçin..."}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -93,10 +60,10 @@ export function ComboboxDemo({
             <CommandGroup heading="Klasörler">
               {folders.map((folder) => (
                 <CommandItem
-                  key={folder._id}
-                  value={folder.folder_name}
+                  key={folder.id}
+                  value={folder.name}
                   onSelect={() => {
-                    handleChange(folder._id, folder.folder_name);
+                    setFolderId(folder.id);
                     setOpen(false);
                   }}
                   className="cursor-pointer"
@@ -104,10 +71,10 @@ export function ComboboxDemo({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      folderId === folder._id ? "opacity-100" : "opacity-0"
+                      folderId === folder.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <span className="truncate">{folder.folder_name}</span>
+                  <span className="truncate">{folder.name}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

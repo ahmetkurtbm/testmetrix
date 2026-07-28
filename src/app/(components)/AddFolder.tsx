@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,102 +13,46 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { FolderPlus } from "lucide-react";
-import { getCookie } from "@/lib/my-utils";
+import { apiPost } from "@/lib/api-client";
 
-export default function FolderAdder() {
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND;
-
+export default function FolderAdder({ onCreated }: { onCreated?: () => void }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [folderName, setFolderName] = useState("");
-
-  const handleAddFolder = () => {
-    setOpen(true);
-  };
-
-  const success = () =>
-    toast.success("Klasör Eklendi.", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-
-  const error = () =>
-    toast.error("Klasör Ekleme Başarısız, Bir Hata Oluştu!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-
-  const emptyError = () =>
-    toast.warning("Klasör adı boş bırakılamaz!", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!folderName.trim()) {
-      emptyError();
+      toast.warning("Klasör adı boş bırakılamaz!", { theme: "dark" });
       return;
     }
 
+    setSaving(true);
     try {
-      const token = await getCookie();
-      if (!token) {
-        return;
-      }
-      const response = await fetch(`${BACKEND_URL}/upload-folder`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", Authorization: token,
-        },
-        body: JSON.stringify({
-          folderName: folderName,
-        }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        success();
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        error();
-        console.error("Upload failed:", data.error);
-      }
-    } catch (err) {
-      error();
-      console.error("Error uploading Folder:", err);
+      await apiPost("/api/folders", { name: folderName.trim() });
+      toast.success("Klasör eklendi.", { theme: "dark" });
+      setOpen(false);
+      setFolderName("");
+      // Eskiden burada `window.location.reload()` vardı: tüm sayfayı ve tüm
+      // JS paketini yeniden indiriyordu. Router yenilemesi sadece veriyi tazeler.
+      onCreated?.();
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Klasör eklenemedi.",
+        { theme: "dark" }
+      );
+    } finally {
+      setSaving(false);
     }
-    setOpen(false);
-    setFolderName("");
   };
 
   return (
     <div className="flex gap-1 rounded">
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild onClick={() => setOpen(true)}>
+        <DialogTrigger asChild>
           <Button>
             <FolderPlus className="w-4 h-4 mr-2" />
             Klasör Ekle
@@ -118,21 +65,24 @@ export default function FolderAdder() {
               Lütfen oluşturmak istediğiniz klasör adını giriniz.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Input
-                placeholder="Klasör adı..."
-                value={folderName}
-                onChange={(e) => setFolderName(e.target.value)}
-                className="col-span-4"
-              />
-            </div>
+          <div className="py-4">
+            <Input
+              placeholder="Klasör adı..."
+              value={folderName}
+              onChange={(e) => setFolderName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave();
+              }}
+              autoFocus
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
               İptal
             </Button>
-            <Button onClick={handleSave}>Kaydet</Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Kaydediliyor..." : "Kaydet"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
