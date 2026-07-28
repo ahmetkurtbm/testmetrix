@@ -1203,16 +1203,19 @@ const TestResults = ({
     highestScore: orZero(d.max),
     lowestScore: orZero(d.min),
     meanScore: d.mean,
-    stdDeviation: d.stdDeviation.toFixed(2),
+    // Bu alanlar `TestData`'da sayı olarak tanımlı. Eski kod buraya
+    // `.toFixed(2)` ile string yazıyordu; prop'lar `any` olduğu için tip
+    // denetimi bunu yakalamıyordu. Biçimlendirme PDF bileşenlerinin işi.
+    stdDeviation: d.stdDeviation,
     frequencyTable: frequency.map((f) => [f.score, f.count, f.percentage]),
     median: orZero(d.median),
     mode: d.mode,
-    varyans: d.variance.toFixed(2),
+    varyans: d.variance,
     successRate: orZero(d.successRate),
     kr20: orZero(reliability.kr20),
     kurtosis: orZero(d.kurtosis),
     skewness: orZero(d.skewness),
-  } as TestData;
+  };
 
   const scores = students.scores;
   const maxScore = orZero(d.max);

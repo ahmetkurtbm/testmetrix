@@ -1,15 +1,9 @@
 /**
  * İstemci tarafı API yardımcıları.
  *
- * Eski kodda her sayfa şu kalıbı tekrarlıyordu:
- *
- *   const token = await getCookie();          // sunucuya ekstra round-trip
- *   if (!token) return;
- *   const res = await fetch(`${BACKEND_URL}/x`, {
- *     headers: { Authorization: token, "Content-Type": "application/json" },
- *     credentials: "include",
- *   });
- *   if (!res.ok) { console.error(...); }
+ * Eski kodda her sayfa, silinmiş Express backend'ine istek atmak için token'ı
+ * bir server action ile okuyup (`my-utils.getCookie`) `Authorization` başlığına
+ * elle koyan ~15 satırlık bir kalıbı tekrarlıyordu.
  *
  * Artık gerek yok: oturum httpOnly çerezde ve API aynı origin'de, yani tarayıcı
  * çerezi kendiliğinden gönderiyor. Token elle taşınmıyor, CORS yok.
