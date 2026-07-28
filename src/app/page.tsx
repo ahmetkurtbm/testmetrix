@@ -1,9 +1,7 @@
-import Login from "./login/page";
+import { redirect } from "next/navigation";
 
+// Kök adres doğrudan uygulamaya yönlendirir; oturum yoksa middleware araya
+// girip /login'e alır. Eskiden burada Login bileşeni doğrudan render ediliyordu.
 export default function Home() {
-  return (
-    <div className="h-screen">
-      <Login></Login>
-    </div>
-  );
+  redirect("/folders");
 }

@@ -1,24 +1,43 @@
-import Header from "../(components)/Header";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import Header from "../(components)/Header";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Eğitim Bilgi Sistemi",
+  title: "TestMetrix",
   description:
-    "Eğitim ve öğretim süreçlerini yönetmek için geliştirilmiş web platformu",
+    "Test ve madde analizi platformu — psikometrik istatistikler ve raporlama",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
   },
 };
 
-const PagesLayout = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => {
+/**
+ * Korumalı sayfaların ortak düzeni.
+ *
+ * Oturum ve rol burada, sunucuda okunuyor. Eskiden bu iş Header içinde
+ * `useEffect` ile yapılıyordu: sayfa render edildikten sonra backend'e sorulup
+ * gerekirse `/login`'e atılıyordu — yani içerik bir an görünüyordu. Artık
+ * middleware isteği zaten sayfaya ulaşmadan kesiyor; buradaki kontrol ikinci
+ * savunma katmanı.
+ */
+const PagesLayout = async ({ children }: { children: React.ReactNode }) => {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+
+  const user = await prisma.appUser.findUnique({
+    where: { id: session.user.id },
+    select: { email: true, role: true },
+  });
+
   return (
     <div>
-      <Header />
+      <Header
+        email={user?.email ?? session.user.email ?? "Profil"}
+        isAdmin={user?.role === "ADMIN"}
+      />
       {children}
     </div>
   );
