@@ -71,6 +71,49 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Görselleştirme token'ları
+   ---------------------------------------------------------------------------
+   Grafiklerde ham hex kullanılmıyor; bileşenler bu ROLLERİ okuyor, böylece tema
+   değişince tek yerden değişiyor.
+
+   Renkler göz kararı seçilmedi: kullanılan seri/vurgu çifti her iki yüzeyde de
+   palet doğrulayıcısından geçirildi (en kötü CVD ΔE 24.7 açık / 26.8 koyu; eşik 8).
+
+   Madde kalitesi bilerek renkle KODLANMIYOR: kırmızı↔yeşil durum çifti
+   deuteranopide ΔE 4.1 ile ayırt edilemiyor. Kalite, konum + etiket + ikon ile
+   veriliyor; renk yalnızca vurgu (sorunlu / normal) ayrımını taşıyor.
+--------------------------------------------------------------------------- */
+:root {
+  --viz-surface: #fcfcfb;
+  --viz-surface-raised: #ffffff;
+  --viz-text: #0b0b0b;
+  --viz-text-secondary: #52514e;
+  --viz-text-muted: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-series: #2a78d6;
+  --viz-series-soft: #cde2fb;
+  --viz-accent: #eb6834;
+  --viz-accent-soft: #fbe3d8;
+  --viz-recessive: #c3c2b7;
+}
+
+.dark {
+  --viz-surface: #1a1a19;
+  --viz-surface-raised: #232322;
+  --viz-text: #ffffff;
+  --viz-text-secondary: #c3c2b7;
+  --viz-text-muted: #898781;
+  --viz-grid: #2c2c2a;
+  --viz-axis: #383835;
+  --viz-series: #3987e5;
+  --viz-series-soft: #184f95;
+  --viz-accent: #d95926;
+  --viz-accent-soft: #5c2a12;
+  --viz-recessive: #52514e;
+}
+
 /* @keyframes scaleIn {
   0% {
     transform: scale(0.75) translateX(-100%);

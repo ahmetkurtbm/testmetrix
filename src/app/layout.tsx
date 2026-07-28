@@ -33,6 +33,15 @@ export default function RootLayout({
       <head>
         <link rel="icon" type="image/png" href="/logo.png" />
         <link rel="apple-touch-icon" type="image/png" href="/logo.png" />
+        {/*
+          Tema sınıfı React yüklenmeden, senkron olarak atanıyor. Aksi halde
+          sayfa önce açık temayla boyanıp sonra koyuya atlıyor (flash).
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;if(d)document.documentElement.classList.add("dark")}catch(e){}})()`,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

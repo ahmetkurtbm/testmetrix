@@ -13,6 +13,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { signOutAction } from "@/app/actions/auth";
+import { ThemeToggle } from "@/app/(components)/ThemeToggle";
 
 /**
  * Oturum bilgisi artık prop olarak geliyor (bkz. (pages)/layout.tsx).
@@ -161,6 +162,8 @@ const Header = ({ email, isAdmin }: HeaderProps) => {
                 İletişim
               </Link>
             </div>
+
+            <ThemeToggle />
 
             <div className="hidden md:block border-l h-6 mx-2 border-gray-200" />
 
