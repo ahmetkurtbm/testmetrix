@@ -14,31 +14,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
 
-    async signIn({ user }) {
-      // 1) Erişim listesi — listede olmayan hesap içeri alınmaz.
-      if (!isEmailAllowed(user.email)) return false;
+    /** Erişim listesi. Yerel kayıt işi `jwt` callback'inde. */
+    signIn({ user }) {
+      return isEmailAllowed(user.email);
+    },
 
-      // 2) Yerel kullanıcı aynası. `id` GateHub'ın `sub` değeri.
-      if (!user.id || !user.email) return false;
-
-      await prisma.appUser.upsert({
-        where: { id: user.id },
-        create: {
-          id: user.id,
-          email: user.email,
-          name: user.name ?? user.email,
-          image: user.image ?? null,
-        },
-        // `role` bilerek güncellenmiyor: sunucu tarafında atanan bir değer,
-        // her girişte varsayılana dönmemeli.
-        update: {
-          email: user.email,
-          name: user.name ?? user.email,
-          image: user.image ?? null,
-        },
-      });
-
-      return true;
+    /**
+     * Yerel kullanıcı aynasını e-posta üzerinden eşleştirir ve oturum kimliğini
+     * ona bağlar.
+     *
+     * Neden `id` değil de e-posta: GateHub'ın `sub` değeri buraya güvenilir
+     * şekilde ulaşmıyor — Auth.js her girişte rastgele yeni bir UUID üretiyordu.
+     * `id` ile eşleştiren eski sürüm bu yüzden ilk girişte satırı oluşturuyor,
+     * sonraki her girişte aynı e-postayla ikinci satır açmaya çalışıp
+     * `Unique constraint failed on the fields: (email)` hatasıyla düşüyordu.
+     * Kullanıcı da "Access Denied" görüyordu.
+     *
+     * E-posta hem GateHub'da hem burada benzersiz ve doğrulanmış; sabit
+     * kimlik olarak kullanılabilecek tek alan o. Satırın kendi `id`'si bir kez
+     * atanıp sabit kalıyor, klasör ve sınavlar ona bağlanıyor.
+     */
+    async jwt({ token, user }) {
+      if (user?.email) {
+        const appUser = await prisma.appUser.upsert({
+          where: { email: user.email },
+          create: {
+            email: user.email,
+            name: user.name ?? user.email,
+            image: user.image ?? null,
+          },
+          // `role` bilerek güncellenmiyor: sunucu tarafında atanan bir değer,
+          // her girişte varsayılana dönmemeli.
+          update: {
+            name: user.name ?? user.email,
+            image: user.image ?? null,
+          },
+          select: { id: true },
+        });
+        token.sub = appUser.id;
+      }
+      return token;
     },
   },
 });

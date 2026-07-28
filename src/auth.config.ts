@@ -63,10 +63,11 @@ export const authConfig = {
     authorized({ auth }) {
       return Boolean(auth?.user);
     },
-    jwt({ token, user }) {
-      if (user?.id) token.sub = user.id;
-      return token;
-    },
+    // NOT: `jwt` callback'i burada DEĞİL, `src/auth.ts`'te tanımlı — çünkü
+    // veritabanına dokunuyor (yerel kullanıcı aynasını e-postadan bulup
+    // `token.sub`'a yazıyor) ve Prisma edge runtime'da çalışamaz. Oturum bir
+    // kez kurulduktan sonra `token.sub` JWT'de taşındığı için middleware'in
+    // veritabanına ihtiyacı olmuyor.
     session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
       return session;

@@ -41,10 +41,14 @@ enum AnswerOption {
   BOS
 }
 
-/// GateHub kimliğinin yerel aynası. Her girişte `signIn` callback'inde
-/// upsert edilir; `id` GateHub'ın `sub` değeridir.
+/// GateHub kimliğinin yerel aynası. Her girişte e-posta üzerinden upsert edilir.
+///
+/// `id` bilerek GateHub'ın `sub` değeri DEĞİL: o değer Auth.js üzerinden
+/// güvenilir şekilde gelmiyordu (her girişte rastgele UUID üretiliyordu).
+/// Sabit kimlik e-posta; `id` yalnızca yerel birincil anahtar ve klasör/sınav
+/// foreign key hedefi.
 model AppUser {
-  id             String    @id
+  id             String    @id @default(cuid())
   email          String    @unique
   name           String
   image          String?
