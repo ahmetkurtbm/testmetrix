@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ExamAnalysis } from "@/features/analysis";
-import { fmt } from "./svg-utils";
+import { fmt } from "@/lib/format";
 
 type SortKey = "rank" | "score" | "zScore";
 
@@ -27,7 +27,6 @@ export function StudentTable({
       score: students.scores[index],
       wrong: descriptive.questionCount - students.scores[index],
       points: students.points[index],
-      successRate: students.successRates[index] * 100,
       zScore: students.zScores[index],
       tScore: students.tScores[index],
       rank: students.ranks[index],
@@ -38,7 +37,9 @@ export function StudentTable({
       const bv = b[sort.key];
       if (av === null) return 1;
       if (bv === null) return -1;
-      return sort.asc ? (av as number) - (bv as number) : (bv as number) - (av as number);
+      return sort.asc
+        ? (av as number) - (bv as number)
+        : (bv as number) - (av as number);
     });
   }, [analysis, studentNames, sort]);
 
@@ -46,33 +47,31 @@ export function StudentTable({
 
   const header = (key: SortKey, label: string) => (
     <th
-      className="px-3 py-2 text-right font-medium cursor-pointer select-none hover:text-[var(--viz-text)]"
+      className="px-3 py-2 text-right font-medium cursor-pointer select-none hover:text-gray-900"
       onClick={() =>
         setSort((prev) => ({ key, asc: prev.key === key ? !prev.asc : true }))
       }
-      aria-sort={sort.key === key ? (sort.asc ? "ascending" : "descending") : "none"}
     >
       {label}
       {sort.key === key && (
-        <span className="ml-1 text-[var(--viz-text-muted)]">
-          {sort.asc ? "↑" : "↓"}
-        </span>
+        <span className="ml-1 text-gray-400">{sort.asc ? "↑" : "↓"}</span>
       )}
     </th>
   );
 
   return (
     <div>
-      <h3 className="mb-1 text-sm font-medium text-[var(--viz-text)]">
-        Öğrenci sonuçları
-      </h3>
-      <p className="mb-3 text-xs text-[var(--viz-text-secondary)]">
+      <h2 className="text-base font-semibold text-gray-800">Öğrenci sonuçları</h2>
+      <p className="mt-0.5 mb-3 text-xs text-gray-500">
         Eşit puan alan öğrenciler eşit sıra alır.
       </p>
 
-      <div className="overflow-x-auto rounded-lg border border-black/5 dark:border-white/10">
-        <table className="min-w-full text-sm" style={{ fontVariantNumeric: "tabular-nums" }}>
-          <thead className="bg-[var(--viz-surface)] text-[var(--viz-text-secondary)]">
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table
+          className="min-w-full text-sm"
+          style={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          <thead className="bg-gray-50 text-gray-600">
             <tr>
               <th className="px-3 py-2 text-left font-medium">Öğrenci</th>
               {header("score", "Doğru")}
@@ -87,27 +86,21 @@ export function StudentTable({
             {visible.map((row, index) => (
               <tr
                 key={`${row.name}-${index}`}
-                className="border-t border-black/5 dark:border-white/10 hover:bg-[var(--viz-surface)]"
+                className="border-t border-gray-100 hover:bg-gray-50"
               >
-                <td className="px-3 py-2 text-[var(--viz-text)]">{row.name}</td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
-                  {row.score}
-                </td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text-secondary)]">
-                  {row.wrong}
-                </td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
+                <td className="px-3 py-2 text-gray-800">{row.name}</td>
+                <td className="px-3 py-2 text-right text-gray-700">{row.score}</td>
+                <td className="px-3 py-2 text-right text-gray-500">{row.wrong}</td>
+                <td className="px-3 py-2 text-right text-gray-700">
                   {fmt(row.points, 1)}
                 </td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
+                <td className="px-3 py-2 text-right text-gray-700">
                   {fmt(row.zScore)}
                 </td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
+                <td className="px-3 py-2 text-right text-gray-700">
                   {fmt(row.tScore, 1)}
                 </td>
-                <td className="px-3 py-2 text-right text-[var(--viz-text)]">
-                  {row.rank}
-                </td>
+                <td className="px-3 py-2 text-right text-gray-700">{row.rank}</td>
               </tr>
             ))}
           </tbody>
@@ -117,11 +110,9 @@ export function StudentTable({
       {rows.length > 10 && (
         <button
           onClick={() => setShowAll((prev) => !prev)}
-          className="mt-2 text-xs text-[var(--viz-text-secondary)] hover:text-[var(--viz-text)] underline"
+          className="mt-2 text-xs text-blue-600 hover:underline"
         >
-          {showAll
-            ? "İlk 10'u göster"
-            : `Tümünü göster (${rows.length} öğrenci)`}
+          {showAll ? "İlk 10'u göster" : `Tümünü göster (${rows.length} öğrenci)`}
         </button>
       )}
     </div>

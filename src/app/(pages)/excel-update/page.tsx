@@ -1,27 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { produce } from "immer";
-import { ToastContainer, toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
-import { apiGet, apiPut } from "@/lib/api-client";
-import { analyzeExam, ANSWER_OPTIONS, type AnswerOption } from "@/features/analysis";
-import { interpretReliability } from "@/features/reports/quality";
-import { fmt } from "@/lib/format";
-import type { ExamDetail } from "@/features/exams/types";
 import {
-  Card,
-  GhostButton,
-  PageHeader,
-  PageShell,
-  PrimaryButton,
-  SectionTitle,
-  StatTile,
-} from "@/features/ui/primitives";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
+import { ToastContainer, toast } from "react-toastify";
+import { apiGet, apiPut } from "@/lib/api-client";
+import { ANSWER_OPTIONS, type AnswerOption } from "@/features/analysis";
+import type { ExamDetail } from "@/features/exams/types";
 
-const LABELS: Record<AnswerOption, string> = {
+const OPTION_LABELS: Record<AnswerOption, string> = {
   A: "A",
   B: "B",
   C: "C",
@@ -30,9 +27,10 @@ const LABELS: Record<AnswerOption, string> = {
   BOS: "Boş",
 };
 
-export default function ExcelUpdate() {
+const ExcelUpdate = () => {
   const router = useRouter();
-  const examId = useSearchParams().get("exam");
+  const searchParams = useSearchParams();
+  const examId = searchParams.get("exam");
 
   const [detail, setDetail] = useState<ExamDetail | null>(null);
   const [name, setName] = useState("");
@@ -52,65 +50,58 @@ export default function ExcelUpdate() {
         setResponses(data.responses);
       })
       .catch((error) =>
-        toast.error(error instanceof Error ? error.message : "Sınav yüklenemedi.", {
-          theme: "dark",
-        })
+        toast.error(
+          error instanceof Error ? error.message : "Sınav yüklenemedi.",
+          { theme: "dark" }
+        )
       );
   }, [examId]);
 
-  /**
-   * Canlı yeniden hesaplama.
-   *
-   * Analiz saf olduğu için her düzenlemede anında yeniden çalışıyor: cevap
-   * anahtarındaki bir düzeltmenin güvenirliği nasıl değiştirdiği kaydetmeden
-   * görülüyor. Eskiden değişikliğin etkisini görmek için kaydedip rapor
-   * ekranına gitmek gerekiyordu.
-   */
-  const live = useMemo(() => {
-    if (!detail || answerKey.length === 0) return null;
-    return analyzeExam({
-      answerKey,
-      studentNames: detail.studentNames,
-      responses,
-    });
-  }, [detail, answerKey, responses]);
-
-  const dirty = useMemo(() => {
-    if (!detail) return false;
-    return (
-      name !== detail.exam.name ||
-      folderId !== detail.exam.folderId ||
-      answerKey.join() !== detail.answerKey.join() ||
-      responses.map((r) => r.join()).join("|") !==
-        detail.responses.map((r) => r.join()).join("|")
-    );
-  }, [detail, name, folderId, answerKey, responses]);
-
-  const setAnswer = useCallback(
-    (row: number, question: number, value: AnswerOption) =>
+  const handleAnswerChange = useCallback(
+    (rowIndex: number, questionIndex: number, value: AnswerOption) => {
       setResponses((prev) =>
         produce(prev, (draft) => {
-          draft[row][question] = value;
+          draft[rowIndex][questionIndex] = value;
         })
-      ),
+      );
+    },
+    []
+  );
+
+  const handleKeyChange = useCallback(
+    (questionIndex: number, value: AnswerOption) => {
+      setAnswerKey((prev) =>
+        produce(prev, (draft) => {
+          draft[questionIndex] = value;
+        })
+      );
+    },
     []
   );
 
   const handleSave = async () => {
     if (!examId || !detail) return;
+
     setSaving(true);
     try {
+      // Sunucu ham matris bekliyor ve normalizasyonu kendisi yapıyor;
+      // burada sadece aynı biçime geri çeviriyoruz.
       const matrix: unknown[][] = [
         ["Cevap Anahtarı", ...answerKey],
-        ...detail.studentNames.map((student, index) => [student, ...responses[index]]),
+        ...detail.studentNames.map((studentName, index) => [
+          studentName,
+          ...responses[index],
+        ]),
       ];
+
       await apiPut(`/api/exams/${examId}`, { name, folderId, matrix });
-      toast.success("Kaydedildi.", { theme: "dark" });
+      toast.success("Değişiklikler kaydedildi.", { theme: "dark" });
       router.push(`/excel-reports?exam=${examId}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kaydedilemedi.", {
-        theme: "dark",
-      });
+      toast.error(
+        error instanceof Error ? error.message : "Kaydedilemedi.",
+        { theme: "dark" }
+      );
     } finally {
       setSaving(false);
     }
@@ -118,169 +109,166 @@ export default function ExcelUpdate() {
 
   if (!examId) {
     return (
-      <PageShell>
-        <p className="text-sm text-[var(--viz-text-secondary)]">Sınav seçilmedi.</p>
-      </PageShell>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Sınav seçilmedi.</p>
+      </div>
     );
   }
 
-  if (!detail || !live) {
+  if (!detail) {
     return (
-      <PageShell>
-        <p className="text-sm text-[var(--viz-text-secondary)]">Yükleniyor...</p>
-      </PageShell>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Yükleniyor...</p>
+      </div>
     );
   }
-
-  const original = detail.analysis.reliability.kr20;
-  const current = live.reliability.kr20;
-  const changed =
-    original !== null && current !== null && Math.abs(original - current) > 0.005;
-
-  const select = (
-    value: AnswerOption,
-    onChange: (v: AnswerOption) => void,
-    highlight?: boolean
-  ) => (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value as AnswerOption)}
-      className={`w-16 rounded-md border px-1.5 py-1 text-sm bg-[var(--viz-surface-raised)] text-[var(--viz-text)] ${
-        highlight
-          ? "border-[var(--viz-series)]"
-          : "border-black/10 dark:border-white/15"
-      }`}
-    >
-      {ANSWER_OPTIONS.map((option) => (
-        <option key={option} value={option}>
-          {LABELS[option]}
-        </option>
-      ))}
-    </select>
-  );
 
   return (
-    <PageShell>
-      <PageHeader
-        title={detail.exam.name}
-        meta={`${detail.exam.studentCount} öğrenci · ${detail.exam.questionCount} madde`}
-        actions={
-          <>
-            <GhostButton href={`/excel-reports?exam=${examId}`}>Rapora dön</GhostButton>
-            <PrimaryButton onClick={handleSave} disabled={saving || !dirty}>
-              {saving ? "Kaydediliyor..." : dirty ? "Kaydet" : "Değişiklik yok"}
-            </PrimaryButton>
-          </>
-        }
-      />
-
-      {/* Canlı özet — düzenledikçe güncelleniyor */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Ortalama" value={fmt(live.descriptive.mean, 1)} />
-        <StatTile label="Std. sapma" value={fmt(live.descriptive.stdDeviation, 1)} />
-        <StatTile
-          label="KR-20"
-          value={fmt(current)}
-          hint={
-            changed
-              ? `kaydedilmiş: ${fmt(original)}`
-              : interpretReliability(current).label
-          }
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-sm" />
+        <img
+          className="w-full h-full object-cover opacity-30"
+          src="/bg-anaekran.jpg"
+          alt=""
         />
-        <StatTile label="Başarı" value={`%${fmt(live.descriptive.successRate, 0)}`} />
       </div>
 
-      <Card>
-        <SectionTitle title="Sınav bilgileri" />
-        <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
-          <div>
-            <label className="text-xs text-[var(--viz-text-secondary)]">Sınav adı</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 text-sm"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-[var(--viz-text-secondary)]">Klasör</label>
-            <div className="mt-1">
+      <div className="relative z-10 space-y-6 max-w-[1400px] mx-auto">
+        <div className="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold text-gray-800">
+                {detail.exam.name}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {detail.exam.studentCount} öğrenci · {detail.exam.questionCount}{" "}
+                madde · {new Date(detail.exam.createdAt).toLocaleString("tr")}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <ComboboxDemo folderId={folderId} setFolderId={setFolderId} />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="border-gray-200"
+                placeholder="Sınav adı"
+              />
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium whitespace-nowrap"
+              >
+                {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              </Button>
             </div>
           </div>
         </div>
-      </Card>
 
-      <Card>
-        <SectionTitle
-          title="Cevaplar"
-          hint="Doğru işaretlenen hücreler vurgulanır. Cevap anahtarı da düzenlenebilir."
-        />
-
-        <div className="overflow-auto max-h-[60vh] rounded-lg border border-black/5 dark:border-white/10">
-          <table className="min-w-full text-sm">
-            <thead className="sticky top-0 bg-[var(--viz-surface)] z-10">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium text-[var(--viz-text-secondary)] whitespace-nowrap">
-                  Öğrenci
-                </th>
-                {answerKey.map((_, index) => (
-                  <th
-                    key={index}
-                    className="px-2 py-2 text-left font-medium text-[var(--viz-text-secondary)]"
-                  >
-                    M{index + 1}
+        <div className="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-16rem)]">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 text-left font-semibold text-gray-700 text-sm sticky top-0 bg-gray-50/95 backdrop-blur-sm">
+                    Öğrenci
                   </th>
-                ))}
-              </tr>
-              <tr className="border-b border-black/10 dark:border-white/15">
-                <th className="px-3 py-2 text-left text-xs font-medium text-[var(--viz-series)] whitespace-nowrap">
-                  Cevap anahtarı
-                </th>
-                {answerKey.map((option, index) => (
-                  <td key={index} className="px-2 py-2">
-                    {select(
-                      option,
-                      (value) =>
-                        setAnswerKey((prev) =>
-                          produce(prev, (draft) => {
-                            draft[index] = value;
-                          })
-                        ),
-                      true
-                    )}
-                  </td>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {responses.map((row, rowIndex) => (
-                <tr
-                  key={rowIndex}
-                  className="border-t border-black/5 dark:border-white/10"
-                >
-                  <td className="px-3 py-2 text-[var(--viz-text)] whitespace-nowrap">
-                    {detail.studentNames[rowIndex]}
-                    <span className="ml-2 text-xs text-[var(--viz-text-muted)]">
-                      {live.students.scores[rowIndex]}/{answerKey.length}
-                    </span>
-                  </td>
-                  {row.map((cell, questionIndex) => (
-                    <td key={questionIndex} className="px-2 py-2">
-                      {select(
-                        cell,
-                        (value) => setAnswer(rowIndex, questionIndex, value),
-                        cell === answerKey[questionIndex]
-                      )}
+                  {answerKey.map((_, index) => (
+                    <th
+                      key={index}
+                      className="p-4 text-left font-semibold text-gray-700 text-sm sticky top-0 bg-gray-50/95 backdrop-blur-sm whitespace-nowrap"
+                    >
+                      M{index + 1}
+                    </th>
+                  ))}
+                </tr>
+                {/* Cevap anahtarı da düzenlenebilir: eskiden salt okunur başlıktı,
+                    anahtarda hata varsa dosyayı yeniden yüklemek gerekiyordu. */}
+                <tr className="bg-amber-50 border-b border-amber-200">
+                  <th className="p-3 text-left text-sm font-semibold text-amber-900 whitespace-nowrap">
+                    Cevap Anahtarı
+                  </th>
+                  {answerKey.map((option, index) => (
+                    <td key={index} className="p-3">
+                      <Select
+                        value={option}
+                        onValueChange={(value) =>
+                          handleKeyChange(index, value as AnswerOption)
+                        }
+                      >
+                        <SelectTrigger className="w-24 p-2 text-sm bg-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ANSWER_OPTIONS.map((value) => (
+                            <SelectItem key={value} value={value} className="text-sm">
+                              {OPTION_LABELS[value]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {responses.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    className="border-b border-gray-100 hover:bg-gray-50/50"
+                  >
+                    <td className="p-4">
+                      <span className="text-sm text-gray-700 font-medium whitespace-nowrap">
+                        {detail.studentNames[rowIndex]}
+                      </span>
+                    </td>
+                    {row.map((cell, questionIndex) => (
+                      <td key={questionIndex} className="p-4">
+                        <Select
+                          value={cell}
+                          onValueChange={(value) =>
+                            handleAnswerChange(
+                              rowIndex,
+                              questionIndex,
+                              value as AnswerOption
+                            )
+                          }
+                        >
+                          <SelectTrigger
+                            className={`w-24 p-2 text-sm ${
+                              cell === answerKey[questionIndex]
+                                ? "border-green-300 bg-green-50"
+                                : "border-gray-200"
+                            }`}
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ANSWER_OPTIONS.map((value) => (
+                              <SelectItem
+                                key={value}
+                                value={value}
+                                className="text-sm"
+                              >
+                                {OPTION_LABELS[value]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </Card>
+      </div>
 
       <ToastContainer position="bottom-right" theme="dark" />
-    </PageShell>
+    </div>
   );
-}
+};
+
+export default ExcelUpdate;

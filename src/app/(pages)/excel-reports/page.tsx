@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 import { apiGet } from "@/lib/api-client";
+import { fmt } from "@/lib/format";
 import type { ExamDetail } from "@/features/exams/types";
 import { classifyItems, interpretReliability } from "@/features/reports/quality";
-import { fmt } from "@/features/reports/svg-utils";
 import { StatTile } from "@/features/reports/StatTile";
 import { ScoreHistogram } from "@/features/reports/ScoreHistogram";
 import { ItemMap } from "@/features/reports/ItemMap";
@@ -17,25 +18,30 @@ import { StudentTable } from "@/features/reports/StudentTable";
 import { DistractorPanel } from "@/features/reports/DistractorPanel";
 
 /**
- * Rapor panosu.
+ * Rapor ekranı.
  *
- * Eski tasarım 12 veri seçeneğini tek açılır menüye bağlayıp aynı anda tek
- * grafik gösteriyordu — 30'dan fazla metrik varken verinin çoğu görünmüyordu.
- * Artık her şey aynı ekranda ve en değerli görünüm (madde haritası) merkezde.
- *
- * Grafikler satır içi SVG; `chart.js` kaldırıldı.
+ * Görünüm diğer ekranlarla aynı dilde: arka plan görseli, yumuşak gradyan ve
+ * `bg-white/95` kartlar. Grafikler Recharts ile çiziliyor.
  */
 
 // Dışa aktarma bileşenleri ExcelJS ve @react-pdf/renderer çekiyor; yalnızca
-// düğmeye basılınca gerekiyorlar.
-const loading = () => <div className="h-9 rounded-md bg-black/5 dark:bg-white/10 animate-pulse" />;
+// düğmeye basılınca yükleniyorlar.
+const loading = () => (
+  <div className="h-9 rounded-md bg-gray-100 animate-pulse" />
+);
 
 const StudentAnalysisExport = dynamic(
-  () => import("@/features/exports/StudentAnalysis").then((m) => m.StudentAnalysisExport),
+  () =>
+    import("@/features/exports/StudentAnalysis").then(
+      (m) => m.StudentAnalysisExport
+    ),
   { ssr: false, loading }
 );
 const QuestionAnalysisExport = dynamic(
-  () => import("@/features/exports/QuestionAnalysis").then((m) => m.QuestionAnalysisExport),
+  () =>
+    import("@/features/exports/QuestionAnalysis").then(
+      (m) => m.QuestionAnalysisExport
+    ),
   { ssr: false, loading }
 );
 const TestAnalysisExport = dynamic(
@@ -43,11 +49,13 @@ const TestAnalysisExport = dynamic(
   { ssr: false, loading }
 );
 const OptionAnalysisExport = dynamic(
-  () => import("@/features/exports/OptionAnalysis").then((m) => m.OptionAnalysisExport),
+  () =>
+    import("@/features/exports/OptionAnalysis").then((m) => m.OptionAnalysisExport),
   { ssr: false, loading }
 );
 const StudentAnswersExport = dynamic(
-  () => import("@/features/exports/StudentAnswers").then((m) => m.StudentAnswersExport),
+  () =>
+    import("@/features/exports/StudentAnswers").then((m) => m.StudentAnswersExport),
   { ssr: false, loading }
 );
 const TestResults = dynamic(() => import("@/app/(functions)/TestResults"), {
@@ -55,15 +63,22 @@ const TestResults = dynamic(() => import("@/app/(functions)/TestResults"), {
   loading,
 });
 
-const Card = ({ children }: { children: React.ReactNode }) => (
-  <section className="rounded-xl border border-black/5 dark:border-white/10 bg-[var(--viz-surface-raised)] p-5">
+const Panel = ({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div
+    className={`bg-white/95 backdrop-blur-sm shadow-lg rounded-xl p-5 ${className}`}
+  >
     {children}
-  </section>
+  </div>
 );
 
 export default function ExcelReports() {
-  const searchParams = useSearchParams();
-  const examId = searchParams.get("exam");
+  const examId = useSearchParams().get("exam");
 
   const [detail, setDetail] = useState<ExamDetail | null>(null);
   const [loadingData, setLoadingData] = useState(true);
@@ -80,7 +95,7 @@ export default function ExcelReports() {
       .catch((error) =>
         toast.error(
           error instanceof Error ? error.message : "Rapor yüklenemedi.",
-          { theme: "dark" }
+          { position: "bottom-right", theme: "dark" }
         )
       )
       .finally(() => setLoadingData(false));
@@ -91,24 +106,41 @@ export default function ExcelReports() {
     [detail]
   );
 
-  if (loadingData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--viz-surface)]">
-        <p className="text-[var(--viz-text-secondary)]">Yükleniyor...</p>
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="fixed inset-0 z-0">
+        <img
+          className="w-full h-full object-cover opacity-30"
+          src="/bg-anaekran.jpg"
+          alt="background"
+        />
       </div>
+      <div className="relative z-10 p-4 max-w-7xl mx-auto space-y-4">{children}</div>
+      <ToastContainer position="bottom-right" theme="dark" />
+    </div>
+  );
+
+  if (loadingData) {
+    return shell(
+      <Panel>
+        <p className="text-sm text-gray-600">Yükleniyor...</p>
+      </Panel>
     );
   }
 
   if (!examId || !detail) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[var(--viz-surface)]">
-        <p className="text-[var(--viz-text-secondary)]">
-          Rapor görüntülemek için bir sınav seçin.
+    return shell(
+      <Panel className="text-center">
+        <p className="text-base font-semibold text-gray-700">
+          Rapor görüntülemek için bir sınav seçin
         </p>
-        <Link href="/folders" className="text-sm text-[var(--viz-series)] underline">
+        <Link
+          href="/folders"
+          className="mt-3 inline-block text-sm text-blue-600 hover:underline"
+        >
           Klasörlere git
         </Link>
-      </div>
+      </Panel>
     );
   }
 
@@ -125,155 +157,147 @@ export default function ExcelReports() {
     examName: exam.name,
   };
 
-  return (
-    <div className="min-h-screen bg-[var(--viz-surface)]">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
-        {/* Başlık şeridi */}
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-[var(--viz-text)]">
+  return shell(
+    <>
+      {/* Başlık */}
+      <Panel>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-gray-800 truncate">
               {exam.name}
             </h1>
-            <p className="mt-0.5 text-sm text-[var(--viz-text-secondary)]">
+            <p className="mt-0.5 text-xs text-gray-500">
               {exam.studentCount} öğrenci · {exam.questionCount} madde ·{" "}
               {new Date(exam.createdAt).toLocaleDateString("tr")}
             </p>
           </div>
           <div className="flex gap-2">
-            <Link
-              href={`/excel-update?exam=${exam.id}`}
-              className="px-3 py-2 text-sm rounded-md border border-black/10 dark:border-white/15 text-[var(--viz-text-secondary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            >
-              Düzenle
+            <Link href={`/excel-update?exam=${exam.id}`}>
+              <Button variant="outline" className="text-sm">
+                ✏️ Düzenle
+              </Button>
             </Link>
-            <button
+            <Button
               onClick={() => setExportsOpen((prev) => !prev)}
-              className="px-3 py-2 text-sm rounded-md bg-[var(--viz-series)] text-white hover:opacity-90 transition-opacity"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
             >
-              Raporları indir
-            </button>
+              📊 Raporları İndir
+            </Button>
           </div>
-        </header>
+        </div>
 
         {exportsOpen && (
-          <Card>
-            <h2 className="mb-3 text-sm font-medium text-[var(--viz-text)]">
-              Dışa aktarma
-            </h2>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              <StudentAnalysisExport {...exportProps} />
-              <QuestionAnalysisExport {...exportProps} />
-              <TestAnalysisExport {...exportProps} />
-              <OptionAnalysisExport {...exportProps} />
-              <StudentAnswersExport {...exportProps} />
-              <StudentAnswersExport {...exportProps} binary />
-              <TestResults
-                analysis={analysis}
-                studentNames={detail.studentNames}
-                examName={exam.name}
-                examDate={exam.createdAt}
-              />
-            </div>
-          </Card>
-        )}
-
-        {/* Hero + KPI */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card>
-            <div className="text-xs text-[var(--viz-text-secondary)]">
-              KR-20 güvenirlik
-            </div>
-            {/* Panonun önderlik ettiği tek sayı; orantılı rakam, sistem sans'ı */}
-            <div className="mt-1 text-5xl font-semibold leading-none text-[var(--viz-text)]">
-              {fmt(reliability.kr20)}
-            </div>
-            <div className="mt-2 text-sm font-medium text-[var(--viz-text)]">
-              {reliabilityInfo.label}
-            </div>
-            <p className="mt-1 text-xs text-[var(--viz-text-secondary)] leading-relaxed">
-              {reliabilityInfo.detail}
-            </p>
-          </Card>
-
-          <div className="lg:col-span-2 grid gap-3 grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            <StatTile label="Ortalama" value={fmt(d.mean, 1)} hint={`${d.questionCount} üzerinden`} />
-            <StatTile label="Standart sapma" value={fmt(d.stdDeviation, 1)} />
-            <StatTile label="Ortanca" value={fmt(d.median, 1)} />
-            <StatTile label="Başarı" value={`%${fmt(d.successRate, 0)}`} />
-          </div>
-        </div>
-
-        {/* Gözden geçirilmesi gereken maddeler — varsa öne çıkar */}
-        {attention.length > 0 && (
-          <Card>
-            <h2 className="text-sm font-medium text-[var(--viz-text)]">
-              {attention.length} madde gözden geçirilmeli
-            </h2>
-            <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
-              {attention.slice(0, 6).map((item) => (
-                <li key={item.questionNo} className="text-xs">
-                  <button
-                    onClick={() => setSelectedItem(item.questionNo)}
-                    className="text-left hover:underline"
-                  >
-                    <span className="font-medium text-[var(--viz-text)]">
-                      M{item.questionNo}
-                    </span>
-                    <span style={{ color: "var(--viz-accent)" }}> {item.label}</span>
-                    <span className="text-[var(--viz-text-secondary)]">
-                      {" "}
-                      — {item.explanation}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {attention.length > 6 && (
-              <p className="mt-2 text-xs text-[var(--viz-text-muted)]">
-                ve {attention.length - 6} madde daha — tabloda tümü listeli.
-              </p>
-            )}
-          </Card>
-        )}
-
-        {/* Grafikler */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card>
-            <ScoreHistogram analysis={analysis} />
-          </Card>
-          <Card>
-            <ItemMap
-              items={items}
-              selected={selectedItem}
-              onSelect={setSelectedItem}
+          <div className="mt-4 pt-4 border-t border-gray-100 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <StudentAnalysisExport {...exportProps} />
+            <QuestionAnalysisExport {...exportProps} />
+            <TestAnalysisExport {...exportProps} />
+            <OptionAnalysisExport {...exportProps} />
+            <StudentAnswersExport {...exportProps} />
+            <StudentAnswersExport {...exportProps} binary />
+            <TestResults
+              analysis={analysis}
+              studentNames={detail.studentNames}
+              examName={exam.name}
+              examDate={exam.createdAt}
             />
-          </Card>
-        </div>
+          </div>
+        )}
+      </Panel>
 
-        {selectedItem !== null && (
+      {/* Güvenirlik + özet */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Panel>
+          <div className="text-xs text-gray-500">KR-20 güvenirlik</div>
+          <div className="mt-1 text-4xl font-bold text-gray-800 leading-none">
+            {fmt(reliability.kr20)}
+          </div>
+          <div className="mt-2 text-sm font-medium text-gray-700">
+            {reliabilityInfo.label}
+          </div>
+          <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+            {reliabilityInfo.detail}
+          </p>
+        </Panel>
+
+        <div className="lg:col-span-2 grid gap-3 grid-cols-2 xl:grid-cols-4">
+          <StatTile
+            label="Ortalama"
+            value={fmt(d.mean, 1)}
+            hint={`${d.questionCount} üzerinden`}
+          />
+          <StatTile label="Standart sapma" value={fmt(d.stdDeviation, 1)} />
+          <StatTile label="Ortanca" value={fmt(d.median, 1)} />
+          <StatTile label="Başarı" value={`%${fmt(d.successRate, 0)}`} />
+        </div>
+      </div>
+
+      {/* Dikkat isteyen maddeler */}
+      {attention.length > 0 && (
+        <Panel>
+          <h2 className="text-base font-semibold text-gray-800">
+            {attention.length} madde gözden geçirilmeli
+          </h2>
+          <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+            {attention.slice(0, 6).map((item) => (
+              <li key={item.questionNo} className="text-xs">
+                <button
+                  onClick={() => setSelectedItem(item.questionNo)}
+                  className="text-left hover:underline"
+                >
+                  <span className="font-medium text-gray-800">
+                    M{item.questionNo}
+                  </span>
+                  <span className="text-orange-600"> {item.label}</span>
+                  <span className="text-gray-500"> — {item.explanation}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {attention.length > 6 && (
+            <p className="mt-2 text-xs text-gray-400">
+              ve {attention.length - 6} madde daha — tabloda tümü listeli.
+            </p>
+          )}
+        </Panel>
+      )}
+
+      {/* Grafikler */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel>
+          <ScoreHistogram analysis={analysis} />
+        </Panel>
+        <Panel>
+          <ItemMap
+            items={items}
+            selected={selectedItem}
+            onSelect={setSelectedItem}
+          />
+        </Panel>
+      </div>
+
+      {selectedItem !== null && (
+        <Panel>
           <DistractorPanel
             analysis={analysis}
             answerKey={detail.answerKey}
             questionNo={selectedItem}
             onClose={() => setSelectedItem(null)}
           />
-        )}
+        </Panel>
+      )}
 
-        <Card>
-          <ItemTable
-            analysis={analysis}
-            items={items}
-            selected={selectedItem}
-            onSelect={setSelectedItem}
-          />
-        </Card>
+      <Panel>
+        <ItemTable
+          analysis={analysis}
+          items={items}
+          selected={selectedItem}
+          onSelect={setSelectedItem}
+        />
+      </Panel>
 
-        <Card>
-          <StudentTable analysis={analysis} studentNames={detail.studentNames} />
-        </Card>
-      </div>
-
-      <ToastContainer position="bottom-right" theme="dark" />
-    </div>
+      <Panel>
+        <StudentTable analysis={analysis} studentNames={detail.studentNames} />
+      </Panel>
+    </>
   );
 }

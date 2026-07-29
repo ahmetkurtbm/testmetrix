@@ -1,19 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  type DropResult,
-} from "@hello-pangea/dnd";
-import type {
-  DraggableProvided,
-  DraggableStateSnapshot,
-  DroppableProvided,
-} from "@hello-pangea/dnd";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,43 +20,43 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import AddFolder from "@/app/(components)/AddFolder";
-import { apiDelete, apiGet, apiPatch, apiPut } from "@/lib/api-client";
-import { fmt, fmtDate } from "@/lib/format";
-import { interpretReliability } from "@/features/reports/quality";
-import type { ExamSummary, FolderSummary } from "@/features/exams/types";
+import { ToastContainer, toast } from "react-toastify";
 import {
-  Card,
-  EmptyState,
-  GhostButton,
-  PageHeader,
-  PageShell,
-  StatTile,
-  TableShell,
-  Th,
-} from "@/features/ui/primitives";
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "@hello-pangea/dnd";
+import type {
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+} from "@hello-pangea/dnd";
+import { apiDelete, apiGet, apiPatch, apiPut } from "@/lib/api-client";
+import type { ExamSummary, FolderSummary } from "@/features/exams/types";
 
 const notifyError = (error: unknown, fallback: string) =>
-  toast.error(error instanceof Error ? error.message : fallback, { theme: "dark" });
-
-type View = "grid" | "list";
+  toast.error(error instanceof Error ? error.message : fallback, {
+    theme: "dark",
+  });
 
 export default function Folders() {
   const router = useRouter();
 
   const [folders, setFolders] = useState<FolderSummary[]>([]);
   const [exams, setExams] = useState<ExamSummary[]>([]);
-  const [query, setQuery] = useState("");
-  const [view, setView] = useState<View>("grid");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<FolderSummary | null>(null);
+
+  const [editingFolder, setEditingFolder] = useState<FolderSummary | null>(null);
   const [editingName, setEditingName] = useState("");
 
+  // Oturum kontrolü YOK: middleware bu sayfaya oturumsuz erişimi kesiyor.
   const load = useCallback(async () => {
     try {
       const [folderList, examList] = await Promise.all([
@@ -79,230 +76,144 @@ export default function Folders() {
     load();
   }, [load]);
 
-  /** Özet sayılar — önbellekteki istatistiklerden, ek sorgu olmadan. */
-  const totals = useMemo(() => {
-    const students = exams.reduce((sum, e) => sum + e.studentCount, 0);
-    const withKr20 = exams.filter((e) => e.stat?.kr20 != null);
-    const avgKr20 = withKr20.length
-      ? withKr20.reduce((sum, e) => sum + (e.stat!.kr20 as number), 0) / withKr20.length
-      : null;
-    return { students, avgKr20, measured: withKr20.length };
-  }, [exams]);
+  /**
+   * Arama hem klasör hem sınav adında çalışır: eşleşen sınavı olan klasör de
+   * listede kalır. Eskiden iki ayrı `filtered*` state'i `useEffect` ile
+   * senkron tutuluyordu; türetilmiş veri artık `useMemo` ile hesaplanıyor.
+   */
+  const visible = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase("tr");
+    if (!query) return { folders, examsByFolder: groupBy(exams) };
 
-  const search = query.trim().toLocaleLowerCase("tr");
-
-  const examsByFolder = useMemo(() => {
-    const map = new Map<string, ExamSummary[]>();
-    for (const exam of exams) {
-      if (search && !exam.name.toLocaleLowerCase("tr").includes(search)) {
-        // Klasör adı eşleşiyorsa sınavlar yine görünsün
-        const folder = folders.find((f) => f.id === exam.folderId);
-        if (!folder?.name.toLocaleLowerCase("tr").includes(search)) continue;
-      }
-      const list = map.get(exam.folderId);
-      if (list) list.push(exam);
-      else map.set(exam.folderId, [exam]);
-    }
-    return map;
-  }, [exams, folders, search]);
-
-  const visibleFolders = useMemo(() => {
-    if (!search) return folders;
-    return folders.filter(
-      (folder) =>
-        folder.name.toLocaleLowerCase("tr").includes(search) ||
-        (examsByFolder.get(folder.id)?.length ?? 0) > 0
+    const matchingExams = exams.filter((exam) =>
+      exam.name.toLocaleLowerCase("tr").includes(query)
     );
-  }, [folders, examsByFolder, search]);
+    const folderIdsWithMatch = new Set(matchingExams.map((e) => e.folderId));
+
+    const matchingFolders = folders.filter(
+      (folder) =>
+        folder.name.toLocaleLowerCase("tr").includes(query) ||
+        folderIdsWithMatch.has(folder.id)
+    );
+
+    return {
+      folders: matchingFolders,
+      examsByFolder: groupBy(
+        exams.filter(
+          (exam) =>
+            matchingExams.includes(exam) ||
+            matchingFolders.some(
+              (f) => f.id === exam.folderId && f.name.toLocaleLowerCase("tr").includes(query)
+            )
+        )
+      ),
+    };
+  }, [folders, exams, searchQuery]);
 
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || search) return;
+    if (!result.destination || searchQuery) return;
+
     const reordered = [...folders];
     const [moved] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
 
     const previous = folders;
-    setFolders(reordered);
+    setFolders(reordered); // iyimser güncelleme
+
     try {
-      await apiPut("/api/folders/order", { folderIds: reordered.map((f) => f.id) });
+      await apiPut("/api/folders/order", {
+        folderIds: reordered.map((f) => f.id),
+      });
     } catch (error) {
-      setFolders(previous);
+      setFolders(previous); // başarısızsa geri al
       notifyError(error, "Sıralama güncellenemedi.");
     }
   };
 
   const handleRename = async () => {
-    if (!editing || !editingName.trim()) return;
+    if (!editingFolder || !editingName.trim()) return;
     try {
-      await apiPatch(`/api/folders/${editing.id}`, { name: editingName.trim() });
+      await apiPatch(`/api/folders/${editingFolder.id}`, {
+        name: editingName.trim(),
+      });
       toast.success("Klasör ismi güncellendi.", { theme: "dark" });
-      setEditing(null);
+      setEditingFolder(null);
       load();
     } catch (error) {
-      notifyError(error, "Güncellenemedi.");
+      notifyError(error, "Klasör ismi güncellenemedi.");
     }
   };
 
   const handleDeleteFolder = async (folder: FolderSummary) => {
     const count = folder._count.exams;
-    if (
-      !confirm(
-        count
-          ? `"${folder.name}" ve içindeki ${count} sınav kalıcı olarak silinecek. Emin misiniz?`
-          : `"${folder.name}" silinecek. Emin misiniz?`
-      )
-    )
-      return;
+    const message = count
+      ? `"${folder.name}" klasörü ve içindeki ${count} sınav kalıcı olarak silinecek. Emin misiniz?`
+      : `"${folder.name}" klasörü silinecek. Emin misiniz?`;
+    if (!confirm(message)) return;
+
     try {
       await apiDelete(`/api/folders/${folder.id}`);
       toast.success("Klasör silindi.", { theme: "dark" });
       load();
     } catch (error) {
-      notifyError(error, "Silinemedi.");
+      notifyError(error, "Klasör silinemedi.");
     }
   };
 
   const handleDeleteExam = async (exam: ExamSummary) => {
-    if (!confirm(`"${exam.name}" kalıcı olarak silinecek. Emin misiniz?`)) return;
+    if (!confirm(`"${exam.name}" sınavı kalıcı olarak silinecek. Emin misiniz?`)) {
+      return;
+    }
     try {
       await apiDelete(`/api/exams/${exam.id}`);
       toast.success("Sınav silindi.", { theme: "dark" });
       load();
     } catch (error) {
-      notifyError(error, "Silinemedi.");
+      notifyError(error, "Sınav silinemedi.");
     }
   };
 
-  const examRow = (exam: ExamSummary) => {
-    const kr20 = exam.stat?.kr20 ?? null;
-    return (
-      <div
-        key={exam.id}
-        className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-black/5 dark:border-white/10 hover:bg-[var(--viz-surface)] transition-colors"
-      >
-        <div className="min-w-0">
-          <div className="text-sm font-medium text-[var(--viz-text)] truncate">
-            {exam.name}
-          </div>
-          <div
-            className="mt-0.5 text-xs text-[var(--viz-text-secondary)]"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {exam.studentCount} öğrenci · {exam.questionCount} madde · ort.{" "}
-            {fmt(exam.stat?.mean, 1)} · KR-20 {fmt(kr20)}
-            {kr20 !== null && (
-              <span className="text-[var(--viz-text-muted)]">
-                {" "}
-                ({interpretReliability(kr20).label.toLocaleLowerCase("tr")})
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="flex gap-1.5">
-          <GhostButton href={`/excel-reports?exam=${exam.id}`}>Rapor</GhostButton>
-          <GhostButton href={`/excel-update?exam=${exam.id}`}>Düzenle</GhostButton>
-          <GhostButton onClick={() => handleDeleteExam(exam)}>Sil</GhostButton>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <PageShell>
-      <PageHeader
-        title="Klasörler"
-        meta={
-          loading
-            ? "Yükleniyor..."
-            : `${folders.length} klasör · ${exams.length} sınav · ${totals.students} öğrenci kaydı`
-        }
-        actions={
-          <>
-            <GhostButton
-              onClick={() => setView((v) => (v === "grid" ? "list" : "grid"))}
-            >
-              {view === "grid" ? "Liste görünümü" : "Kart görünümü"}
-            </GhostButton>
-            <AddFolder onCreated={load} />
-          </>
-        }
-      />
-
-      {!loading && exams.length > 0 && (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <StatTile label="Sınav" value={String(exams.length)} />
-          <StatTile label="Öğrenci kaydı" value={String(totals.students)} />
-          <StatTile
-            label="Ortalama KR-20"
-            value={fmt(totals.avgKr20)}
-            hint={`${totals.measured} sınavda hesaplandı`}
-          />
-          <StatTile label="Klasör" value={String(folders.length)} />
-        </div>
-      )}
-
-      <Card>
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Klasör veya sınav arayın..."
-          className="max-w-md"
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="fixed inset-0 z-0">
+        <img
+          className="w-full h-full object-cover opacity-30"
+          src="/bg-anaekran.jpg"
+          alt=""
         />
+      </div>
+
+      <div className="relative z-10 p-4 space-y-6">
+        <div className="flex flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Klasör veya sınav arayın..."
+              className="pl-10 pr-4 w-full"
+            />
+            <img
+              src="/search.svg"
+              alt=""
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+            />
+          </div>
+          <div className="shrink-0">
+            <AddFolder onCreated={load} />
+          </div>
+        </div>
 
         {loading ? (
-          <p className="mt-6 text-sm text-[var(--viz-text-secondary)]">Yükleniyor...</p>
+          <p className="text-center text-gray-600">Yükleniyor...</p>
         ) : folders.length === 0 ? (
-          <EmptyState
-            icon="📁"
-            title="Henüz klasör yok"
-            body="Sınavlarınızı düzenlemek için önce bir klasör oluşturun."
-          />
-        ) : view === "list" ? (
-          <div className="mt-4">
-            <TableShell>
-              <thead className="bg-[var(--viz-surface)] text-[var(--viz-text-secondary)]">
-                <tr>
-                  <Th>Sınav</Th>
-                  <Th>Klasör</Th>
-                  <Th align="right">Öğrenci</Th>
-                  <Th align="right">Madde</Th>
-                  <Th align="right">Ortalama</Th>
-                  <Th align="right">KR-20</Th>
-                  <Th align="right">Tarih</Th>
-                  <Th align="right">İşlem</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {exams
-                  .filter((e) => (examsByFolder.get(e.folderId) ?? []).includes(e))
-                  .map((exam) => (
-                    <tr
-                      key={exam.id}
-                      className="border-t border-black/5 dark:border-white/10 hover:bg-[var(--viz-surface)]"
-                    >
-                      <td className="px-3 py-2 text-[var(--viz-text)]">{exam.name}</td>
-                      <td className="px-3 py-2 text-[var(--viz-text-secondary)]">
-                        {folders.find((f) => f.id === exam.folderId)?.name ?? "—"}
-                      </td>
-                      <td className="px-3 py-2 text-right">{exam.studentCount}</td>
-                      <td className="px-3 py-2 text-right">{exam.questionCount}</td>
-                      <td className="px-3 py-2 text-right">{fmt(exam.stat?.mean, 1)}</td>
-                      <td className="px-3 py-2 text-right">{fmt(exam.stat?.kr20)}</td>
-                      <td className="px-3 py-2 text-right text-[var(--viz-text-secondary)]">
-                        {fmtDate(exam.createdAt)}
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <button
-                          onClick={() => router.push(`/excel-reports?exam=${exam.id}`)}
-                          className="text-[var(--viz-series)] hover:underline"
-                        >
-                          Rapor
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </TableShell>
+          <div className="max-w-md mx-auto bg-white/95 p-6 rounded-2xl shadow text-center">
+            <p className="text-lg font-semibold text-gray-700">
+              📁 Henüz klasör yok
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Başlamak için yukarıdan bir klasör ekleyin.
+            </p>
           </div>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -311,74 +222,174 @@ export default function Folders() {
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="mt-4 grid gap-3 lg:grid-cols-2"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto"
                 >
-                  {visibleFolders.map((folder, index) => (
+                  {visible.folders.map((folder, index) => (
                     <Draggable
                       key={folder.id}
                       draggableId={folder.id}
                       index={index}
-                      isDragDisabled={Boolean(search)}
+                      isDragDisabled={Boolean(searchQuery)}
                     >
                       {(
-                        drag: DraggableProvided,
+                        dragProvided: DraggableProvided,
                         snapshot: DraggableStateSnapshot
                       ) => (
                         <div
-                          ref={drag.innerRef}
-                          {...drag.draggableProps}
-                          {...drag.dragHandleProps}
-                          style={drag.draggableProps.style}
-                          className={`rounded-lg border border-black/5 dark:border-white/10 bg-[var(--viz-surface)] p-4 ${
-                            snapshot.isDragging ? "opacity-60" : ""
-                          }`}
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          {...dragProvided.dragHandleProps}
+                          className={snapshot.isDragging ? "opacity-50" : ""}
+                          style={dragProvided.draggableProps.style}
                         >
-                          <div className="flex items-start justify-between gap-2 mb-3">
-                            <div className="min-w-0">
-                              <h3 className="text-sm font-medium text-[var(--viz-text)] truncate">
-                                {folder.name}
-                              </h3>
-                              <p className="text-xs text-[var(--viz-text-secondary)]">
-                                {folder._count.exams} sınav ·{" "}
-                                {fmtDate(folder.createdAt)}
-                              </p>
-                            </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="px-2 text-[var(--viz-text-muted)] hover:text-[var(--viz-text)]">
-                                ⋯
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => router.push("/excel-upload")}
-                                >
-                                  Dosya yükle
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setEditing(folder);
-                                    setEditingName(folder.name);
-                                  }}
-                                >
-                                  İsmi düzenle
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteFolder(folder)}
-                                  className="text-red-600"
-                                >
-                                  Klasörü sil
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
+                          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader>
+                              <div className="flex flex-row justify-between items-center gap-2 bg-slate-100 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <img
+                                    src="/grab.svg"
+                                    alt=""
+                                    className="w-5 h-5 cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity shrink-0"
+                                  />
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 min-w-0">
+                                    <h2 className="text-lg font-semibold text-gray-800 truncate">
+                                      {folder.name}
+                                    </h2>
+                                    <p className="text-xs text-gray-500 whitespace-nowrap">
+                                      {new Date(folder.createdAt).toLocaleString("tr")}
+                                    </p>
+                                  </div>
+                                </div>
 
-                          <div className="space-y-2">
-                            {(examsByFolder.get(folder.id) ?? []).map(examRow)}
-                            {(examsByFolder.get(folder.id) ?? []).length === 0 && (
-                              <p className="text-xs text-[var(--viz-text-muted)] px-1 py-2">
-                                Bu klasörde sınav yok.
-                              </p>
-                            )}
-                          </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="hover:bg-slate-200 shrink-0"
+                                    >
+                                      <img
+                                        src="/threeDots.svg"
+                                        alt="Menü"
+                                        className="h-5 w-5"
+                                      />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-64">
+                                    <DropdownMenuItem
+                                      onClick={() => router.push("/excel-upload")}
+                                      className="text-green-600"
+                                    >
+                                      Dosya Yükle
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setEditingFolder(folder);
+                                        setEditingName(folder.name);
+                                      }}
+                                      className="text-blue-600"
+                                    >
+                                      İsmi Düzenle
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleDeleteFolder(folder)}
+                                      className="text-red-600"
+                                    >
+                                      Klasörü Sil
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </CardHeader>
+
+                            <CardContent>
+                              <ul className="space-y-3">
+                                {(visible.examsByFolder.get(folder.id) ?? []).map(
+                                  (exam) => (
+                                    <li
+                                      key={exam.id}
+                                      className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-3 hover:bg-gray-50 rounded-lg border border-gray-100"
+                                    >
+                                      <div className="flex flex-col gap-1 min-w-0">
+                                        <span className="font-medium text-blue-600 break-all">
+                                          {exam.name}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                          {exam.studentCount} öğrenci ·{" "}
+                                          {exam.questionCount} madde ·{" "}
+                                          {new Date(exam.createdAt).toLocaleString("tr")}
+                                        </span>
+                                      </div>
+
+                                      <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="bg-green-500 hover:bg-green-600 text-white w-[80px]"
+                                                onClick={() =>
+                                                  router.push(
+                                                    `/excel-reports?exam=${exam.id}`
+                                                  )
+                                                }
+                                              >
+                                                Raporlar
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              İstatistikleri ve grafikleri görün
+                                            </TooltipContent>
+                                          </Tooltip>
+
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="bg-blue-500 hover:bg-blue-600 text-white w-[80px]"
+                                                onClick={() =>
+                                                  router.push(
+                                                    `/excel-update?exam=${exam.id}`
+                                                  )
+                                                }
+                                              >
+                                                Düzenle
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              Cevapları düzenleyin
+                                            </TooltipContent>
+                                          </Tooltip>
+
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="bg-red-500 hover:bg-red-600 text-white w-[80px]"
+                                                onClick={() => handleDeleteExam(exam)}
+                                              >
+                                                Sil
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Sınavı silin</TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </div>
+                                    </li>
+                                  )
+                                )}
+                                {(visible.examsByFolder.get(folder.id) ?? []).length ===
+                                  0 && (
+                                  <li className="text-sm text-gray-400 px-3 py-2">
+                                    Bu klasörde sınav yok.
+                                  </li>
+                                )}
+                              </ul>
+                            </CardContent>
+                          </Card>
                         </div>
                       )}
                     </Draggable>
@@ -389,33 +400,54 @@ export default function Folders() {
             </Droppable>
           </DragDropContext>
         )}
-      </Card>
+      </div>
 
-      <Dialog open={editing !== null} onOpenChange={(open) => !open && setEditing(null)}>
+      <Dialog
+        open={editingFolder !== null}
+        onOpenChange={(open) => !open && setEditingFolder(null)}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-base">Klasör ismini düzenle</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-center">
+              Klasör İsmini Düzenle
+            </DialogTitle>
           </DialogHeader>
-          <Input
-            value={editingName}
-            onChange={(e) => setEditingName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleRename()}
-            autoFocus
-          />
-          <DialogFooter>
-            <GhostButton onClick={() => setEditing(null)}>İptal</GhostButton>
-            <button
-              onClick={handleRename}
-              disabled={!editingName.trim()}
-              className="px-3 py-2 text-sm rounded-md bg-[var(--viz-series)] text-white disabled:opacity-50"
-            >
+
+          <div className="space-y-2 py-4">
+            <label className="text-sm font-medium text-gray-700">Yeni isim</label>
+            <Input
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleRename();
+              }}
+              placeholder="Yeni klasör ismini girin..."
+              autoFocus
+            />
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setEditingFolder(null)}>
+              İptal
+            </Button>
+            <Button onClick={handleRename} disabled={!editingName.trim()}>
               Kaydet
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <ToastContainer position="bottom-right" theme="dark" />
-    </PageShell>
+    </div>
   );
+}
+
+function groupBy(exams: ExamSummary[]): Map<string, ExamSummary[]> {
+  const map = new Map<string, ExamSummary[]>();
+  for (const exam of exams) {
+    const list = map.get(exam.folderId);
+    if (list) list.push(exam);
+    else map.set(exam.folderId, [exam]);
+  }
+  return map;
 }

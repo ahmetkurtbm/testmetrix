@@ -1,25 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { fmt } from "./svg-utils";
+import { useMemo } from "react";
+import {
+  CartesianGrid,
+  Cell,
+  LabelList,
+  ReferenceLine,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ZAxis,
+} from "recharts";
+import { fmt } from "@/lib/format";
+import { CHART } from "./chart-theme";
 import { THRESHOLDS, type ItemQuality } from "./quality";
 
 /**
  * Madde haritası — güçlük (x) ve ayırt edicilik (y).
  *
  * Ekranın en değerli görünümü: "hangi soruyu değiştirmeliyim" sorusunu tek
- * bakışta yanıtlıyor. Sağ üstteki maddeler iyi; kenarlara savrulanlar sorunlu.
+ * bakışta yanıtlıyor. Ortada ve yukarıda kalan maddeler iyi; kenarlara
+ * savrulanlar sorunlu.
  *
- * Kalite RENKLE kodlanmıyor. Kırmızı/yeşil durum çifti deuteranopide ΔE 4.1 ile
- * ayırt edilemiyor (doğrulayıcı çıktısı), yani kullanıcıların bir bölümü için
- * anlamsız olurdu. Bunun yerine **vurgu deseni**: sorunlu maddeler aksan renginde
- * ve DOĞRUDAN ETİKETLİ, geri kalanı geri planda. Böylece kimlik renge değil,
- * konum + etiket ikilisine bağlı.
+ * Kalite renkle değil, KONUM + ETİKET ile veriliyor. Kırmızı/yeşil durum çifti
+ * deuteranopide ayırt edilemediği için kullanılmadı; dikkat isteyen maddeler
+ * turuncu ve ayrıca "M7" gibi doğrudan etiketli.
  */
-const W = 720;
-const H = 380;
-const PAD = { top: 20, right: 24, bottom: 48, left: 52 };
-
 export function ItemMap({
   items,
   selected,
@@ -29,237 +38,143 @@ export function ItemMap({
   selected: number | null;
   onSelect: (questionNo: number | null) => void;
 }) {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const data = useMemo(
+    () =>
+      items.map((item) => ({
+        x: item.difficulty,
+        y: item.discrimination,
+        questionNo: item.questionNo,
+        label: item.label,
+        explanation: item.explanation,
+        needsAttention: item.needsAttention,
+        // Etiket yalnızca sorunlu maddelerde; her noktaya yazı koymak
+        // 50 maddelik sınavda okunmaz hale geliyor.
+        tag: item.needsAttention ? `M${item.questionNo}` : "",
+      })),
+    [items]
+  );
 
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
-
-  const yDomain = useMemo(() => {
-    const values = items.map((i) => i.discrimination);
-    return {
-      min: Math.min(-0.2, ...values),
-      max: Math.max(1, ...values),
-    };
-  }, [items]);
-
-  const xOf = (difficulty: number) => PAD.left + difficulty * plotW;
-  const yOf = (discrimination: number) =>
-    PAD.top +
-    plotH -
-    ((discrimination - yDomain.min) / (yDomain.max - yDomain.min)) * plotH;
-
-  /**
-   * Etiketlenecek maddeler.
-   *
-   * Her sorunlu maddeyi etiketlemek 50+ maddelik sınavlarda etiketleri üst üste
-   * bindiriyor. Basit bir çakışma kontrolü: yerleştirilmiş bir etikete çok yakın
-   * olan atlanır — değeri zaten hover'da ve tabloda var, yani hiçbir şey
-   * yalnızca etikete bağlı değil.
-   */
-  const labelled = useMemo(() => {
-    const placed: { x: number; y: number }[] = [];
-    const result = new Set<number>();
-
-    for (const item of items.filter((i) => i.needsAttention)) {
-      const x = xOf(item.difficulty);
-      const y = yOf(item.discrimination);
-      const collides = placed.some(
-        (p) => Math.abs(p.x - x) < 34 && Math.abs(p.y - y) < 16
-      );
-      if (!collides) {
-        placed.push({ x, y });
-        result.add(item.questionNo);
-      }
-    }
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, yDomain]);
-
-  const active = hovered ?? selected;
-  const activeItem = items.find((i) => i.questionNo === active) ?? null;
-  const attentionCount = items.filter((i) => i.needsAttention).length;
+  const attention = items.filter((i) => i.needsAttention).length;
+  const yMin = Math.min(-0.2, ...items.map((i) => i.discrimination));
 
   return (
-    <figure className="m-0">
-      <figcaption className="mb-1 text-sm font-medium text-[var(--viz-text)]">
-        Madde haritası
-      </figcaption>
-      <p className="mb-3 text-xs text-[var(--viz-text-secondary)]">
-        Sağ üst bölge ideal: orta güçlükte ve iyi ayırt eden maddeler. Bir maddeye
-        tıklayarak seçenek dağılımını görebilirsiniz.
+    <div>
+      <h2 className="text-base font-semibold text-gray-800">Madde haritası</h2>
+      <p className="mt-0.5 mb-2 text-xs text-gray-500">
+        Yukarıda ve ortada kalan maddeler iyi. Bir noktaya tıklayarak seçenek
+        dağılımını görebilirsiniz.
       </p>
 
-      {/* İki görsel sınıf var → efsane zorunlu; renk tek başına kimlik taşımıyor */}
-      <div className="mb-2 flex flex-wrap items-center gap-4 text-xs text-[var(--viz-text-secondary)]">
+      {/* İki görsel sınıf var → efsane şart; renk tek başına kimlik taşımıyor */}
+      <div className="mb-2 flex flex-wrap items-center gap-4 text-xs text-gray-600">
         <span className="inline-flex items-center gap-1.5">
           <span
             className="inline-block w-2.5 h-2.5 rounded-full"
-            style={{ background: "var(--viz-series)" }}
+            style={{ background: CHART.series }}
           />
-          Beklenen aralıkta ({items.length - attentionCount})
+          Beklenen aralıkta ({items.length - attention})
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span
             className="inline-block w-2.5 h-2.5 rounded-full"
-            style={{ background: "var(--viz-accent)" }}
+            style={{ background: CHART.accent }}
           />
-          Gözden geçirin ({attentionCount})
+          Gözden geçirin ({attention})
         </span>
       </div>
 
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full h-auto"
-        role="img"
-        aria-label="Maddelerin güçlük ve ayırt edicilik dağılımı"
-      >
-        {/* Eşik çizgileri — hairline, düz */}
-        {[THRESHOLDS.hardBelow, THRESHOLDS.easyAbove].map((threshold) => (
-          <line
-            key={threshold}
-            x1={xOf(threshold)}
-            x2={xOf(threshold)}
-            y1={PAD.top}
-            y2={PAD.top + plotH}
-            stroke="var(--viz-grid)"
-            strokeWidth={1}
+      <ResponsiveContainer width="100%" height={300}>
+        <ScatterChart margin={{ top: 10, right: 16, bottom: 22, left: 0 }}>
+          <CartesianGrid stroke={CHART.grid} />
+          <XAxis
+            type="number"
+            dataKey="x"
+            domain={[0, 1]}
+            ticks={[0, 0.25, 0.5, 0.75, 1]}
+            tick={{ fontSize: 11, fill: CHART.muted }}
+            tickLine={false}
+            axisLine={{ stroke: CHART.axis }}
+            label={{
+              value: "Güçlük (doğru yanıtlama oranı)",
+              position: "insideBottom",
+              offset: -14,
+              style: { fontSize: 11, fill: CHART.muted },
+            }}
           />
-        ))}
-        <line
-          x1={PAD.left}
-          x2={W - PAD.right}
-          y1={yOf(THRESHOLDS.weakDiscriminationBelow)}
-          y2={yOf(THRESHOLDS.weakDiscriminationBelow)}
-          stroke="var(--viz-grid)"
-          strokeWidth={1}
-        />
-        {/* Sıfır çizgisi: altı negatif ayırt edicilik */}
-        {yDomain.min < 0 && (
-          <line
-            x1={PAD.left}
-            x2={W - PAD.right}
-            y1={yOf(0)}
-            y2={yOf(0)}
-            stroke="var(--viz-axis)"
-            strokeWidth={1}
+          <YAxis
+            type="number"
+            dataKey="y"
+            domain={[yMin, "auto"]}
+            tick={{ fontSize: 11, fill: CHART.muted }}
+            tickLine={false}
+            axisLine={false}
+            label={{
+              value: "Ayırt edicilik",
+              angle: -90,
+              position: "insideLeft",
+              style: { fontSize: 11, fill: CHART.muted },
+            }}
           />
-        )}
+          <ZAxis range={[70, 70]} />
 
-        {/* Eksenler */}
-        {[0, 0.25, 0.5, 0.75, 1].map((tick) => (
-          <text
-            key={tick}
-            x={xOf(tick)}
-            y={H - PAD.bottom + 18}
-            textAnchor="middle"
-            className="fill-[var(--viz-text-muted)]"
-            style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}
+          {/* Eşik çizgileri */}
+          <ReferenceLine x={THRESHOLDS.hardBelow} stroke={CHART.grid} />
+          <ReferenceLine x={THRESHOLDS.easyAbove} stroke={CHART.grid} />
+          <ReferenceLine
+            y={THRESHOLDS.weakDiscriminationBelow}
+            stroke={CHART.grid}
+          />
+          {yMin < 0 && <ReferenceLine y={0} stroke={CHART.axis} />}
+
+          <Tooltip
+            cursor={{ strokeDasharray: "3 3" }}
+            contentStyle={CHART.tooltip}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const point = payload[0].payload as (typeof data)[number];
+              return (
+                <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg max-w-[240px]">
+                  <p className="text-sm font-medium text-gray-800">
+                    Madde {point.questionNo} — {point.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-600">
+                    {point.explanation}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Güçlük {fmt(point.x)} · Ayırt edicilik {fmt(point.y)}
+                  </p>
+                </div>
+              );
+            }}
+          />
+
+          <Scatter
+            data={data}
+            onClick={(point) => {
+              const clicked = point as unknown as { questionNo: number };
+              onSelect(
+                selected === clicked.questionNo ? null : clicked.questionNo
+              );
+            }}
+            cursor="pointer"
           >
-            {tick.toFixed(2)}
-          </text>
-        ))}
-        {[yDomain.min, 0.2, 0.5, yDomain.max].map((tick) => (
-          <text
-            key={tick}
-            x={PAD.left - 10}
-            y={yOf(tick) + 4}
-            textAnchor="end"
-            className="fill-[var(--viz-text-muted)]"
-            style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}
-          >
-            {tick.toFixed(2)}
-          </text>
-        ))}
-
-        <text
-          x={PAD.left + plotW / 2}
-          y={H - 8}
-          textAnchor="middle"
-          className="fill-[var(--viz-text-muted)]"
-          style={{ fontSize: 11 }}
-        >
-          Güçlük (doğru yanıtlama oranı) →
-        </text>
-        <text
-          x={14}
-          y={PAD.top + plotH / 2}
-          textAnchor="middle"
-          transform={`rotate(-90 14 ${PAD.top + plotH / 2})`}
-          className="fill-[var(--viz-text-muted)]"
-          style={{ fontSize: 11 }}
-        >
-          Ayırt edicilik →
-        </text>
-
-        {/* Noktalar. Sorunlular üstte çizilsin diye sona bırakılıyor. */}
-        {[...items]
-          .sort((a, b) => Number(a.needsAttention) - Number(b.needsAttention))
-          .map((item) => {
-            const x = xOf(item.difficulty);
-            const y = yOf(item.discrimination);
-            const isActive = active === item.questionNo;
-            const color = item.needsAttention
-              ? "var(--viz-accent)"
-              : "var(--viz-series)";
-
-            return (
-              <g key={item.questionNo}>
-                {/* 2px yüzey halkası: üst üste binen noktalar ayrık okunuyor */}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={isActive ? 8 : 6}
-                  fill={color}
-                  stroke="var(--viz-surface-raised)"
-                  strokeWidth={2}
-                  opacity={active === null || isActive ? 1 : 0.5}
-                />
-                {/* Hit alanı noktadan büyük (~24px): ince nişan gerekmiyor */}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={13}
-                  fill="transparent"
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={() => setHovered(item.questionNo)}
-                  onMouseLeave={() => setHovered(null)}
-                  onClick={() =>
-                    onSelect(selected === item.questionNo ? null : item.questionNo)
-                  }
-                />
-                {labelled.has(item.questionNo) && (
-                  <text
-                    x={x + 11}
-                    y={y + 4}
-                    className="fill-[var(--viz-text-secondary)]"
-                    style={{ fontSize: 11 }}
-                  >
-                    M{item.questionNo}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-      </svg>
-
-      {activeItem ? (
-        <div className="mt-2 rounded-md bg-[var(--viz-surface)] border border-black/5 dark:border-white/10 p-3">
-          <p className="text-sm font-medium text-[var(--viz-text)]">
-            Madde {activeItem.questionNo} — {activeItem.label}
-          </p>
-          <p className="mt-0.5 text-xs text-[var(--viz-text-secondary)]">
-            {activeItem.explanation}
-          </p>
-          <p className="mt-1 text-xs text-[var(--viz-text-muted)]">
-            Güçlük {fmt(activeItem.difficulty)} · Ayırt edicilik{" "}
-            {fmt(activeItem.discrimination)}
-          </p>
-        </div>
-      ) : (
-        <p className="mt-2 text-xs text-[var(--viz-text-muted)]">
-          Ayrıntı için bir maddenin üzerine gelin.
-        </p>
-      )}
-    </figure>
+            {data.map((point) => (
+              <Cell
+                key={point.questionNo}
+                fill={point.needsAttention ? CHART.accent : CHART.series}
+                stroke="#ffffff"
+                strokeWidth={selected === point.questionNo ? 3 : 1.5}
+              />
+            ))}
+            <LabelList
+              dataKey="tag"
+              position="right"
+              offset={8}
+              style={{ fontSize: 11, fill: CHART.secondary }}
+            />
+          </Scatter>
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
