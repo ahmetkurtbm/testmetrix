@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import { apiGet } from "@/lib/api-client";
 import { fmt } from "@/lib/format";
 import type { ExamDetail } from "@/features/exams/types";
-import { classifyItems, interpretReliability } from "@/features/reports/quality";
+import { classifyItems } from "@/features/reports/quality";
 import { StatTile } from "@/features/reports/StatTile";
 import { ScoreHistogram } from "@/features/reports/ScoreHistogram";
+import { ItemDifficultyArea } from "@/features/reports/ItemDifficultyArea";
 import { ItemMap } from "@/features/reports/ItemMap";
 import { ItemTable } from "@/features/reports/ItemTable";
 import { StudentTable } from "@/features/reports/StudentTable";
 import { DistractorPanel } from "@/features/reports/DistractorPanel";
+import { ReliabilityGauge } from "@/features/reports/ReliabilityGauge";
 
 /**
  * Rapor ekranı.
@@ -146,7 +148,6 @@ export default function ExcelReports() {
 
   const { analysis, exam } = detail;
   const { descriptive: d, reliability } = analysis;
-  const reliabilityInfo = interpretReliability(reliability.kr20);
   const attention = items.filter((i) => i.needsAttention);
 
   const exportProps = {
@@ -207,16 +208,7 @@ export default function ExcelReports() {
       {/* Güvenirlik + özet */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Panel>
-          <div className="text-xs text-gray-500">KR-20 güvenirlik</div>
-          <div className="mt-1 text-4xl font-bold text-gray-800 leading-none">
-            {fmt(reliability.kr20)}
-          </div>
-          <div className="mt-2 text-sm font-medium text-gray-700">
-            {reliabilityInfo.label}
-          </div>
-          <p className="mt-1 text-xs text-gray-500 leading-relaxed">
-            {reliabilityInfo.detail}
-          </p>
+          <ReliabilityGauge kr20={reliability.kr20} />
         </Panel>
 
         <div className="lg:col-span-2 grid gap-3 grid-cols-2 xl:grid-cols-4">
@@ -274,6 +266,10 @@ export default function ExcelReports() {
           />
         </Panel>
       </div>
+
+      <Panel>
+        <ItemDifficultyArea items={items} />
+      </Panel>
 
       {selectedItem !== null && (
         <Panel>

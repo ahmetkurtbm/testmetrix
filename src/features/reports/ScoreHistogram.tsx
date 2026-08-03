@@ -17,9 +17,9 @@ import { CHART } from "./chart-theme";
 /**
  * Puan dağılımı.
  *
- * Tek seri olduğu için tek renk ve efsane yok — başlık zaten neyin çizildiğini
- * söylüyor. Her sütuna sayı yazılmıyor; değerler tooltip'te ve alttaki
- * tablolarda. Ortalama referans çizgisi olarak işaretli.
+ * Sütunlar gradyan dolgulu ve kalın — düz tek renk yerine üstten koyu,
+ * tabana doğru açılan bir dolgu. Tek seri olduğu için efsane yok; başlık zaten
+ * neyin çizildiğini söylüyor. Her sütuna sayı yazılmıyor, değerler tooltip'te.
  */
 export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
   const { frequency, descriptive } = analysis;
@@ -38,8 +38,14 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
         Kaç öğrencinin hangi puanı aldığı. Kesikli çizgi ortalamayı gösterir.
       </p>
 
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data} margin={{ top: 16, right: 8, bottom: 20, left: 0 }}>
+          <defs>
+            <linearGradient id="histogramFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={CHART.series} stopOpacity={0.95} />
+              <stop offset="100%" stopColor={CHART.series} stopOpacity={0.55} />
+            </linearGradient>
+          </defs>
           <CartesianGrid stroke={CHART.grid} vertical={false} />
           <XAxis
             dataKey="score"
@@ -73,19 +79,20 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
             <ReferenceLine
               x={Math.round(descriptive.mean)}
               stroke={CHART.accent}
+              strokeWidth={2}
               strokeDasharray="4 3"
               label={{
                 value: `Ort. ${fmt(descriptive.mean, 1)}`,
                 position: "top",
-                style: { fontSize: 11, fill: CHART.secondary },
+                style: { fontSize: 11, fontWeight: 600, fill: CHART.secondary },
               }}
             />
           )}
           <Bar
             dataKey="count"
-            fill={CHART.series}
-            radius={[4, 4, 0, 0]}
-            maxBarSize={26}
+            fill="url(#histogramFill)"
+            radius={[6, 6, 0, 0]}
+            maxBarSize={44}
           />
         </BarChart>
       </ResponsiveContainer>
