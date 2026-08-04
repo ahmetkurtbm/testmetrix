@@ -1,17 +1,13 @@
 // TestMetrix veri modeli.
 //
-// Bu şema, GateHub ile AYNI Postgres veritabanında ama ayrı bir `testmetrix`
-// schema'sında yaşar (Supabase ücretsiz kademe 2 projeyle sınırlı olduğu için).
-// Schema seçimi: Prisma CLI için bağlantı dizesindeki `?schema=testmetrix`,
-// çalışma zamanında PrismaPg adapter'ına geçilen `{ schema: "testmetrix" }`.
+// Kendine ait, izole bir Supabase Postgres projesinde yaşıyor — başka hiçbir
+// uygulamayla paylaşılmıyor. Bu yüzden şema tanımında `public`'ten farklı bir
+// schema'ya ya da özel bir adapter seçeneğine gerek yok.
 //
-// Ayrı schema'nın güvenlik faydası: Supabase Data API varsayılan olarak yalnızca
-// `public` ve `graphql_public` schema'larını yayınlar, bu tablolar PostgREST'e
-// hiç açılmaz.
-//
-// Kimlik doğrulama tablosu YOK: giriş GateHub üzerinden OIDC ile yapılıyor ve
-// Auth.js JWT session stratejisi kullanıyor. `app_user` yalnızca GateHub
-// kimliğinin yerel aynası — foreign key ve cascade silme için.
+// Kimlik doğrulama kendi içimizde: Auth.js v5, JWT session stratejisi.
+// E-posta/şifre (bcrypt hash) ve Google OAuth destekleniyor. Ayrı bir
+// oturum/hesap tablosu yok — JWT stratejisinde gerekmiyor; `app_user` hem
+// kimlik hem de uygulama profilini tek satırda tutuyor.
 
 generator client {
   provider = "prisma-client"
@@ -41,28 +37,53 @@ enum AnswerOption {
   BOS
 }
 
-/// GateHub kimliğinin yerel aynası. Her girişte e-posta üzerinden upsert edilir.
+/// Kullanıcı hesabı. E-posta/şifre ile ya da Google ile girilebilir; ikisi
+/// aynı satırda buluşur (aynı e-posta = aynı hesap).
 ///
-/// `id` bilerek GateHub'ın `sub` değeri DEĞİL: o değer Auth.js üzerinden
-/// güvenilir şekilde gelmiyordu (her girişte rastgele UUID üretiliyordu).
-/// Sabit kimlik e-posta; `id` yalnızca yerel birincil anahtar ve klasör/sınav
-/// foreign key hedefi.
+/// `passwordHash` nullable: yalnızca Google ile kaydolan kullanıcının şifresi
+/// yok. `id` sabit yerel birincil anahtar; klasör/sınav foreign key hedefi.
 model AppUser {
   id             String    @id @default(cuid())
   email          String    @unique
   name           String
   image          String?
+  /// bcrypt hash. Google-only kullanıcıda null — parola girişiyle giriş
+  /// denenirse `null` kontrolü bunu engeller.
+  passwordHash   String?
   university     String?
   phone          String?
   role           Role      @default(TEACHER)
   kvkkAcceptedAt DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
 
-  folders Folder[]
-  exams   Exam[]
+  /// Kaba kuvvet koruması. GateHub'ın sağladığı hız sınırlama artık yok;
+  /// bunun yerini alıyor. 5 yanlış denemeden sonra hesap geçici kilitlenir.
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  folders             Folder[]
+  exams                Exam[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("app_user")
+}
+
+/// Şifre sıfırlama bağlantısı. Token'ın kendisi asla saklanmaz — yalnızca
+/// SHA-256 hash'i; e-posta ele geçirilse bile veritabanı sızıntısı token'ı
+/// yeniden üretmeye yetmez. Kullanılınca ya da süresi dolunca silinir.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_token")
 }
 
 model Folder {

@@ -26,9 +26,10 @@ export const config = {
    */
   /**
    * `$` ilk sırada: kök adres (`/`) public tanıtım sayfası olduğu için
-   * korumanın dışında. Diğer her şey varsayılan olarak korumalı.
+   * korumanın dışında. Kimlik doğrulama akışının tüm sayfaları (giriş, kayıt,
+   * parola sıfırlama) da serbest; diğer her şey varsayılan olarak korumalı.
    */
   matcher: [
-    "/((?!$|api/auth|login|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
+    "/((?!$|api/auth|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
   ],
 };

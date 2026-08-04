@@ -1,29 +1,22 @@
 import type { NextAuthConfig } from "next-auth";
+import Google from "next-auth/providers/google";
 
 /**
  * Edge-safe Auth.js yapılandırması.
  *
- * `middleware.ts` edge runtime'da çalışır ve Prisma'yı oraya sokamayız; bu yüzden
- * yapılandırma ikiye bölünmüştür: veritabanına dokunmayan kısım burada,
- * `app_user` upsert'ü yapan `signIn` callback'i `src/auth.ts`'te.
+ * `middleware.ts` edge runtime'da çalışır ve Prisma/bcrypt oraya sokulamaz;
+ * bu yüzden yapılandırma ikiye bölünmüş. Burada veritabanına dokunmayan kısım
+ * var: Google provider (node-only bağımlılığı yok) ve `authorized`/`session`
+ * callback'leri. E-posta/şifre (Credentials) provider'ı ve `jwt` callback'i
+ * `src/auth.ts`'te — ikisi de Prisma/bcrypt kullanıyor.
  */
 
-const issuer = process.env.GATEHUB_ISSUER ?? "http://localhost:3000/api/auth";
+const googleConfigured = Boolean(
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+);
 
-const allowedEmails = (process.env.ALLOWED_EMAILS ?? "")
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
-
-/**
- * Erişim listesi kontrolü.
- *
- * Liste boşsa **kimse giremez** (fail closed). Ortam değişkeni unutulduğunda
- * uygulamanın herkese açılması, kilitlenmesinden çok daha kötü bir hata olurdu.
- */
-export function isEmailAllowed(email?: string | null): boolean {
-  if (!email) return false;
-  return allowedEmails.includes(email.toLowerCase());
+export function isGoogleConfigured(): boolean {
+  return googleConfigured;
 }
 
 export const authConfig = {
@@ -33,41 +26,22 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET,
   pages: { signIn: "/login" },
   session: { strategy: "jwt" },
-  providers: [
-    {
-      id: "gatehub",
-      name: "GateHub",
-      type: "oidc",
-      issuer,
-      clientId: process.env.GATEHUB_CLIENT_ID,
-      clientSecret: process.env.GATEHUB_CLIENT_SECRET,
-      authorization: {
-        params: {
-          scope: "openid profile email offline_access",
-          prompt: "select_account",
-        },
-      },
-      checks: ["pkce", "state"],
-      profile(profile) {
-        return {
-          id: profile.sub as string,
-          name: (profile.name ?? profile.email ?? "TestMetrix kullanıcısı") as string,
-          email: profile.email as string,
-          image: (profile.picture ?? null) as string | null,
-        };
-      },
-    },
-  ],
+  providers: googleConfigured
+    ? [
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+      ]
+    : [],
   callbacks: {
     // middleware bunu kullanır: oturum yoksa /login'e yönlendirilir.
     authorized({ auth }) {
       return Boolean(auth?.user);
     },
     // NOT: `jwt` callback'i burada DEĞİL, `src/auth.ts`'te tanımlı — çünkü
-    // veritabanına dokunuyor (yerel kullanıcı aynasını e-postadan bulup
-    // `token.sub`'a yazıyor) ve Prisma edge runtime'da çalışamaz. Oturum bir
-    // kez kurulduktan sonra `token.sub` JWT'de taşındığı için middleware'in
-    // veritabanına ihtiyacı olmuyor.
+    // veritabanına dokunuyor (yerel kullanıcı satırını e-postadan bulup
+    // `token.sub`'a yazıyor) ve Prisma edge runtime'da çalışamaz.
     session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
       return session;

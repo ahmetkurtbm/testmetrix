@@ -19,16 +19,19 @@ export async function GET() {
         phone: true,
         role: true,
         kvkkAcceptedAt: true,
+        passwordHash: true,
       },
     });
     if (!user) throw new NotFoundError("Kullanıcı bulunamadı");
-    return user;
+    // Hash asla istemciye gitmez; yalnızca "parola var mı" bilgisi gider —
+    // profil ekranı buna göre parola değiştirme bölümünü gösterir/gizler.
+    const { passwordHash, ...rest } = user;
+    return { ...rest, hasPassword: passwordHash !== null };
   });
 }
 
 /**
  * Hesabı siler. Klasörler, sınavlar ve tüm cevap satırları cascade ile gider.
- * GateHub'daki hesap etkilenmez — orası ayrı bir sistem.
  */
 export async function DELETE() {
   return handle(async () => {
@@ -43,11 +46,12 @@ export async function PATCH(request: NextRequest) {
     const userId = await requireUserId();
     const input = updateProfileSchema.parse(await request.json());
 
-    // Ad ve e-posta GateHub'da yönetilir; buradan değiştirilemez.
+    // E-posta buradan değiştirilemez (benzersizlik/oturum kimliği ona bağlı).
     // `role` şemada zaten yok — istemciden asla okunmuyor.
     return prisma.appUser.update({
       where: { id: userId },
       data: {
+        name: input.name ?? undefined,
         university: input.university ?? undefined,
         phone: input.phone ?? undefined,
         ...(input.kvkkAccepted === true ? { kvkkAcceptedAt: new Date() } : {}),

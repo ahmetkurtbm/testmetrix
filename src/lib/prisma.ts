@@ -14,12 +14,8 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL ortam değişkeni tanımlı değil.");
   }
 
-  // Bu veritabanı GateHub ile paylaşılıyor. `schema` seçeneği olmadan sorgular
-  // `public` schema'sına, yani GateHub'ın tablolarının yanına gider.
-  // Bağlantı dizesine `?schema=` yazmak işe yaramaz — onu yalnızca Prisma CLI
-  // anlar, çalışma zamanındaki node-postgres anlamaz.
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString }, { schema: "testmetrix" }),
+    adapter: new PrismaPg({ connectionString }),
   });
 }
 

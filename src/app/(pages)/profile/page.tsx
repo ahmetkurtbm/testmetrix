@@ -20,22 +20,28 @@ const ROLE_LABELS = {
 /**
  * Profil sayfası.
  *
- * Ad, e-posta ve parola alanları YOK — bunlar GateHub'da yönetiliyor. Eski
- * sürümde bu sayfa parola değiştirme ve e-posta güncelleme de yapıyordu;
- * e-posta değiştirince doğrulama istenmiyordu ve aynı e-posta zaten kayıtlıysa
- * ham Mongo duplicate-key hatası istemciye dönüyordu.
+ * E-posta değiştirilemez (benzersizlik ve oturum kimliği ona bağlı), ama ad
+ * ve parola artık buradan yönetiliyor — kimlik doğrulama kendi sistemimizde
+ * olduğu için.
  */
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [name, setName] = useState("");
   const [university, setUniversity] = useState("");
   const [phone, setPhone] = useState("");
   const [kvkk, setKvkk] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordAgain, setNewPasswordAgain] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
   useEffect(() => {
     apiGet<Profile>("/api/profile")
       .then((data) => {
         setProfile(data);
+        setName(data.name);
         setUniversity(data.university ?? "");
         setPhone(data.phone ?? "");
         setKvkk(data.kvkkAcceptedAt !== null);
@@ -52,6 +58,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await apiPatch("/api/profile", {
+        name: name.trim(),
         university: university.trim() || null,
         phone: phone.trim() || null,
         kvkkAccepted: kvkk,
@@ -66,11 +73,32 @@ export default function ProfilePage() {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (newPassword !== newPasswordAgain) {
+      toast.error("Yeni parolalar aynı değil.", { theme: "dark" });
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await apiPatch("/api/profile/password", { currentPassword, newPassword });
+      toast.success("Parola güncellendi.", { theme: "dark" });
+      setCurrentPassword("");
+      setNewPassword("");
+      setNewPasswordAgain("");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Parola değiştirilemedi.",
+        { theme: "dark" }
+      );
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        "Hesabınız ve tüm klasörleriniz, sınavlarınız kalıcı olarak silinecek. " +
-          "GateHub hesabınız etkilenmez. Emin misiniz?"
+        "Hesabınız ve tüm klasörleriniz, sınavlarınız kalıcı olarak silinecek. Emin misiniz?"
       )
     ) {
       return;
@@ -100,18 +128,13 @@ export default function ProfilePage() {
         <Card className="bg-white/95 shadow-sm">
           <CardHeader>
             <h1 className="text-xl font-semibold text-gray-800">Profil</h1>
-            <p className="text-sm text-gray-600">
-              Ad, e-posta ve parola bilgileri GateHub üzerinden yönetilir.
-            </p>
           </CardHeader>
 
           <CardContent className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label className="text-gray-600">Ad Soyad</Label>
-                <div className="p-2.5 bg-gray-100 rounded-md text-sm text-gray-700">
-                  {profile.name}
-                </div>
+                <Label htmlFor="name">Ad Soyad</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-gray-600">E-posta</Label>
@@ -175,12 +198,60 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
+        {profile.hasPassword && (
+          <Card className="bg-white/95 shadow-sm">
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-gray-800">Parola Değiştir</h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="currentPassword">Mevcut Parola</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="newPassword">Yeni Parola</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="newPasswordAgain">Yeni Parola (Tekrar)</Label>
+                  <Input
+                    id="newPasswordAgain"
+                    type="password"
+                    value={newPasswordAgain}
+                    onChange={(e) => setNewPasswordAgain(e.target.value)}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                En az 12 karakter; büyük harf, küçük harf ve rakam içermeli.
+              </p>
+              <Button
+                onClick={handleChangePassword}
+                disabled={changingPassword || !currentPassword || !newPassword}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {changingPassword ? "Güncelleniyor..." : "Parolayı Güncelle"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="bg-white/95 shadow-sm border-red-200">
           <CardHeader>
             <h2 className="text-lg font-semibold text-red-700">Hesabı Sil</h2>
             <p className="text-sm text-gray-600">
               Bu işlem klasörlerinizi ve sınavlarınızı kalıcı olarak siler.
-              GateHub hesabınız etkilenmez.
             </p>
           </CardHeader>
           <CardContent>

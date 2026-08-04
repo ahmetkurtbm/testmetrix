@@ -6,6 +6,12 @@ export default defineConfig({
     alias: {
       // tsconfig.json'daki `@/*` → `./src/*` eşlemesinin vitest karşılığı.
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // `server-only` paketi react-server export koşuluna göre iki farklı
+      // dosya sunuyor; vitest bu koşulu uygulamadığı için "Client
+      // Component'ten import edilemez" hatası veren sürüme düşüyor.
+      "server-only": fileURLToPath(
+        new URL("./src/test/server-only.stub.ts", import.meta.url)
+      ),
     },
   },
   test: {

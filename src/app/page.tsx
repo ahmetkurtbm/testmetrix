@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { signInWithGateHub } from "@/app/actions/auth";
 import { DemoAnalyzer } from "@/app/(components)/DemoAnalyzer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,14 +61,11 @@ export default async function LandingPage() {
               </Button>
             </Link>
           ) : (
-            <form action={signInWithGateHub}>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
+            <Link href="/login">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Giriş Yap
               </Button>
-            </form>
+            </Link>
           )}
         </div>
       </header>
@@ -161,8 +157,8 @@ export default async function LandingPage() {
             Sınavlarınızı kaydetmek için giriş yapın
           </h2>
           <p className="text-gray-600 max-w-xl mx-auto text-sm">
-            Giriş GateHub üzerinden yapılır. Yüklediğiniz sınavlar klasörlerde
-            saklanır, sonradan düzenlenebilir ve yeniden raporlanabilir.
+            E-posta ile ya da Google hesabınızla kaydolun. Yüklediğiniz sınavlar
+            klasörlerde saklanır, sonradan düzenlenebilir ve yeniden raporlanabilir.
           </p>
           {sessionUser ? (
             <Link href="/folders">
@@ -171,14 +167,11 @@ export default async function LandingPage() {
               </Button>
             </Link>
           ) : (
-            <form action={signInWithGateHub}>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                GateHub ile Giriş Yap
+            <Link href="/register">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                Ücretsiz Kaydol
               </Button>
-            </form>
+            </Link>
           )}
         </section>
       </main>

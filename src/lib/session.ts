@@ -5,7 +5,7 @@ import { NotFoundError, UnauthorizedError } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Oturumdaki kullanıcının id'si (GateHub `sub`). Oturum yoksa 401.
+ * Oturumdaki kullanıcının id'si (`app_user.id`). Oturum yoksa 401.
  *
  * Bilerek `features/exams/data.ts`'ten ayrı tutuluyor: veri erişim katmanının
  * kimlik doğrulama çatısına bağımlı olmaması, hem katman ayrımını netleştiriyor

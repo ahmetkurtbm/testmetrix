@@ -3,15 +3,16 @@
 import { signIn, signOut } from "@/auth";
 
 /**
- * Giriş ve çıkış server action'ları.
+ * Google girişi ve çıkış server action'ları.
  *
- * Eski sürümde giriş, e-posta/şifreyi Express backend'ine POST edip dönen JWT'yi
- * bir cookie'ye yazmakla oluyordu. Artık parola testmetrix'e hiç uğramıyor:
- * kullanıcı GateHub'a yönlendiriliyor, oradan OIDC ile dönüyor.
+ * E-posta/şifre girişi burada değil: o istemci tarafında `next-auth/react`'ın
+ * `signIn("credentials", …)` fonksiyonuyla yapılıyor (bkz. LoginForm.tsx),
+ * çünkü sonucun `error` alanını forma göstermek için `redirect: false` ile
+ * çağrılması ve JS tarafında ele alınması gerekiyor.
  */
 
-export async function signInWithGateHub() {
-  await signIn("gatehub", { redirectTo: "/folders" });
+export async function signInWithGoogle() {
+  await signIn("google", { redirectTo: "/folders" });
 }
 
 export async function signOutAction() {

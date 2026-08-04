@@ -58,4 +58,6 @@ export type Profile = {
   phone: string | null;
   role: "ADMIN" | "TEACHER" | "STUDENT";
   kvkkAcceptedAt: string | null;
+  /** Parola değiştirme bölümünü göstermek için: Google-only hesapta false. */
+  hasPassword: boolean;
 };

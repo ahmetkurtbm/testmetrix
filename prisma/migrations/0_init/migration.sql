@@ -1,12 +1,5 @@
 -- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "testmetrix";
-
--- GÜVENLİK KORUMASI (elle eklendi, Prisma üretmiyor):
--- Bu betikteki CREATE TABLE / CREATE TYPE ifadeleri schema-qualified değil; nereye
--- düşecekleri tamamen search_path'e bağlı. Bu veritabanını GateHub ile paylaşıyoruz ve
--- yanlış search_path bu tabloları GateHub'ın `public` schema'sına yazardı.
--- Aşağıdaki satır sonucu deterministik kılar.
-SET search_path TO "testmetrix";
+CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'TEACHER', 'STUDENT');
@@ -20,14 +13,28 @@ CREATE TABLE "app_user" (
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "image" TEXT,
+    "passwordHash" TEXT,
     "university" TEXT,
     "phone" TEXT,
     "role" "Role" NOT NULL DEFAULT 'TEACHER',
     "kvkkAcceptedAt" TIMESTAMP(3),
+    "failedLoginAttempts" INTEGER NOT NULL DEFAULT 0,
+    "lockedUntil" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "app_user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "password_reset_token" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "tokenHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "password_reset_token_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -126,6 +133,12 @@ CREATE TABLE "item_stat" (
 CREATE UNIQUE INDEX "app_user_email_key" ON "app_user"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "password_reset_token_tokenHash_key" ON "password_reset_token"("tokenHash");
+
+-- CreateIndex
+CREATE INDEX "password_reset_token_userId_idx" ON "password_reset_token"("userId");
+
+-- CreateIndex
 CREATE INDEX "folder_ownerId_sortOrder_idx" ON "folder"("ownerId", "sortOrder");
 
 -- CreateIndex
@@ -139,6 +152,9 @@ CREATE UNIQUE INDEX "student_examId_rowNo_key" ON "student"("examId", "rowNo");
 
 -- CreateIndex
 CREATE INDEX "answer_examId_questionNo_idx" ON "answer"("examId", "questionNo");
+
+-- AddForeignKey
+ALTER TABLE "password_reset_token" ADD CONSTRAINT "password_reset_token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app_user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "folder" ADD CONSTRAINT "folder_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "app_user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

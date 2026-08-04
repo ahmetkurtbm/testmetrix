@@ -58,8 +58,14 @@ export const updateExamSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
+  name: trimmedName.optional(),
   university: z.string().trim().max(160).nullish(),
   phone: z.string().trim().max(32).nullish(),
   kvkkAccepted: z.boolean().optional(),
   // `role` bilerek YOK: sunucu tarafında atanır, istemciden hiç okunmaz.
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Mevcut parola gerekli."),
+  newPassword: z.string().min(1, "Yeni parola gerekli."),
 });
