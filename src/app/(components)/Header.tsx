@@ -67,7 +67,7 @@ const Header = ({ email, isAdmin }: HeaderProps) => {
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-[300px] sm:w-[400px] bg-gradient-to-br from-slate-50 to-white"
+                className="w-[300px] sm:w-[400px] bg-gray-50"
               >
                 <div className="mb-8 mt-2">
                   <img src="/logo.png" alt="TestMetrix" className="h-12 w-auto mb-4" />

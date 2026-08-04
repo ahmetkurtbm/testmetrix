@@ -124,17 +124,8 @@ const ExcelUpdate = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-sm" />
-        <img
-          className="w-full h-full object-cover opacity-30"
-          src="/bg-anaekran.jpg"
-          alt=""
-        />
-      </div>
-
-      <div className="relative z-10 space-y-6 max-w-[1400px] mx-auto">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="space-y-6 max-w-[1400px] mx-auto">
         <div className="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="space-y-1">

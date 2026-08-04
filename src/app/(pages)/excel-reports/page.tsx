@@ -109,15 +109,8 @@ export default function ExcelReports() {
   );
 
   const shell = (children: React.ReactNode) => (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="fixed inset-0 z-0">
-        <img
-          className="w-full h-full object-cover opacity-30"
-          src="/bg-anaekran.jpg"
-          alt="background"
-        />
-      </div>
-      <div className="relative z-10 p-4 max-w-7xl mx-auto space-y-4">{children}</div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 max-w-7xl mx-auto space-y-4">{children}</div>
       <ToastContainer position="bottom-right" theme="dark" />
     </div>
   );

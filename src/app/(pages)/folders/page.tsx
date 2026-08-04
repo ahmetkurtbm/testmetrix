@@ -174,16 +174,8 @@ export default function Folders() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="fixed inset-0 z-0">
-        <img
-          className="w-full h-full object-cover opacity-30"
-          src="/bg-anaekran.jpg"
-          alt=""
-        />
-      </div>
-
-      <div className="relative z-10 p-4 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 space-y-6">
         <div className="flex flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
           <div className="relative flex-1">
             <Input

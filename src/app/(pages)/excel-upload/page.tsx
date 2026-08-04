@@ -112,14 +112,8 @@ const ExcelUploadPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
-      <img
-        className="absolute inset-0 w-full h-full object-cover"
-        src="/bg-anaekran.jpg"
-        alt="Background"
-      />
-
-      <div className="relative z-10 min-h-screen p-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen p-4 flex items-center justify-center">
         <div className="flex flex-col lg:flex-row gap-4 max-w-6xl w-full">
           {/* Sol Kısım */}
           <div className="w-full lg:w-1/2 flex flex-col items-center justify-center gap-5">
