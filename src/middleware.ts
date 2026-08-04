@@ -28,8 +28,15 @@ export const config = {
    * `$` ilk sırada: kök adres (`/`) public tanıtım sayfası olduğu için
    * korumanın dışında. Kimlik doğrulama akışının tüm sayfaları (giriş, kayıt,
    * parola sıfırlama) da serbest; diğer her şey varsayılan olarak korumalı.
+   *
+   * NOT: Sayfa yollarının (`register`, `forgot-password`) yanı sıra bunların
+   * ARKASINDAKİ API rotaları da (`api/register`, `api/password/*`) burada
+   * olmalı. Bu unutulunca middleware oturumsuz isteği `/login`'e 307 ile
+   * yönlendiriyordu; istemci JSON beklerken HTML redirect gövdesi alıp
+   * "Unexpected token '<'" hatasıyla çöküyordu — kayıt formu bu yüzden
+   * bozuktu.
    */
   matcher: [
-    "/((?!$|api/auth|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
+    "/((?!$|api/auth|api/register|api/password|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
   ],
 };
