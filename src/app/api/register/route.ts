@@ -1,18 +1,12 @@
 import type { NextRequest } from "next/server";
 import { registerSchema } from "@/features/auth/schemas";
 import { handle, ValidationError } from "@/lib/api";
-import { isAdminEmail } from "@/lib/admin";
 import { hashPassword, validatePasswordStrength } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Kayıt.
- *
- * Herkese açık — ALLOWED_EMAILS listesi gibi bir kapı yok. `role` istemciden
- * asla okunmaz; ADMIN_EMAILS listesindeyse ADMIN, değilse TEACHER olarak
- * sabitlenir (bkz. src/lib/admin.ts). Eski Express backend'inde `role`
- * doğrudan gövdeden okunup kaydediliyordu — herkes kendini yönetici
- * yapabiliyordu; burada o sınıf açık yapısal olarak imkânsız.
+ * Herkese açık kayıt. E-posta sahipliği burada doğrulanmadığı için rol her
+ * zaman TEACHER'dır; ADMIN_EMAILS yalnızca Google'ın doğruladığı girişte uygulanır.
  */
 export async function POST(request: NextRequest) {
   return handle(async () => {
@@ -39,7 +33,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         passwordHash,
-        role: isAdminEmail(email) ? "ADMIN" : "TEACHER",
+        role: "TEACHER",
       },
     });
 

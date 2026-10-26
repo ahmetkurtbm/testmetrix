@@ -2,12 +2,12 @@ import { mean, stdDeviation } from "./descriptive";
 import type { ExamData, StudentStats } from "./types";
 
 /**
- * n × k ikili matris: doğru yanıt 1, yanlış veya boş 0.
- * Diğer madde hesaplarının tamamı bunun üzerine kurulur.
+ * n × k ikili matris: doğru yanıt 1, yanlış veya boş 0. Anahtarı boş olan bir
+ * soruda boş bırakan öğrenci doğru sayılmaz.
  */
 export function toBinaryMatrix({ answerKey, responses }: ExamData): number[][] {
   return responses.map((row) =>
-    answerKey.map((correct, j) => (row[j] === correct ? 1 : 0))
+    answerKey.map((correct, j) => (correct !== "BOS" && row[j] === correct ? 1 : 0))
   );
 }
 

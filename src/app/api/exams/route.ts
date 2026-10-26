@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { parseExamMatrix } from "@/features/analysis";
+import { answerKeyError, parseExamMatrix } from "@/features/analysis";
 import { createExam, listExams } from "@/features/exams/data";
 import { createExamSchema } from "@/features/exams/schemas";
 import { handle, ValidationError } from "@/lib/api";
@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
     if (data.answerKey.length === 0) {
       throw new ValidationError("Cevap anahtarı okunamadı");
     }
+    const keyError = answerKeyError(data.answerKey);
+    if (keyError) throw new ValidationError(keyError);
     if (data.studentNames.length === 0) {
       throw new ValidationError("Dosyada geçerli öğrenci satırı bulunamadı");
     }

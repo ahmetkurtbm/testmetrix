@@ -62,3 +62,20 @@ export function parseExamMatrix(matrix: unknown[][]): ExamData {
 
   return { answerKey, studentNames, responses };
 }
+
+/**
+ * Cevap anahtarında boş ya da geçersiz olan soruların numaraları (1'den başlar).
+ * Böyle bir soru puanlanırsa boş bırakan öğrenciler doğru sayılırdı.
+ */
+export function invalidAnswerKeyQuestions(answerKey: readonly AnswerOption[]): number[] {
+  return answerKey.flatMap((option, index) => (option === "BOS" ? [index + 1] : []));
+}
+
+/** Kullanıcıya gösterilecek hata mesajı; anahtar geçerliyse `null`. */
+export function answerKeyError(answerKey: readonly AnswerOption[]): string | null {
+  const invalid = invalidAnswerKeyQuestions(answerKey);
+  if (invalid.length === 0) return null;
+  const list = invalid.length > 10 ? `${invalid.slice(0, 10).join(", ")}…` : invalid.join(", ");
+  return `Cevap anahtarında boş ya da geçersiz soru var (${list}). Her soru için A–E arasında bir cevap girin.`;
+}
+

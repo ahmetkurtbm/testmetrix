@@ -4,7 +4,8 @@ import { upperLowerGroups } from "../groups";
 import { correlationsOf, difficultyOf, reliabilityIndexOf } from "../item-analysis";
 import { normalOrdinateAt, probit } from "../normal";
 import { kr20, kr21 } from "../reliability";
-import { ranksOf } from "../scoring";
+import { answerKeyError, invalidAnswerKeyQuestions, parseExamMatrix } from "../parse";
+import { ranksOf, toBinaryMatrix } from "../scoring";
 
 /**
  * Bu dosya, eski koddaki somut hataların her birini kilitler.
@@ -177,5 +178,26 @@ describe("üst/alt %27 grupları", () => {
 
   it("tek öğrencide grup oluşturulamaz", () => {
     expect(upperLowerGroups([5])).toBeNull();
+  });
+});
+
+describe("cevap anahtarında boş soru", () => {
+  const data = parseExamMatrix([
+    ["Anahtar", "A", "", "C"],
+    ["Ali", "A", "", "C"],
+    ["Ayşe", "B", "D", "C"],
+  ]);
+
+  it("boş bırakan öğrenciyi doğru saymaz", () => {
+    expect(toBinaryMatrix(data)).toEqual([
+      [1, 0, 1],
+      [0, 0, 1],
+    ]);
+  });
+
+  it("hangi sorunun hatalı olduğunu bildirir", () => {
+    expect(invalidAnswerKeyQuestions(data.answerKey)).toEqual([2]);
+    expect(answerKeyError(data.answerKey)).toContain("(2)");
+    expect(answerKeyError(parseExamMatrix([["K", "A"], ["Ali", "A"]]).answerKey)).toBeNull();
   });
 });

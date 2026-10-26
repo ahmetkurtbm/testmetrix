@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { analyzeExam, parseExamMatrix, type ExamAnalysis } from "@/features/analysis";
+import { analyzeExam, answerKeyError, parseExamMatrix, type ExamAnalysis } from "@/features/analysis";
 import { SAMPLE_EXAM_MATRIX } from "@/features/analysis/sample-exam";
 import { readExcelMatrix } from "@/features/exams/read-excel";
 
@@ -42,6 +42,11 @@ export function DemoAnalyzer() {
         setError(
           "Dosya okunamadı. İlk satır cevap anahtarı, sonraki satırlar öğrenciler olmalı."
         );
+        return;
+      }
+      const keyError = answerKeyError(data.answerKey);
+      if (keyError) {
+        setError(keyError);
         return;
       }
       setAnalysis(analyzeExam(data));

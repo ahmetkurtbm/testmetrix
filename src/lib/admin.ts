@@ -1,13 +1,7 @@
 /**
- * Otomatik yönetici ataması.
- *
- * `ADMIN_EMAILS` listesindeki bir e-posta kayıt olduğunda ya da giriş
- * yaptığında ADMIN rolü alır. Kayıt tamamen herkese açık olduğu için bu,
- * "ilk kullanıcı otomatik admin olsun" gibi kırılgan bir kurala değil, sabit
- * bir listeye dayanıyor — GateHub'daki `adminUserIds` deseninin aynısı.
- *
- * Yalnızca hesap İLK OLUŞTURULURKEN uygulanır (bkz. auth.ts, prisma.ts).
- * Sonradan panelden değiştirilen roller asla otomatik ezilmez.
+ * `ADMIN_EMAILS` listesindeki e-posta, Google'ın doğruladığı girişte ADMIN olur
+ * (bkz. auth.ts). Parolalı kayıtta e-posta sahipliği doğrulanmadığı için
+ * listeye bakılmaz; aksi hâlde listedeki adresle ilk kaydolan admin olurdu.
  */
 const adminEmails = (process.env.ADMIN_EMAILS ?? "")
   .split(",")

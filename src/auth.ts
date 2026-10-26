@@ -70,26 +70,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
 
-    /** Google ile ilk girişte yerel hesabı oluşturur. */
-    async signIn({ user, account }) {
-      if (account?.provider === "google" && user.email) {
-        await prisma.appUser.upsert({
-          where: { email: user.email },
-          create: {
-            email: user.email,
-            name: user.name ?? user.email,
-            image: user.image ?? null,
-            role: isAdminEmail(user.email) ? "ADMIN" : "TEACHER",
-          },
-          // `role` bilerek güncellenmiyor: sunucu tarafında atanan bir değer,
-          // her girişte varsayılana dönmemeli. Var olan kullanıcının adı/
-          // fotoğrafı Google'daki güncel haliyle senkron tutuluyor.
-          update: {
-            name: user.name ?? undefined,
-            image: user.image ?? undefined,
-          },
-        });
-      }
+    /**
+     * Google girişinde yerel hesabı oluşturur ya da günceller. ADMIN_EMAILS
+     * yalnızca burada ve Google e-postayı doğruladıysa uygulanır; listede
+     * olmayan kullanıcının rolüne dokunulmaz.
+     */
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google") return true;
+      if (!user.email || profile?.email_verified !== true) return false;
+
+      const admin = isAdminEmail(user.email);
+      await prisma.appUser.upsert({
+        where: { email: user.email },
+        create: {
+          email: user.email,
+          name: user.name ?? user.email,
+          image: user.image ?? null,
+          role: admin ? "ADMIN" : "TEACHER",
+        },
+        update: {
+          name: user.name ?? undefined,
+          image: user.image ?? undefined,
+          ...(admin ? { role: "ADMIN" as const } : {}),
+        },
+      });
       return true;
     },
 

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { analyzeExam, parseExamMatrix } from "@/features/analysis";
+import { analyzeExam, answerKeyError, parseExamMatrix } from "@/features/analysis";
 import { deleteExam, getExamData, replaceExamData } from "@/features/exams/data";
 import { updateExamSchema } from "@/features/exams/schemas";
 import { handle, ValidationError } from "@/lib/api";
@@ -51,6 +51,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (data.answerKey.length === 0) {
       throw new ValidationError("Cevap anahtarı okunamadı");
     }
+    const keyError = answerKeyError(data.answerKey);
+    if (keyError) throw new ValidationError(keyError);
     if (data.studentNames.length === 0) {
       throw new ValidationError("Geçerli öğrenci satırı bulunamadı");
     }

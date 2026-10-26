@@ -6,7 +6,7 @@ import { computeStudentStats, toBinaryMatrix } from "./scoring";
 import type { ExamAnalysis, ExamData } from "./types";
 
 export * from "./types";
-export { parseExamMatrix, normalizeAnswer } from "./parse";
+export { answerKeyError, invalidAnswerKeyQuestions, normalizeAnswer, parseExamMatrix } from "./parse";
 export { upperLowerGroups } from "./groups";
 export { probit, normalPdf, normalOrdinateAt } from "./normal";
 
