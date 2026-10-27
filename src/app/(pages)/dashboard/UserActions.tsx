@@ -52,7 +52,7 @@ export function UserActions({
             body: JSON.stringify({ role: event.target.value }),
           })
         }
-        className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm disabled:opacity-50"
+        className="rounded-md border border-gray-300 bg-surface px-2 py-1 text-sm disabled:opacity-50"
       >
         {(Object.keys(ROLE_LABELS) as Role[]).map((value) => (
           <option key={value} value={value}>

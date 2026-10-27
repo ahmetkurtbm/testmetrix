@@ -34,15 +34,15 @@ export function ItemDifficultyArea({ items }: { items: ItemQuality[] }) {
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-gray-800">
+      <h3 className="text-lg font-semibold text-gray-900">
         Madde güçlüğü akışı
-      </h2>
-      <p className="mt-0.5 mb-3 text-xs text-gray-500">
+      </h3>
+      <p className="mt-1 mb-4 text-sm text-gray-500">
         Sınav boyunca madde güçlüğünün seyri. Gölgeli bantlar çok kolay ve çok
         zor eşiklerini gösterir.
       </p>
 
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={240}>
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
           <defs>
             <linearGradient id="difficultyFill" x1="0" y1="0" x2="0" y2="1">
@@ -68,7 +68,7 @@ export function ItemDifficultyArea({ items }: { items: ItemQuality[] }) {
 
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 10, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
             interval={data.length > 20 ? Math.ceil(data.length / 20) - 1 : 0}
@@ -76,7 +76,7 @@ export function ItemDifficultyArea({ items }: { items: ItemQuality[] }) {
           <YAxis
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
-            tick={{ fontSize: 11, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={false}
           />

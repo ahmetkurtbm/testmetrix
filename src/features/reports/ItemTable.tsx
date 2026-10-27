@@ -74,8 +74,8 @@ export function ItemTable({
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-gray-800">Madde istatistikleri</h2>
-      <p className="mt-0.5 mb-3 text-xs text-gray-500">
+      <h3 className="text-lg font-semibold text-gray-900">Madde istatistikleri</h3>
+      <p className="mt-1 mb-4 text-sm text-gray-500">
         Başlığa tıklayarak sıralayın. “—” hesaplanamayan değer demektir.
       </p>
 
@@ -133,9 +133,9 @@ export function ItemTable({
                 <td className="px-3 py-2">
                   {/* İkon + metin: renk tek başına anlam taşımıyor */}
                   <span
-                    className="inline-flex items-center gap-1.5 text-xs"
+                    className="inline-flex items-center gap-1.5 text-sm"
                     style={{
-                      color: row.needsAttention ? CHART.accent : "#6b7280",
+                      color: row.needsAttention ? CHART.accent : CHART.muted,
                     }}
                   >
                     <span aria-hidden>{ICONS[row.flag]}</span>

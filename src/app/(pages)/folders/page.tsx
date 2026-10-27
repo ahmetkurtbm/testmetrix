@@ -1,15 +1,9 @@
 "use client";
 
+import { BarChart3, FolderOpen, GripVertical, MoreHorizontal, Pencil, Search, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -25,6 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import AddFolder from "@/app/(components)/AddFolder";
+import { EmptyState, PageContainer, PageHeader } from "@/components/app/page";
 import { ToastContainer, toast } from "react-toastify";
 import {
   DragDropContext,
@@ -173,252 +168,211 @@ export default function Folders() {
     }
   };
 
+  const totalExams = exams.length;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 space-y-6">
-        <div className="flex flex-row justify-center items-center gap-4 max-w-2xl mx-auto">
-          <div className="relative flex-1">
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Klasör veya sınav arayın..."
-              className="pl-10 pr-4 w-full"
-            />
-            <img
-              src="/search.svg"
-              alt=""
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-            />
-          </div>
-          <div className="shrink-0">
+    <PageContainer>
+      <PageHeader
+        eyebrow="Sınavlarım"
+        title="Klasörler"
+        description={
+          loading
+            ? "Yükleniyor…"
+            : `${folders.length} klasör · ${totalExams} sınav. Klasörleri sürükleyerek sıralayabilirsiniz.`
+        }
+        actions={
+          <>
+            <Button variant="outline" onClick={() => router.push("/excel-upload")}>
+              <Upload aria-hidden="true" />
+              Sınav yükle
+            </Button>
             <AddFolder onCreated={load} />
-          </div>
-        </div>
+          </>
+        }
+      />
 
-        {loading ? (
-          <p className="text-center text-gray-600">Yükleniyor...</p>
-        ) : folders.length === 0 ? (
-          <div className="max-w-md mx-auto bg-white/95 p-6 rounded-2xl shadow text-center">
-            <p className="text-lg font-semibold text-gray-700">
-              📁 Henüz klasör yok
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Başlamak için yukarıdan bir klasör ekleyin.
-            </p>
-          </div>
-        ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="folders">
-              {(provided: DroppableProvided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto"
-                >
-                  {visible.folders.map((folder, index) => (
-                    <Draggable
-                      key={folder.id}
-                      draggableId={folder.id}
-                      index={index}
-                      isDragDisabled={Boolean(searchQuery)}
-                    >
-                      {(
-                        dragProvided: DraggableProvided,
-                        snapshot: DraggableStateSnapshot
-                      ) => (
-                        <div
-                          ref={dragProvided.innerRef}
-                          {...dragProvided.draggableProps}
-                          {...dragProvided.dragHandleProps}
-                          className={snapshot.isDragging ? "opacity-50" : ""}
-                          style={dragProvided.draggableProps.style}
-                        >
-                          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                            <CardHeader>
-                              <div className="flex flex-row justify-between items-center gap-2 bg-slate-100 p-3 rounded-lg">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <img
-                                    src="/grab.svg"
-                                    alt=""
-                                    className="w-5 h-5 cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity shrink-0"
-                                  />
-                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 min-w-0">
-                                    <h2 className="text-lg font-semibold text-gray-800 truncate">
-                                      {folder.name}
-                                    </h2>
-                                    <p className="text-xs text-gray-500 whitespace-nowrap">
-                                      {new Date(folder.createdAt).toLocaleString("tr")}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="hover:bg-slate-200 shrink-0"
-                                    >
-                                      <img
-                                        src="/threeDots.svg"
-                                        alt="Menü"
-                                        className="h-5 w-5"
-                                      />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-64">
-                                    <DropdownMenuItem
-                                      onClick={() => router.push("/excel-upload")}
-                                      className="text-green-600"
-                                    >
-                                      Dosya Yükle
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setEditingFolder(folder);
-                                        setEditingName(folder.name);
-                                      }}
-                                      className="text-blue-600"
-                                    >
-                                      İsmi Düzenle
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => handleDeleteFolder(folder)}
-                                      className="text-red-600"
-                                    >
-                                      Klasörü Sil
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </CardHeader>
-
-                            <CardContent>
-                              <ul className="space-y-3">
-                                {(visible.examsByFolder.get(folder.id) ?? []).map(
-                                  (exam) => (
-                                    <li
-                                      key={exam.id}
-                                      className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-3 hover:bg-gray-50 rounded-lg border border-gray-100"
-                                    >
-                                      <div className="flex flex-col gap-1 min-w-0">
-                                        <span className="font-medium text-blue-600 break-all">
-                                          {exam.name}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                          {exam.studentCount} öğrenci ·{" "}
-                                          {exam.questionCount} madde ·{" "}
-                                          {new Date(exam.createdAt).toLocaleString("tr")}
-                                        </span>
-                                      </div>
-
-                                      <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="bg-green-500 hover:bg-green-600 text-white w-[80px]"
-                                                onClick={() =>
-                                                  router.push(
-                                                    `/excel-reports?exam=${exam.id}`
-                                                  )
-                                                }
-                                              >
-                                                Raporlar
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              İstatistikleri ve grafikleri görün
-                                            </TooltipContent>
-                                          </Tooltip>
-
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="bg-blue-500 hover:bg-blue-600 text-white w-[80px]"
-                                                onClick={() =>
-                                                  router.push(
-                                                    `/excel-update?exam=${exam.id}`
-                                                  )
-                                                }
-                                              >
-                                                Düzenle
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              Cevapları düzenleyin
-                                            </TooltipContent>
-                                          </Tooltip>
-
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="bg-red-500 hover:bg-red-600 text-white w-[80px]"
-                                                onClick={() => handleDeleteExam(exam)}
-                                              >
-                                                Sil
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Sınavı silin</TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      </div>
-                                    </li>
-                                  )
-                                )}
-                                {(visible.examsByFolder.get(folder.id) ?? []).length ===
-                                  0 && (
-                                  <li className="text-sm text-gray-400 px-3 py-2">
-                                    Bu klasörde sınav yok.
-                                  </li>
-                                )}
-                              </ul>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        )}
+      <div className="relative max-w-md">
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Klasör veya sınav arayın…"
+          aria-label="Klasör veya sınav ara"
+          className="h-11 bg-surface pl-9"
+        />
       </div>
 
-      <Dialog
-        open={editingFolder !== null}
-        onOpenChange={(open) => !open && setEditingFolder(null)}
-      >
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-48 animate-pulse rounded-xl border border-gray-200 bg-surface" />
+          ))}
+        </div>
+      ) : folders.length === 0 ? (
+        <EmptyState
+          icon={FolderOpen}
+          title="Henüz klasör yok"
+          description="Sınavlarınızı düzenlemek için bir klasör oluşturun, ardından Excel dosyanızı yükleyin."
+          action={<AddFolder onCreated={load} />}
+        />
+      ) : (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="folders">
+            {(provided: DroppableProvided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef} className="grid gap-4 md:grid-cols-2">
+                {visible.folders.map((folder, index) => {
+                  const folderExams = visible.examsByFolder.get(folder.id) ?? [];
+                  return (
+                    <Draggable key={folder.id} draggableId={folder.id} index={index} isDragDisabled={Boolean(searchQuery)}>
+                      {(dragProvided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+                        <section
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          style={dragProvided.draggableProps.style}
+                          className={`flex flex-col rounded-xl border bg-surface transition-colors ${
+                            snapshot.isDragging ? "border-blue-500 shadow-lg" : "border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+                            <span
+                              {...dragProvided.dragHandleProps}
+                              aria-label="Klasörü sürükleyerek taşı"
+                              className="cursor-grab text-gray-400 hover:text-gray-700 active:cursor-grabbing"
+                            >
+                              <GripVertical aria-hidden="true" className="h-5 w-5" />
+                            </span>
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                              <FolderOpen aria-hidden="true" className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <h2 className="truncate text-base font-semibold text-gray-900">{folder.name}</h2>
+                              <p className="text-xs text-gray-500">
+                                {folder._count.exams} sınav · {new Date(folder.createdAt).toLocaleDateString("tr")}
+                              </p>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" aria-label={`${folder.name} klasörü işlemleri`}>
+                                  <MoreHorizontal aria-hidden="true" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuItem onClick={() => router.push("/excel-upload")}>
+                                  <Upload aria-hidden="true" className="h-4 w-4" />
+                                  Sınav yükle
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setEditingFolder(folder);
+                                    setEditingName(folder.name);
+                                  }}
+                                >
+                                  <Pencil aria-hidden="true" className="h-4 w-4" />
+                                  Adını değiştir
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteFolder(folder)} className="text-red-600">
+                                  <Trash2 aria-hidden="true" className="h-4 w-4" />
+                                  Klasörü sil
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
+                          {folderExams.length === 0 ? (
+                            <p className="px-4 py-6 text-sm text-gray-500">Bu klasörde henüz sınav yok.</p>
+                          ) : (
+                            <ul className="divide-y divide-gray-200">
+                              {folderExams.map((exam) => (
+                                <li key={exam.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push(`/excel-reports?exam=${exam.id}`)}
+                                    className="min-w-0 flex-1 text-left"
+                                  >
+                                    <span className="block truncate font-medium text-gray-900 hover:text-blue-700">{exam.name}</span>
+                                    <span className="mt-0.5 block text-xs text-gray-500">
+                                      {exam.studentCount} öğrenci · {exam.questionCount} madde ·{" "}
+                                      {new Date(exam.createdAt).toLocaleDateString("tr")}
+                                    </span>
+                                  </button>
+                                  {exam.stat && (
+                                    <dl className="flex gap-4 text-right text-xs">
+                                      <div>
+                                        <dt className="text-gray-500">Ortalama</dt>
+                                        <dd className="font-semibold tabular-nums text-gray-900">{exam.stat.mean.toFixed(1)}</dd>
+                                      </div>
+                                      <div>
+                                        <dt className="text-gray-500">KR-20</dt>
+                                        <dd className="font-semibold tabular-nums text-gray-900">
+                                          {exam.stat.kr20 === null ? "—" : exam.stat.kr20.toFixed(2)}
+                                        </dd>
+                                      </div>
+                                    </dl>
+                                  )}
+                                  <div className="flex gap-1.5">
+                                    <Button
+                                      size="sm"
+                                      className="bg-blue-600 text-white hover:bg-blue-700"
+                                      onClick={() => router.push(`/excel-reports?exam=${exam.id}`)}
+                                    >
+                                      <BarChart3 aria-hidden="true" />
+                                      Rapor
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      aria-label={`${exam.name} sınavını düzenle`}
+                                      onClick={() => router.push(`/excel-update?exam=${exam.id}`)}
+                                    >
+                                      <Pencil aria-hidden="true" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      aria-label={`${exam.name} sınavını sil`}
+                                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                      onClick={() => handleDeleteExam(exam)}
+                                    >
+                                      <Trash2 aria-hidden="true" />
+                                    </Button>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </section>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
+
+      <Dialog open={editingFolder !== null} onOpenChange={(open) => !open && setEditingFolder(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-center">
-              Klasör İsmini Düzenle
-            </DialogTitle>
+            <DialogTitle>Klasör adını değiştir</DialogTitle>
           </DialogHeader>
-
-          <div className="space-y-2 py-4">
-            <label className="text-sm font-medium text-gray-700">Yeni isim</label>
+          <div className="space-y-2 py-2">
+            <label htmlFor="folder-name" className="text-sm font-medium text-gray-700">
+              Yeni ad
+            </label>
             <Input
+              id="folder-name"
               value={editingName}
               onChange={(e) => setEditingName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleRename();
               }}
-              placeholder="Yeni klasör ismini girin..."
               autoFocus
             />
           </div>
-
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setEditingFolder(null)}>
               İptal
             </Button>
@@ -429,8 +383,8 @@ export default function Folders() {
         </DialogContent>
       </Dialog>
 
-      <ToastContainer position="bottom-right" theme="dark" />
-    </div>
+      <ToastContainer position="bottom-right" />
+    </PageContainer>
   );
 }
 

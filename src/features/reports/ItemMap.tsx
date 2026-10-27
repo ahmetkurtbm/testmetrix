@@ -59,14 +59,14 @@ export function ItemMap({
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-gray-800">Madde haritası</h2>
-      <p className="mt-0.5 mb-2 text-xs text-gray-500">
+      <h3 className="text-lg font-semibold text-gray-900">Madde haritası</h3>
+      <p className="mt-1 mb-3 text-sm text-gray-500">
         Yukarıda ve ortada kalan maddeler iyi. Bir noktaya tıklayarak seçenek
         dağılımını görebilirsiniz.
       </p>
 
       {/* İki görsel sınıf var → efsane şart; renk tek başına kimlik taşımıyor */}
-      <div className="mb-2 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+      <div className="mb-3 flex flex-wrap items-center gap-4 text-sm text-gray-600">
         <span className="inline-flex items-center gap-1.5">
           <span
             className="inline-block w-2.5 h-2.5 rounded-full"
@@ -91,28 +91,28 @@ export function ItemMap({
             dataKey="x"
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
-            tick={{ fontSize: 11, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
             label={{
               value: "Güçlük (doğru yanıtlama oranı)",
               position: "insideBottom",
               offset: -14,
-              style: { fontSize: 11, fill: CHART.muted },
+              style: { fontSize: 12, fill: CHART.muted },
             }}
           />
           <YAxis
             type="number"
             dataKey="y"
             domain={[yMin, "auto"]}
-            tick={{ fontSize: 11, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={false}
             label={{
               value: "Ayırt edicilik",
               angle: -90,
               position: "insideLeft",
-              style: { fontSize: 11, fill: CHART.muted },
+              style: { fontSize: 12, fill: CHART.muted },
             }}
           />
           <ZAxis range={[70, 70]} />
@@ -133,14 +133,14 @@ export function ItemMap({
               if (!active || !payload?.length) return null;
               const point = payload[0].payload as (typeof data)[number];
               return (
-                <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg max-w-[240px]">
+                <div className="rounded-lg border border-gray-200 bg-surface px-3 py-2 shadow-lg max-w-[240px]">
                   <p className="text-sm font-medium text-gray-800">
                     Madde {point.questionNo} — {point.label}
                   </p>
-                  <p className="mt-0.5 text-xs text-gray-600">
+                  <p className="mt-0.5 text-sm text-gray-600">
                     {point.explanation}
                   </p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-sm text-gray-500">
                     Güçlük {fmt(point.x)} · Ayırt edicilik {fmt(point.y)}
                   </p>
                 </div>
@@ -162,7 +162,7 @@ export function ItemMap({
               <Cell
                 key={point.questionNo}
                 fill={point.needsAttention ? CHART.accent : CHART.series}
-                stroke="#ffffff"
+                stroke={CHART.surface}
                 strokeWidth={selected === point.questionNo ? 3 : 1.5}
               />
             ))}
@@ -170,7 +170,7 @@ export function ItemMap({
               dataKey="tag"
               position="right"
               offset={8}
-              style={{ fontSize: 11, fill: CHART.secondary }}
+              style={{ fontSize: 12, fill: CHART.secondary }}
             />
           </Scatter>
         </ScatterChart>

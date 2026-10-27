@@ -55,12 +55,12 @@ export default function FolderAdder({ onCreated }: { onCreated?: () => void }) {
         <DialogTrigger asChild>
           <Button>
             <FolderPlus className="w-4 h-4 mr-2" />
-            Klasör Ekle
+            Klasör ekle
           </Button>
         </DialogTrigger>
         <DialogContent className="w-[90vw] sm:max-w-[425px] p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Yeni Klasör Ekle</DialogTitle>
+            <DialogTitle>Yeni klasör</DialogTitle>
             <DialogDescription>
               Lütfen oluşturmak istediğiniz klasör adını giriniz.
             </DialogDescription>

@@ -36,10 +36,10 @@ export function DistractorPanel({
     <div>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-gray-800">
+          <h3 className="text-lg font-semibold text-gray-900">
             Madde {questionNo} — seçenek dağılımı
-          </h2>
-          <p className="mt-0.5 text-xs text-gray-500">
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
             Doğru yanıt <strong className="text-gray-700">{correct}</strong>. Üst ve
             alt grup, puana göre en iyi ve en zayıf %27'lik dilim
             {option.groupSize > 0 ? ` (${option.groupSize}'şer öğrenci)` : ""}.
@@ -47,7 +47,7 @@ export function DistractorPanel({
         </div>
         <button
           onClick={onClose}
-          className="text-xs text-gray-400 hover:text-gray-700 shrink-0"
+          className="text-sm text-gray-500 hover:text-gray-900 shrink-0"
         >
           Kapat
         </button>

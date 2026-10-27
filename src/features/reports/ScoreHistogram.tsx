@@ -33,8 +33,8 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-gray-800">Puan dağılımı</h2>
-      <p className="mt-0.5 mb-3 text-xs text-gray-500">
+      <h3 className="text-lg font-semibold text-gray-900">Puan dağılımı</h3>
+      <p className="mt-1 mb-4 text-sm text-gray-500">
         Kaç öğrencinin hangi puanı aldığı. Kesikli çizgi ortalamayı gösterir.
       </p>
 
@@ -49,18 +49,18 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
           <CartesianGrid stroke={CHART.grid} vertical={false} />
           <XAxis
             dataKey="score"
-            tick={{ fontSize: 11, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
             label={{
               value: "Doğru sayısı",
               position: "insideBottom",
               offset: -12,
-              style: { fontSize: 11, fill: CHART.muted },
+              style: { fontSize: 12, fill: CHART.muted },
             }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: CHART.muted }}
+            tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={false}
             // Öğrenci sayısı tam sayıdır; "0.5 öğrenci" gibi bir eksen değeri olmamalı.
@@ -84,7 +84,7 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
               label={{
                 value: `Ort. ${fmt(descriptive.mean, 1)}`,
                 position: "top",
-                style: { fontSize: 11, fontWeight: 600, fill: CHART.secondary },
+                style: { fontSize: 12, fontWeight: 600, fill: CHART.secondary },
               }}
             />
           )}

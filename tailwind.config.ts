@@ -9,7 +9,23 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-work-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-outfit)", "var(--font-work-sans)", "system-ui", "sans-serif"],
+      },
       colors: {
+        // Gri skala ve yüzey temaya göre değişen değişkenlerden okunur (bkz. globals.css);
+        // sayfalardaki `text-gray-700`, `bg-surface` gibi sınıflar koyu temada kendiliğinden döner.
+        surface: "rgb(var(--surface) / <alpha-value>)",
+        gray: Object.fromEntries(
+          [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((step) => [
+            step,
+            `rgb(var(--gray-${step}) / <alpha-value>)`,
+          ])
+        ),
+        blue: Object.fromEntries(
+          [50, 100, 500, 600, 700].map((step) => [step, `rgb(var(--blue-${step}) / <alpha-value>)`])
+        ),
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

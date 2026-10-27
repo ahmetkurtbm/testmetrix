@@ -14,10 +14,10 @@ export function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl bg-white/95 shadow-sm border border-gray-100 p-4">
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="mt-1 text-xl font-semibold text-gray-800">{value}</div>
-      {hint && <div className="mt-1 text-xs text-gray-400">{hint}</div>}
+    <div className="rounded-xl border border-gray-200 bg-surface p-5">
+      <div className="text-sm font-medium text-gray-500">{label}</div>
+      <div className="mt-1.5 font-display text-3xl font-semibold tabular-nums text-gray-900">{value}</div>
+      {hint && <div className="mt-1 text-sm text-gray-500">{hint}</div>}
     </div>
   );
 }

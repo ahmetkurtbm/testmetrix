@@ -30,7 +30,7 @@ yazılır. Cevap anahtarında boş veya geçersiz soru varsa dosya reddedilir. �
 | Uygulama | Next.js 15 (App Router), React 18, TypeScript |
 | Veri | PostgreSQL (Supabase) + Prisma 7 |
 | Kimlik | Auth.js v5 (e-posta/şifre + Google), bcrypt, Resend ile şifre sıfırlama |
-| Arayüz | Tailwind CSS, Radix UI, Recharts |
+| Arayüz | Tailwind CSS (açık/koyu tema), Radix UI, Recharts, Outfit + Work Sans |
 | Raporlama | ExcelJS, @react-pdf/renderer |
 | Test | Vitest (birim + entegrasyon) |
 
@@ -44,12 +44,19 @@ yazılır. Cevap anahtarında boş veya geçersiz soru varsa dosya reddedilir. �
 
 ## Kurulum
 
+Yerel veritabanı Docker'da çalışır:
+
 ```bash
 npm install
-cp .env.example .env.local   # veritabanı, AUTH_SECRET ve isteğe bağlı Google/Resend
+docker compose up -d         # PostgreSQL 17, localhost:5434
+cp .env.example .env.local   # DATABASE_URL / DIRECT_URL'i yerel veritabanına, AUTH_URL'i http://localhost:3001'e ayarlayın
 npm run db:deploy            # migration'ları uygular
 npm run dev                  # http://localhost:3001
 ```
+
+Yerel veritabanı bağlantısı: `postgres://postgres:postgres@localhost:5434/testmetrix`.
+Tanıtım sayfasındaki deneme veritabanı kullanmaz; analiz ve raporlar tarayıcıda hesaplanır
+ve giriş yapıldığında görülen rapor ekranının aynısıdır.
 
 ## Komutlar
 

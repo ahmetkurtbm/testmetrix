@@ -1,15 +1,10 @@
 "use client";
 
+import { CheckCircle2, Download, Eye, FileSpreadsheet, FolderOpen, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -20,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TableContainer from "@/app/(components)/TableContainer";
+import { EmptyState, PageContainer, PageHeader, Section } from "@/components/app/page";
 import { ComboboxDemo } from "@/components/ui/comboboxForFolder";
 import { ToastContainer, toast } from "react-toastify";
 import { apiGet, apiPost } from "@/lib/api-client";
@@ -111,132 +107,138 @@ const ExcelUploadPage = () => {
     }
   };
 
+  const studentCount = Math.max(0, arrayData.length - 1);
+  const questionCount = Math.max(0, (arrayData[0]?.length ?? 1) - 1);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="min-h-screen p-4 flex items-center justify-center">
-        <div className="flex flex-col lg:flex-row gap-4 max-w-6xl w-full">
-          {/* Sol Kısım */}
-          <div className="w-full lg:w-1/2 flex flex-col items-center justify-center gap-5">
-            <div className="animate-scale-in">
-              <img
-                src="/excel.svg"
-                alt="Excel Logo"
-                className="w-32 h-32 lg:w-44 lg:h-44"
-              />
-            </div>
-            <Button
-              onClick={downloadSampleFile}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-5 rounded-lg shadow-md hover:shadow-lg transition-all w-52"
-            >
-              📥 Örnek Dosya İndir
+    <PageContainer>
+      <PageHeader
+        eyebrow="Yeni sınav"
+        title="Sınav yükle"
+        description="Excel dosyanızı seçin; analiz kayıttan hemen sonra hazır olur."
+      />
+
+      {isFolder === false ? (
+        <EmptyState
+          icon={FolderOpen}
+          title="Önce bir klasör oluşturun"
+          description="Sınavlar klasörlerde saklanır. Klasörler sayfasından bir klasör ekleyip buraya dönün."
+          action={
+            <Button onClick={() => router.push("/folders")}>
+              <FolderOpen aria-hidden="true" />
+              Klasörlere git
             </Button>
-          </div>
+          }
+        />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <Section title="Sınav bilgileri">
+            <ol className="space-y-6">
+              <li>
+                <StepLabel number={1} htmlFor="folder">Klasör</StepLabel>
+                <ComboboxDemo folderId={folderId} setFolderId={setFolderId} />
+              </li>
 
-          {/* Sağ Kısım */}
-          <div className="w-full lg:w-1/2 flex items-center justify-center">
-            {isFolder === false ? (
-              <div className="w-full max-w-md bg-white/95 p-5 rounded-2xl shadow-md text-center">
-                <p className="text-base font-semibold text-gray-700">
-                  📁 Şu anda klasör bulunmamaktadır
-                </p>
-                <p className="text-sm text-gray-500 mt-1.5">
-                  Lütfen önce bir klasör ekleyiniz.
-                </p>
-              </div>
-            ) : (
-              <Card className="w-full max-w-lg shadow-lg bg-white/95">
-                <CardHeader className="space-y-1 pb-3">
-                  <h1 className="text-lg font-bold text-center text-gray-800">
-                    Excel Dosyası Yükle
-                  </h1>
-                  <p className="text-xs text-center text-gray-600">
-                    Lütfen analiz etmek istediğiniz dosyayı seçin
+              <li>
+                <StepLabel number={2} htmlFor="fileUpload">Excel dosyası</StepLabel>
+                <label
+                  htmlFor="fileUpload"
+                  className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-8 text-center transition-colors hover:border-blue-500"
+                >
+                  <FileSpreadsheet aria-hidden="true" className="h-8 w-8 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-900">
+                    {arrayData.length > 0 ? "Başka bir dosya seçin" : "Dosya seçmek için tıklayın"}
+                  </span>
+                  <span className="text-xs text-gray-500">.xlsx veya .xls</span>
+                  <input id="fileUpload" type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="sr-only" />
+                </label>
+                {arrayData.length > 0 && (
+                  <p className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
+                    <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
+                    {studentCount} öğrenci, {questionCount} madde okundu
                   </p>
-                </CardHeader>
+                )}
+              </li>
 
-                <CardContent className="space-y-3.5">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      1. Klasör Seçin
-                    </label>
-                    <ComboboxDemo folderId={folderId} setFolderId={setFolderId} />
-                  </div>
+              <li>
+                <StepLabel number={3} htmlFor="examName">Sınav adı</StepLabel>
+                <Input
+                  id="examName"
+                  value={fileName}
+                  onChange={(e) => setFileName(e.target.value)}
+                  placeholder="Örn. 8. Sınıf Matematik 1. Dönem"
+                  className="h-11"
+                />
+              </li>
+            </ol>
 
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">
-                      2. Dosya Yükleyin
-                    </label>
-                    <Input
-                      id="fileUpload"
-                      type="file"
-                      accept=".xlsx, .xls"
-                      onChange={handleFileUpload}
-                      className="w-full text-sm border-2 border-dashed border-gray-300 rounded-lg p-2.5 hover:border-blue-500 transition-colors"
-                    />
-                  </div>
+            <div className="mt-8 flex flex-col gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" disabled={arrayData.length === 0}>
+                    <Eye aria-hidden="true" />
+                    Önizle
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[95vw] sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Veri önizleme</DialogTitle>
+                    <DialogDescription>Dosyadan okunan ilk satırlar</DialogDescription>
+                  </DialogHeader>
+                  <TableContainer data={arrayData} />
+                </DialogContent>
+              </Dialog>
+              <Button onClick={handleSave} disabled={saving} className="bg-blue-600 text-white hover:bg-blue-700">
+                <Upload aria-hidden="true" />
+                {saving ? "Yükleniyor…" : "Yükle ve analiz et"}
+              </Button>
+            </div>
+          </Section>
 
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700">
-                      3. Sınav Adı
-                    </label>
-                    <Input
-                      value={fileName}
-                      onChange={(e) => setFileName(e.target.value)}
-                      placeholder="Örn. 8. Sınıf Matematik 1. Dönem"
-                      className="text-sm"
-                    />
-                  </div>
-
-                  {arrayData.length > 0 && (
-                    <div className="bg-blue-50 p-2 rounded-lg">
-                      <p className="text-xs text-blue-800">
-                        📎 {arrayData.length - 1} öğrenci,{" "}
-                        {(arrayData[0]?.length ?? 1) - 1} madde okundu
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-
-                <CardFooter className="pt-1">
-                  <div className="flex flex-col sm:flex-row w-full gap-2.5">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full sm:w-1/2 text-sm"
-                          disabled={arrayData.length === 0}
-                        >
-                          👁️ Önizle
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px] w-[95vw] sm:w-full">
-                        <DialogHeader>
-                          <DialogTitle className="text-base">Veri Önizleme</DialogTitle>
-                          <DialogDescription className="text-xs">
-                            Yüklediğiniz verinin önizlemesi
-                          </DialogDescription>
-                        </DialogHeader>
-                        <TableContainer data={arrayData} />
-                      </DialogContent>
-                    </Dialog>
-                    <Button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                    >
-                      {saving ? "Yükleniyor..." : "💾 Yükle"}
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            )}
-          </div>
+          <Section title="Dosya biçimi" description="İlk satır cevap anahtarı, sonraki her satır bir öğrenci.">
+            <div className="overflow-hidden rounded-lg border border-gray-200 text-xs">
+              <table className="w-full tabular-nums">
+                <tbody>
+                  {[
+                    ["Cevap_Anahtarı", "A", "C", "B", "D"],
+                    ["Ayşe Yılmaz", "A", "C", "D", "D"],
+                    ["Mehmet Kaya", "B", "C", "B", ""],
+                  ].map((row, i) => (
+                    <tr key={i} className={i === 0 ? "bg-blue-50 font-semibold text-blue-700" : "border-t border-gray-200 text-gray-700"}>
+                      {row.map((cell, j) => (
+                        <td key={j} className={`px-2 py-1.5 ${j === 0 ? "text-left" : "text-center"}`}>
+                          {cell || "–"}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ul className="mt-4 space-y-2 text-sm text-gray-600">
+              <li>Şıklar A–E; boş bırakılan cevap için hücreyi boş bırakın ya da “-” yazın.</li>
+              <li>Cevap anahtarında boş soru varsa dosya reddedilir.</li>
+            </ul>
+            <Button variant="outline" onClick={downloadSampleFile} className="mt-5 w-full">
+              <Download aria-hidden="true" />
+              Örnek dosyayı indir
+            </Button>
+          </Section>
         </div>
-      </div>
+      )}
 
-      <ToastContainer position="bottom-right" theme="dark" />
-    </div>
+      <ToastContainer position="bottom-right" />
+    </PageContainer>
   );
 };
+
+function StepLabel({ number, htmlFor, children }: { number: number; htmlFor: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-gray-900">
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs text-white">{number}</span>
+      {children}
+    </label>
+  );
+}
 
 export default ExcelUploadPage;

@@ -1,8 +1,8 @@
 "use client";
 
+import { PageContainer, PageHeader, Section } from "@/components/app/page";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -116,21 +116,18 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Yükleniyor...</p>
-      </div>
+      <PageContainer narrow>
+        <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-surface" />
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <Card className="bg-white/95 shadow-sm">
-          <CardHeader>
-            <h1 className="text-xl font-semibold text-gray-800">Profil</h1>
-          </CardHeader>
+    <PageContainer narrow>
+      <PageHeader eyebrow="Hesap" title="Profil" description="Kişisel bilgileriniz, parolanız ve hesap ayarlarınız." />
 
-          <CardContent className="space-y-5">
+        <Section title="Kişisel bilgiler">
+          <div className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="name">Ad Soyad</Label>
@@ -138,7 +135,7 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-gray-600">E-posta</Label>
-                <div className="p-2.5 bg-gray-100 rounded-md text-sm text-gray-700 break-all">
+                <div className="flex h-10 items-center rounded-md bg-gray-100 px-3 text-sm text-gray-700 break-all">
                   {profile.email}
                 </div>
               </div>
@@ -146,12 +143,12 @@ export default function ProfilePage() {
 
             <div className="space-y-1.5">
               <Label className="text-gray-600">Rol</Label>
-              <div className="p-2.5 bg-gray-100 rounded-md text-sm text-gray-700">
+              <div className="flex h-10 items-center rounded-md bg-gray-100 px-3 text-sm text-gray-700">
                 {ROLE_LABELS[profile.role]}
               </div>
             </div>
 
-            <div className="border-t pt-5 space-y-4">
+            <div className="space-y-4 border-t border-gray-200 pt-5">
               <div className="space-y-1.5">
                 <Label htmlFor="university">Üniversite / Kurum</Label>
                 <Input
@@ -192,18 +189,15 @@ export default function ProfilePage() {
                 disabled={saving}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {saving ? "Kaydediliyor..." : "Kaydet"}
+                {saving ? "Kaydediliyor…" : "Kaydet"}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </Section>
 
         {profile.hasPassword && (
-          <Card className="bg-white/95 shadow-sm">
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-800">Parola Değiştir</h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <Section title="Parola değiştir">
+            <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="currentPassword">Mevcut Parola</Label>
                 <Input
@@ -241,32 +235,27 @@ export default function ProfilePage() {
                 disabled={changingPassword || !currentPassword || !newPassword}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {changingPassword ? "Güncelleniyor..." : "Parolayı Güncelle"}
+                {changingPassword ? "Güncelleniyor…" : "Parolayı güncelle"}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </Section>
         )}
 
-        <Card className="bg-white/95 shadow-sm border-red-200">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-red-700">Hesabı Sil</h2>
-            <p className="text-sm text-gray-600">
-              Bu işlem klasörlerinizi ve sınavlarınızı kalıcı olarak siler.
-            </p>
-          </CardHeader>
-          <CardContent>
+        <Section
+          title={<span className="text-red-600">Hesabı sil</span>}
+          description="Bu işlem klasörlerinizi ve sınavlarınızı kalıcı olarak siler."
+          className="border-red-200 dark:border-red-900/60"
+        >
             <Button
               variant="outline"
               onClick={handleDeleteAccount}
               className="border-red-300 text-red-600 hover:bg-red-50"
             >
-              Hesabımı ve Tüm Verilerimi Sil
+              Hesabımı ve tüm verilerimi sil
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+        </Section>
 
-      <ToastContainer position="bottom-right" theme="dark" />
-    </div>
+      <ToastContainer position="bottom-right" />
+    </PageContainer>
   );
 }

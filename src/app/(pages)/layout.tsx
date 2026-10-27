@@ -1,8 +1,10 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Header from "../(components)/Header";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
+import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 
 // `title` bilerek yok: kök layout'ta `default: "TestMetrix"` +
 // `template: "%s — TestMetrix"` tanımlı. Burada tekrar "TestMetrix" yazmak
@@ -34,11 +36,14 @@ const PagesLayout = async ({ children }: { children: React.ReactNode }) => {
     select: { email: true, role: true },
   });
 
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Header
         email={user?.email ?? sessionUser.email ?? "Profil"}
         isAdmin={user?.role === "ADMIN"}
+        theme={theme}
       />
       {children}
     </div>

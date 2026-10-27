@@ -1,84 +1,57 @@
+import { Clock, Info, Mail } from "lucide-react";
 import type { Metadata } from "next";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mail, MapPin, Clock } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "İletişim — TestMetrix",
-};
+import { PageContainer, PageHeader, Section } from "@/components/app/page";
+
+export const metadata: Metadata = { title: "İletişim" };
 
 const CONTACT_EMAIL = "ahmetkurtk2@gmail.com";
 
 /**
- * İletişim sayfası.
- *
- * Buradaki form kaldırıldı. Eski hali, backend'deki `/send-mail` uç noktasına
- * POST atıyordu; o uç nokta kimlik doğrulaması ve hız sınırı olmadan, gövdeden
- * gelen adresi `from` alanına koyarak projenin kendi Gmail hesabından mail
- * gönderiyordu — yani internete açık bir mail relay'di. Spam için kullanılsaydı
- * hesabın kapanmasıyla sonuçlanabilirdi.
- *
- * Yerine doğrudan `mailto:` bağlantısı kondu: yeni saldırı yüzeyi açmıyor ve
- * kullanıcının kendi mail istemcisini kullanıyor. Gerçek bir form gerekirse
- * hız sınırlı bir uç noktayla sonradan eklenebilir.
+ * İletişim sayfası. Form bilerek yok: eski form kimlik doğrulaması ve hız sınırı
+ * olmayan bir mail relay'ine POST atıyordu. Doğrudan `mailto:` yeni bir saldırı
+ * yüzeyi açmıyor; gerçek bir form gerekirse hız sınırlı bir uç noktayla eklenir.
  */
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">İletişim</h1>
-          <p className="text-gray-600">
-            Soru, öneri ve hata bildirimleriniz için bize ulaşın.
-          </p>
+    <PageContainer narrow>
+      <PageHeader eyebrow="Destek" title="İletişim" description="Soru, öneri ve hata bildirimleriniz için yazın." />
+
+      <Section flush>
+        <a
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("TestMetrix — ")}`}
+          className="flex items-start gap-4 border-b border-gray-200 p-5 transition-colors hover:bg-gray-50"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <Mail aria-hidden="true" className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block font-semibold text-gray-900">E-posta</span>
+            <span className="block break-all text-blue-600">{CONTACT_EMAIL}</span>
+            <span className="mt-1 block text-sm text-gray-500">Tıklayınca e-posta uygulamanız açılır.</span>
+          </span>
+        </a>
+        <div className="flex items-start gap-4 border-b border-gray-200 p-5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+            <Clock aria-hidden="true" className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block font-semibold text-gray-900">Yanıt süresi</span>
+            <span className="block text-sm text-gray-600">Mesajlar genellikle birkaç iş günü içinde yanıtlanır.</span>
+          </span>
         </div>
-
-        <Card className="bg-white/95 shadow-sm">
-          <CardContent className="p-6 space-y-5">
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-                "TestMetrix — "
-              )}`}
-              className="flex items-start gap-4 p-4 rounded-lg hover:bg-blue-50 transition-colors group"
-            >
-              <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                <Mail className="w-5 h-5 text-blue-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">E-posta</h2>
-                <p className="text-blue-600 break-all">{CONTACT_EMAIL}</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Tıklayarak doğrudan mail gönderebilirsiniz.
-                </p>
-              </div>
-            </a>
-
-            <div className="flex items-start gap-4 p-4">
-              <div className="p-3 bg-gray-100 rounded-lg">
-                <Clock className="w-5 h-5 text-gray-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Yanıt Süresi</h2>
-                <p className="text-gray-600">
-                  Mesajlar genellikle birkaç iş günü içinde yanıtlanır.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 p-4">
-              <div className="p-3 bg-gray-100 rounded-lg">
-                <MapPin className="w-5 h-5 text-gray-700" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Proje Hakkında</h2>
-                <p className="text-gray-600">
-                  TestMetrix, çoktan seçmeli sınavlar için madde ve test analizi
-                  yapan bir platformdur.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <div className="flex items-start gap-4 p-5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+            <Info aria-hidden="true" className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block font-semibold text-gray-900">Hata bildirirken</span>
+            <span className="block text-sm text-gray-600">
+              Mümkünse sorunlu Excel dosyasını (öğrenci adlarını çıkararak) ve gördüğünüz hata mesajını ekleyin.
+            </span>
+          </span>
+        </div>
+      </Section>
+    </PageContainer>
   );
 }

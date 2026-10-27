@@ -61,8 +61,8 @@ export function StudentTable({
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-gray-800">Öğrenci sonuçları</h2>
-      <p className="mt-0.5 mb-3 text-xs text-gray-500">
+      <h3 className="text-lg font-semibold text-gray-900">Öğrenci sonuçları</h3>
+      <p className="mt-1 mb-4 text-sm text-gray-500">
         Eşit puan alan öğrenciler eşit sıra alır.
       </p>
 
@@ -110,7 +110,7 @@ export function StudentTable({
       {rows.length > 10 && (
         <button
           onClick={() => setShowAll((prev) => !prev)}
-          className="mt-2 text-xs text-blue-600 hover:underline"
+          className="mt-3 text-sm font-medium text-blue-600 hover:underline"
         >
           {showAll ? "İlk 10'u göster" : `Tümünü göster (${rows.length} öğrenci)`}
         </button>

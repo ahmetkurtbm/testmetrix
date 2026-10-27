@@ -1,204 +1,185 @@
 "use client";
 
+import { ChevronDown, FolderOpen, Info, LogOut, Mail, Menu, Shield, Upload, User } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+import { signOutAction } from "@/app/actions/auth";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { useState } from "react";
-import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { signOutAction } from "@/app/actions/auth";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import type { Theme } from "@/lib/theme";
 
-/**
- * Oturum bilgisi artık prop olarak geliyor (bkz. (pages)/layout.tsx).
- * Eskiden bu bileşen `useEffect` içinde önce bir server action ile cookie'yi
- * okuyor, sonra backend'e `/user-authentication` isteği atıyordu: her sayfa
- * yüklemesinde iki fazladan gidiş-dönüş, üstelik koruma render'dan sonra.
- */
+/** Oturum bilgisi sunucudan prop olarak gelir (bkz. (pages)/layout.tsx). */
 type HeaderProps = {
   email: string;
   isAdmin: boolean;
+  theme: Theme;
 };
 
-const Header = ({ email, isAdmin }: HeaderProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const navLinks = (
-    <>
-      <Link
-        href="/folders"
-        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
-      >
-        Klasörler
-      </Link>
-      <Link
-        href="/excel-upload"
-        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
-      >
-        Dosya Yükle
-      </Link>
-      {isAdmin && (
-        <Link
-          href="/dashboard"
-          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          Yönetim
-        </Link>
-      )}
-    </>
+export function Brand({ tone = "dark" }: { tone?: "light" | "dark" }) {
+  return (
+    <span className="flex items-center gap-2.5">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+        <img src="/logo.png" alt="" className="h-6 w-auto" />
+      </span>
+      <span className={`font-display text-lg font-semibold tracking-tight ${tone === "dark" ? "text-white" : "text-gray-900"}`}>
+        TestMetrix
+      </span>
+    </span>
   );
+}
+
+const Header = ({ email, isAdmin, theme }: HeaderProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  const primary = [
+    { href: "/folders", label: "Klasörler", icon: FolderOpen },
+    { href: "/excel-upload", label: "Sınav yükle", icon: Upload },
+    ...(isAdmin ? [{ href: "/dashboard", label: "Yönetim", icon: Shield }] : []),
+  ];
+  const secondary = [
+    { href: "/information", label: "Hakkında", icon: Info },
+    { href: "/iletisim", label: "İletişim", icon: Mail },
+  ];
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`) || (href === "/folders" && pathname.startsWith("/excel-"));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="flex h-16 items-center px-4 sm:px-6">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Mobil menü */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="w-[300px] sm:w-[400px] bg-gray-50"
+    <header className="sticky top-0 z-50 w-full bg-[#0f1b3d] text-white dark:bg-[#0a1228]">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="Menüyü aç"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-white/80 hover:bg-white/10 hover:text-white md:hidden"
               >
-                <div className="mb-8 mt-2">
-                  <img src="/logo.png" alt="TestMetrix" className="h-12 w-auto mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-800">Menü</h2>
-                  <div className="h-1 w-20 bg-blue-600 mt-2 rounded-full" />
+                <Menu aria-hidden="true" className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex w-[300px] flex-col bg-surface p-0">
+              <SheetTitle className="sr-only">Menü</SheetTitle>
+              <div className="bg-[#0f1b3d] px-5 py-5 dark:bg-[#0a1228]">
+                <Brand />
+              </div>
+              <nav className="flex flex-1 flex-col gap-1 p-3" onClick={() => setIsOpen(false)}>
+                {[...primary, ...secondary].map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${
+                      isActive(href) ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Icon aria-hidden="true" className="h-4 w-4" />
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="space-y-3 border-t border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Tema</span>
+                  <ThemeSwitcher initial={theme} />
                 </div>
-
-                <nav
-                  className="flex flex-col space-y-1"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Link
-                    href="/folders"
-                    className="px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                <p className="truncate text-sm text-gray-500">{email}</p>
+                <form action={signOutAction}>
+                  <button
+                    type="submit"
+                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 text-sm font-medium text-red-600 hover:bg-red-50"
                   >
-                    Klasörler
-                  </Link>
-                  <Link
-                    href="/excel-upload"
-                    className="px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    Dosya Yükle
-                  </Link>
-                  {isAdmin && (
-                    <Link
-                      href="/dashboard"
-                      className="px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    >
-                      Yönetim
-                    </Link>
-                  )}
+                    <LogOut aria-hidden="true" className="h-4 w-4" />
+                    Çıkış yap
+                  </button>
+                </form>
+              </div>
+            </SheetContent>
+          </Sheet>
 
-                  <div className="my-4 border-t border-gray-200" />
+          <Link href="/folders" aria-label="TestMetrix ana sayfa">
+            <Brand />
+          </Link>
 
-                  <Link
-                    href="/information"
-                    className="px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    Hakkımızda
-                  </Link>
-                  <Link
-                    href="/iletisim"
-                    className="px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    İletişim
-                  </Link>
-                </nav>
+          <div className="ml-4 hidden h-16 items-stretch gap-1 md:flex">
+            {primary.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={isActive(href) ? "page" : undefined}
+                className={`flex items-center border-b-2 px-3 text-sm font-medium transition-colors ${
+                  isActive(href)
+                    ? "border-amber-400 text-white"
+                    : "border-transparent text-white/70 hover:text-white"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10 bg-blue-600 text-white">
-                      <span className="text-sm">{email[0]?.toUpperCase()}</span>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {email}
-                      </p>
-                      <form action={signOutAction}>
-                        <button
-                          type="submit"
-                          className="text-xs text-red-600 hover:text-red-700 font-medium"
-                        >
-                          Çıkış Yap
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            <Link href="/folders" className="flex items-center">
-              <img src="/logo.png" alt="TestMetrix" className="h-8 sm:h-10 w-auto" />
-            </Link>
-
-            <div className="hidden md:flex items-center gap-1">{navLinks}</div>
+        <div className="flex items-center gap-2">
+          <div className="hidden lg:flex">
+            {secondary.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`rounded-md px-3 py-2 text-sm transition-colors ${
+                  isActive(href) ? "text-white" : "text-white/70 hover:text-white"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+          <div className="hidden sm:block">
+            <ThemeSwitcher initial={theme} tone="dark" />
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-1">
-              <Link
-                href="/information"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2 text-white/90 hover:bg-white/10"
               >
-                Hakkımızda
-              </Link>
-              <Link
-                href="/iletisim"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                İletişim
-              </Link>
-            </div>
-
-            <div className="hidden md:block border-l h-6 mx-2 border-gray-200" />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 hover:bg-gray-50"
-                >
-                  <Avatar className="h-8 w-8 bg-blue-600 text-white">
-                    <span className="text-sm">{email[0]?.toUpperCase()}</span>
-                  </Avatar>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[200px] truncate">
-                    {email}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-2">
-                <DropdownMenuItem className="py-2" asChild>
-                  <Link href="/profile" className="flex items-center w-full">
-                    <span className="text-sm font-medium text-gray-700">
-                      Profili Görüntüle
-                    </span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="py-2" asChild>
-                  <form action={signOutAction} className="w-full">
-                    <button
-                      type="submit"
-                      className="flex items-center w-full text-sm font-medium text-red-600 hover:text-red-700"
-                    >
-                      Çıkış Yap
-                    </button>
-                  </form>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-sm font-semibold text-[#0f1b3d]">
+                  {email[0]?.toLocaleUpperCase("tr")}
+                </span>
+                <ChevronDown aria-hidden="true" className="hidden h-4 w-4 sm:block" />
+                <span className="sr-only">Hesap menüsü</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              <div className="px-2 py-1.5">
+                <p className="text-xs text-gray-500">Oturum açık</p>
+                <p className="truncate text-sm font-medium text-gray-900">{email}</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex w-full items-center gap-2">
+                  <User aria-hidden="true" className="h-4 w-4" />
+                  Profil
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <form action={signOutAction} className="w-full">
+                  <button type="submit" className="flex w-full items-center gap-2 text-red-600">
+                    <LogOut aria-hidden="true" className="h-4 w-4" />
+                    Çıkış yap
+                  </button>
+                </form>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </nav>
     </header>

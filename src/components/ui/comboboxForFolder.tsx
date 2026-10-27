@@ -46,9 +46,10 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-orange-500 text-white"
+          id="folder"
+          className="h-11 w-full justify-between bg-surface font-normal text-gray-900"
         >
-          <span className="truncate">{selectedName || "Klasör Seçin..."}</span>
+          <span className="truncate">{selectedName || "Klasör seçin…"}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

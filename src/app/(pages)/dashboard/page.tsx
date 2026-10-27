@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdminId } from "@/lib/session";
+import { PageContainer, PageHeader, Section } from "@/components/app/page";
 import { UserActions } from "./UserActions";
 
 /**
@@ -38,73 +39,50 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Kullanıcılar</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Kullanıcıların rollerini buradan yönetebilirsiniz.
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Yönetim"
+        title="Kullanıcılar"
+        description={`${users.length} kayıtlı kullanıcı. Rolleri buradan değiştirebilirsiniz.`}
+      />
 
-        <div className="overflow-x-auto rounded-lg shadow bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {["Ad", "E-posta", "Üniversite", "Klasör", "Sınav"].map((header) => (
-                  <th
-                    key={header}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
-                  >
-                    {header}
-                  </th>
-                ))}
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol / İşlem
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {user.name}
-                    {user.id === adminId && (
-                      <span className="ml-2 text-xs text-blue-600">(siz)</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user.university ?? "—"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user._count.folders}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {user._count.exams}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <UserActions
-                      userId={user.id}
-                      role={user.role}
-                      email={user.email}
-                      isSelf={user.id === adminId}
-                    />
-                  </td>
+      <Section flush>
+        {users.length === 0 ? (
+          <p className="px-5 py-10 text-center text-sm text-gray-500">Henüz kullanıcı yok.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <tr>
+                  {["Ad", "E-posta", "Kurum", "Klasör", "Sınav"].map((header) => (
+                    <th key={header} className="whitespace-nowrap px-5 py-3">
+                      {header}
+                    </th>
+                  ))}
+                  <th className="px-5 py-3 text-right">Rol / işlem</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {users.length === 0 && (
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Henüz kullanıcı yok.
-          </p>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-5 py-3 font-medium text-gray-900">
+                      {user.name}
+                      {user.id === adminId && <span className="ml-2 text-xs font-normal text-blue-600">(siz)</span>}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-gray-600">{user.email}</td>
+                    <td className="whitespace-nowrap px-5 py-3 text-gray-600">{user.university ?? "—"}</td>
+                    <td className="px-5 py-3 tabular-nums text-gray-600">{user._count.folders}</td>
+                    <td className="px-5 py-3 tabular-nums text-gray-600">{user._count.exams}</td>
+                    <td className="whitespace-nowrap px-5 py-3">
+                      <UserActions userId={user.id} role={user.role} email={user.email} isSelf={user.id === adminId} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
-    </div>
+      </Section>
+    </PageContainer>
   );
 }
