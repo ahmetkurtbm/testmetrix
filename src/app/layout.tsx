@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Work_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 
@@ -26,7 +26,16 @@ export const metadata: Metadata = {
   description:
     "Çoktan seçmeli sınavlar için madde ve test analizi: güçlük, ayırt edicilik, " +
     "KR-20/KR-21 güvenirlik katsayıları ve raporlama.",
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  applicationName: "TestMetrix",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  appleWebApp: { capable: true, title: "TestMetrix", statusBarStyle: "black-translucent" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f1b3d",
 };
 
 export default async function RootLayout({

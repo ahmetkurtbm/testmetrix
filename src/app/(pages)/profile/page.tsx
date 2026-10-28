@@ -1,6 +1,7 @@
 "use client";
 
 import { PageContainer, PageHeader, Section } from "@/components/app/page";
+import { InstallApp } from "@/components/InstallApp";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -240,6 +241,10 @@ export default function ProfilePage() {
             </div>
           </Section>
         )}
+
+        <Section title="Mobil uygulama" description="TestMetrix'i telefonunuzun ana ekranına ekleyin; kendi simgesiyle tam ekran açılır.">
+          <InstallApp />
+        </Section>
 
         <Section
           title={<span className="text-red-600">Hesabı sil</span>}

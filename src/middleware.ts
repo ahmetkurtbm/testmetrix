@@ -37,6 +37,6 @@ export const config = {
    * bozuktu.
    */
   matcher: [
-    "/((?!$|api/auth|api/register|api/password|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
+    "/((?!$|api/auth|api/register|api/password|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:png|jpe?g|gif|svg|webp|ico|xlsx|css|js)$).*)",
   ],
 };

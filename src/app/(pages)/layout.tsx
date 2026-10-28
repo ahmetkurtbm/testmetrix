@@ -13,10 +13,6 @@ import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 export const metadata: Metadata = {
   description:
     "Test ve madde analizi platformu — psikometrik istatistikler ve raporlama",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 /**

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { signOutAction } from "@/app/actions/auth";
+import { InstallApp } from "@/components/InstallApp";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import {
   DropdownMenu,
@@ -27,9 +28,7 @@ type HeaderProps = {
 export function Brand({ tone = "dark" }: { tone?: "light" | "dark" }) {
   return (
     <span className="flex items-center gap-2.5">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-        <img src="/logo.png" alt="" className="h-6 w-auto" />
-      </span>
+      <img src="/favicon.svg" alt="" className="h-8 w-8" />
       <span className={`font-display text-lg font-semibold tracking-tight ${tone === "dark" ? "text-white" : "text-gray-900"}`}>
         TestMetrix
       </span>
@@ -90,6 +89,10 @@ const Header = ({ email, isAdmin, theme }: HeaderProps) => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">Tema</span>
                   <ThemeSwitcher initial={theme} />
+                </div>
+                <div className="rounded-lg bg-gray-50 p-3">
+                  <p className="mb-2 text-sm font-medium text-gray-700">Telefona yükle</p>
+                  <InstallApp />
                 </div>
                 <p className="truncate text-sm text-gray-500">{email}</p>
                 <form action={signOutAction}>

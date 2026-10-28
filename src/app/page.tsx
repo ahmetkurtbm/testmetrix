@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { DemoAnalyzer } from "@/app/(components)/DemoAnalyzer";
 import { Brand } from "@/app/(components)/Header";
+import { InstallSection } from "@/components/InstallSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/session";
@@ -172,6 +173,8 @@ export default async function LandingPage() {
             ))}
           </div>
         </section>
+
+        <InstallSection />
 
         <section className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-[#0f1b3d] p-8 text-white dark:bg-[#0a1228] sm:flex-row sm:items-center sm:p-10">
           <div>
