@@ -6,6 +6,34 @@ puanlarını hesaplayıp grafik, Excel ve PDF raporları üretir.
 
 **Canlı demo:** [testmetrix.vercel.app](https://testmetrix.vercel.app/) (tanıtım sayfasında giriş yapmadan örnek sınavla denenebilir)
 
+## Hangi sorunu çözüyor
+
+**Sorun.** Öğretmenler sınav sonrası madde analizini ya hiç yapmaz ya da Excel'de elle formüllerle yapar. Hangi sorunun fazla zor ya da ayırt edici olmadığı, cevap anahtarında hata olup olmadığı, hangi çeldiricinin işe yaramadığı görülmez. Bu işi yapan istatistik programları pahalı ve öğretmen için tasarlanmamış.
+
+**Çözüm.** Öğretmen tek bir Excel dosyası yükler; saniyeler içinde şunları alır:
+- Her madde için güçlük, ayırt edicilik ve güvenirlik değerleri, sorunlu maddeler önem sırasına göre üstte.
+- "Cevap anahtarı hatalı olabilir" uyarısı ve doğrudan düzenleme bağlantısı.
+- Seçenek dağılımını üst ve alt grupta ayrı gösteren çeldirici paneli.
+- Öğrenci puanları, Z/T puanları ve paylaşılabilir PDF/Excel raporları.
+
+Tanıtım sayfasındaki örnek sınav giriş yapmadan denenebilir.
+
+### Teknik kararlar
+
+- **İstatistik hesapları saf fonksiyonlar** ve birim testleriyle doğrulanmış; hesaplanamayan durumlar (tek madde, sıfır varyans) sıfır değil "belirsiz" gösterilir.
+- **Sahiplik veri katmanında.** Her sorgu öğretmen kimliğiyle sınırlandırılır; başkasının sınavı "bulunamadı" döner.
+- **Excel sunucuda normalize edilir;** istemcinin gönderdiği biçime güvenilmez, hatalı anahtar satırı açık bir hatayla reddedilir.
+- **Uzun soluklu proje:** 2025'ten beri geliştiriliyor, 120'den fazla commit.
+
+## Ekran görüntüleri
+
+<!-- docs/screenshots/ klasörüne bu adlarla PNG ekleyin. -->
+| Sınav raporu | Madde haritası |
+|---|---|
+| ![Sınav raporu](docs/screenshots/rapor.png) | ![Madde haritası](docs/screenshots/madde-haritasi.png) |
+| **Çeldirici paneli** | **Tanıtım sayfası** |
+| ![Çeldirici paneli](docs/screenshots/celdirici.png) | ![Tanıtım sayfası](docs/screenshots/tanitim.png) |
+
 ## Özellikler
 
 - **Madde analizi:** p (güçlük) değeri, üst-alt %27 ayırt edicilik indeksi, biserial ve point-biserial korelasyon, madde güvenirlik indeksi

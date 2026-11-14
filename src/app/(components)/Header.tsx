@@ -50,7 +50,7 @@ const Header = ({ email, isAdmin, theme }: HeaderProps) => {
     { href: "/iletisim", label: "İletişim", icon: Mail },
   ];
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`) || (href === "/folders" && pathname.startsWith("/excel-"));
+    pathname === href || pathname.startsWith(`${href}/`) || (href === "/folders" && pathname.startsWith("/excel-") && pathname !== "/excel-upload");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#0f1b3d] text-white dark:bg-[#0a1228]">

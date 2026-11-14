@@ -1,12 +1,17 @@
-import { ArrowRight, BarChart3, Download, FileSpreadsheet, Gauge, ListChecks, Lock, Users } from "lucide-react";
+import { ArrowDown, Download, Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { DemoAnalyzer } from "@/app/(components)/DemoAnalyzer";
 import { Brand } from "@/app/(components)/Header";
+import { ItemWalk, type WalkStep } from "@/app/(components)/ItemWalk";
 import { InstallSection } from "@/components/InstallSection";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
+import { ANSWER_OPTIONS, analyzeExam, parseExamMatrix } from "@/features/analysis";
+import { SAMPLE_EXAM_MATRIX } from "@/features/analysis/sample-exam";
+import { classifyItems, interpretReliability } from "@/features/reports/quality";
+import { fmt } from "@/lib/format";
 import { getSessionUser } from "@/lib/session";
 import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 
@@ -14,50 +19,162 @@ import { THEME_COOKIE, parseTheme } from "@/lib/theme";
  * Public tanıtım sayfası. Oturum açıkken bile YÖNLENDİRME YAPILMAZ, yalnızca
  * düğme değişir: karşılıklı yönlendirme geçmişte `/login` ⇄ `/folders`
  * döngüsüne yol açmıştı.
+ *
+ * Sayfa örnek sınavı madde madde gezdirir. Gösterilen her sayı, demo ve
+ * kayıtlı sınav ekranında kullanılan analiz kodundan gelir; elle yazılmaz.
  */
 const METRICS = [
-  {
-    icon: Gauge,
-    title: "Madde güçlüğü ve ayırt edicilik",
-    body: "Her madde için p değeri, üst-alt %27 ayırt edicilik indeksi, biserial ve point-biserial korelasyonlar.",
-  },
-  {
-    icon: ListChecks,
-    title: "Güvenirlik katsayıları",
-    body: "KR-20 ve KR-21. Hesaplanamayan durumlar (tek madde, sıfır varyans) sıfır olarak değil, açıkça belirsiz gösterilir.",
-  },
-  {
-    icon: BarChart3,
-    title: "Çeldirici analizi",
-    body: "Madde başına seçenek dağılımı, üst ve alt grubun her şıkka nasıl dağıldığıyla birlikte.",
-  },
-  {
-    icon: Users,
-    title: "Öğrenci raporları",
-    body: "Puan, başarı yüzdesi, Z ve T puanları, sıralama. Eşit puanlar eşit sıra alır.",
-  },
-  {
-    icon: FileSpreadsheet,
-    title: "Betimsel istatistikler",
-    body: "Ortalama, ortanca, mod, ranj, varyans, standart sapma, çarpıklık, basıklık, frekans tablosu.",
-  },
-  {
-    icon: Download,
-    title: "Dışa aktarma",
-    body: "Altı ayrı Excel raporu ve grafikli bir PDF. Grafikler ekranda da incelenebilir.",
-  },
-];
+  ["Madde güçlüğü (p)", "Soruyu doğru yanıtlayanların oranı. 0,2'nin altı çok zor, 0,9'un üstü çok kolay sayılır."],
+  ["Ayırt edicilik", "Başarılı ve başarısız öğrencileri ne kadar ayırdığı: üst ve alt %27'lik grupların farkı, biserial ve point-biserial korelasyonla."],
+  ["Güvenirlik (KR-20, KR-21)", "Testin tutarlı ölçüp ölçmediği. Hesaplanamıyorsa sıfır değil, açıkça belirsiz yazılır."],
+  ["Çeldirici analizi", "Her şıkkı kimin seçtiği; üst ve alt grup ayrı ayrı."],
+  ["Öğrenci raporları", "Puan, başarı yüzdesi, Z ve T puanları, sıralama. Eşit puanlar eşit sıra alır."],
+  ["Betimsel istatistik", "Ortalama, ortanca, mod, ranj, varyans, standart sapma, çarpıklık, basıklık ve frekans tablosu."],
+] as const;
 
-const PREVIEW = [
-  { label: "KR-20", value: "0,84", hint: "Yüksek güvenirlik" },
-  { label: "Ortalama", value: "6,2", hint: "10 üzerinden" },
-  { label: "Başarı", value: "%62", hint: "12 öğrenci" },
-  { label: "Gözden geçir", value: "5", hint: "madde" },
-];
+function OptionBars({
+  questionNo,
+  correct,
+  percentages,
+}: {
+  questionNo: number;
+  correct: string;
+  percentages: Record<string, number>;
+}) {
+  const rows = ANSWER_OPTIONS.filter((o) => o !== "BOS" && (percentages[o] ?? 0) > 0);
+  return (
+    <figure className="max-w-md rounded-xl border border-gray-200 bg-surface p-4">
+      <figcaption className="text-sm font-medium text-gray-700">Madde {questionNo}: hangi şık seçildi?</figcaption>
+      <ul className="mt-3 space-y-2">
+        {rows.map((option) => (
+          <li key={option} className="grid grid-cols-[4.5rem_1fr_3rem] items-center gap-3 text-sm">
+            <span className="text-gray-900">
+              {option}
+              {option === correct ? <span className="ml-1 text-xs text-blue-600">✓ doğru</span> : null}
+            </span>
+            <span className="h-2 overflow-hidden rounded-full bg-gray-100">
+              <span
+                className={`block h-full rounded-full ${option === correct ? "bg-blue-600" : "bg-gray-300"}`}
+                style={{ width: `${percentages[option]}%` }}
+              />
+            </span>
+            <span className="text-right tabular-nums text-gray-600">%{fmt(percentages[option], 0)}</span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+  );
+}
 
 export default async function LandingPage() {
   const sessionUser = await getSessionUser();
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+
+  const data = parseExamMatrix(SAMPLE_EXAM_MATRIX);
+  const analysis = analyzeExam(data);
+  const items = classifyItems(analysis);
+  const kr20 = analysis.reliability.kr20;
+  const reliability = interpretReliability(kr20);
+  const byFlag = (flag: string) => items.filter((i) => i.flag === flag).map((i) => i.questionNo);
+  const hard = byFlag("tooHard");
+  const easy = byFlag("tooEasy");
+  const good = byFlag("ok");
+  const list = (nums: number[]) => nums.map((n) => `M${n}`).join(", ");
+  const hardest = items.filter((i) => i.flag === "tooHard").sort((a, b) => a.difficulty - b.difficulty)[0];
+  const hardestOptions = hardest ? analysis.options[hardest.questionNo - 1] : null;
+
+  const steps: WalkStep[] = [
+    {
+      id: "guvenirlik",
+      title: `Önce bütün: KR-20 ${fmt(kr20)}, ${reliability.label.toLocaleLowerCase("tr")}`,
+      body: (
+        <p>
+          {data.studentNames.length} öğrenci, {data.answerKey.length} soru. Güvenirlik testin bir bütün olarak tutarlı
+          ölçüp ölçmediğini söyler. Ama yüksek güvenirlik, her sorunun iyi olduğu anlamına gelmez.
+        </p>
+      ),
+      highlight: [],
+    },
+    ...(hard.length > 0 && hardest && hardestOptions
+      ? [
+          {
+            id: "zor",
+            title: `${list(hard)}: neredeyse kimse doğru yapamadı`,
+            body: (
+              <p>
+                {/* Sayıya ek getirmeyen kuruluş: "9'u", "%17'si" gibi ekler sayıya göre değişir. */}
+                Madde {hardest.questionNo} için doğru yanıt oranı yalnızca %{fmt(hardest.difficulty * 100, 0)}. Şıklara bakınca neden olduğu görünüyor: sınıfın büyük kısmı aynı yanlış şıkta toplanmış.
+                Konu işlenmemiş ya da soru yanıltıcı olabilir.
+              </p>
+            ),
+            highlight: hard,
+            evidence: (
+              <OptionBars
+                questionNo={hardest.questionNo}
+                correct={data.answerKey[hardest.questionNo - 1]}
+                percentages={hardestOptions.percentages}
+              />
+            ),
+          },
+        ]
+      : []),
+    ...(easy.length > 0
+      ? [
+          {
+            id: "kolay",
+            title: `${list(easy)}: herkes bildi, kimseyi ayırmadı`,
+            body: (
+              <p>
+                Neredeyse tüm sınıfın doğru yaptığı sorular puanı yükseltir ama öğrenciler arasında fark ortaya koymaz.
+                Isınma sorusu olarak kalabilirler; ölçme amacıyla yeniden yazılabilirler.
+              </p>
+            ),
+            highlight: easy,
+          },
+        ]
+      : []),
+    {
+      id: "iyi",
+      title: `${list(good)}: işini yapan sorular`,
+      body: (
+        <p>
+          Orta güçlükte ve başarılı öğrencilerin daha çok doğru yaptığı sorular. Haritada ortada ve yukarıda dururlar.
+          Raporda her madde için seçenek dağılımı, korelasyonlar ve öğrenci puanları da var.
+        </p>
+      ),
+      highlight: good,
+    },
+  ];
+
+  const intro = (
+    <div className="pt-6 lg:pt-16">
+      <h1 className="font-display text-4xl font-semibold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl [text-wrap:balance]">
+        Sınavınızdaki hangi soru işe yaramadı?
+      </h1>
+      <p className="mt-5 max-w-xl text-lg leading-relaxed text-gray-600 [text-wrap:pretty]">
+        Cevap anahtarını ve öğrenci yanıtlarını içeren Excel dosyasını yükleyin. TestMetrix her sorunun güçlüğünü,
+        ayırt ediciliğini ve testin güvenirliğini hesaplar; sorunlu maddeleri nedeniyle birlikte gösterir.
+      </p>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <a href="#deneyin">
+          <Button className="h-11 bg-amber-400 px-5 text-[#0f1b3d] hover:bg-amber-300">
+            Kendi dosyanızla deneyin
+            <ArrowDown aria-hidden="true" />
+          </Button>
+        </a>
+        <a href="/sample.xlsx" download>
+          <Button variant="outline" className="h-11 px-5">
+            <Download aria-hidden="true" />
+            Örnek dosya
+          </Button>
+        </a>
+      </div>
+      <p className="mt-10 hidden items-center gap-2 text-sm text-gray-500 lg:flex">
+        <ArrowDown aria-hidden="true" className="h-4 w-4" />
+        Örnek bir sınavı madde madde inceleyin
+      </p>
+    </div>
+  );
 
   const primaryCta = sessionUser ? (
     <Link href="/folders">
@@ -77,114 +194,80 @@ export default async function LandingPage() {
             <Brand />
           </Link>
           <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <ThemeSwitcher initial={theme} tone="dark" />
-            </div>
+            <ThemeSwitcher initial={theme} tone="dark" />
             {primaryCta}
           </div>
         </header>
+      </div>
 
-        <section className="mx-auto grid max-w-6xl gap-10 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center lg:pb-20 lg:pt-14">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-amber-400">Test ve madde analizi</p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Çoktan seçmeli sınavlarınızın ne ölçtüğünü görün
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/75">
-              Cevap anahtarını ve öğrenci yanıtlarını içeren Excel dosyasını yükleyin; hangi maddenin işe yaradığını,
-              hangisinin ayırt etmediğini ve testin ne kadar güvenilir olduğunu tek ekranda görün.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#deneyin">
-                <Button className="h-11 bg-amber-400 px-5 text-[#0f1b3d] hover:bg-amber-300">
-                  Giriş yapmadan deneyin
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              </a>
-              <a href="/sample.xlsx" download>
-                <Button variant="outline" className="h-11 border-white/25 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white">
-                  <Download aria-hidden="true" />
-                  Örnek dosya
-                </Button>
-              </a>
-            </div>
-          </div>
-
-          <div aria-hidden="true" className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-white/60">Örnek sınav · rapor özeti</p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {PREVIEW.map((item) => (
-                <div key={item.label} className="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
-                  <p className="text-sm text-white/60">{item.label}</p>
-                  <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{item.value}</p>
-                  <p className="mt-0.5 text-xs text-white/50">{item.hint}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex h-20 items-end gap-1.5 rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
-              {[1, 1, 1, 2, 1, 2, 1, 2, 1, 1].map((h, i) => (
-                <span key={i} className="flex-1 rounded-t bg-[#3987e5]" style={{ height: `${h * 45}%` }} />
-              ))}
-            </div>
-          </div>
+      <div className="border-b border-gray-200 bg-surface">
+        <section aria-labelledby="yuruyus" className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-10 lg:pb-24">
+          <h2 id="yuruyus" className="sr-only">
+            Örnek sınavın madde madde incelemesi
+          </h2>
+          <ItemWalk
+            intro={intro}
+            steps={steps}
+            points={items.map((i) => ({
+              questionNo: i.questionNo,
+              difficulty: i.difficulty,
+              discrimination: i.discrimination,
+              needsAttention: i.needsAttention,
+            }))}
+          />
         </section>
       </div>
 
-      <main className="mx-auto max-w-6xl space-y-16 px-4 py-14 sm:px-6">
-        <section className="grid gap-4 sm:grid-cols-3">
-          {[
-            ["1", "Excel yükleyin", "İlk satır cevap anahtarı, sonraki satırlar öğrenciler."],
-            ["2", "Analiz otomatik", "Madde ve test istatistikleri anında hesaplanır."],
-            ["3", "Raporu indirin", "Excel ve PDF çıktıları, grafiklerle birlikte."],
-          ].map(([step, title, body]) => (
-            <div key={step} className="rounded-xl border border-gray-200 bg-surface p-5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                {step}
-              </span>
-              <h2 className="mt-4 text-lg font-semibold text-gray-900">{title}</h2>
-              <p className="mt-1 text-sm text-gray-600">{body}</p>
-            </div>
-          ))}
-        </section>
-
-        <section id="deneyin" className="scroll-mt-6 space-y-5">
+      <main className="mx-auto max-w-6xl space-y-20 px-4 py-16 sm:px-6">
+        <section id="deneyin" aria-labelledby="deneyin-baslik" className="scroll-mt-6 space-y-5">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">Canlı deneme</p>
-            <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">Hemen deneyin</h2>
-            <p className="mt-2 flex items-center gap-2 text-gray-500">
+            <h2 id="deneyin-baslik" className="font-display text-3xl font-semibold tracking-tight text-gray-900">
+              Şimdi sizin sınavınız
+            </h2>
+            <p className="mt-2 max-w-2xl text-gray-600">
+              İlk satır cevap anahtarı (A–E), sonraki her satır bir öğrenci. Rapor, giriş yaptığınızda gördüğünüz ekranın
+              aynısıdır.
+            </p>
+            <p className="mt-2 flex items-center gap-2 text-sm text-gray-500">
               <Lock aria-hidden="true" className="h-4 w-4" />
-              Hesap gerekmez; rapor, giriş yaptığınızda gördüğünüz ekranın aynısıdır.
+              Hesap gerekmez; dosya bilgisayarınızdan çıkmaz.
             </p>
           </div>
           <DemoAnalyzer />
         </section>
 
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold tracking-tight text-gray-900">Neler hesaplanıyor?</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {METRICS.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="rounded-xl border border-gray-200 bg-surface p-5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                  <Icon aria-hidden="true" className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 font-semibold text-gray-900">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{body}</p>
+        <section aria-labelledby="olcutler-baslik" className="grid gap-8 lg:grid-cols-[18rem_1fr]">
+          <h2 id="olcutler-baslik" className="font-display text-3xl font-semibold tracking-tight text-gray-900">
+            Raporda neler var?
+          </h2>
+          <dl className="grid gap-x-10 gap-y-6 border-t border-gray-200 pt-6 sm:grid-cols-2">
+            {METRICS.map(([term, detail]) => (
+              <div key={term}>
+                <dt className="font-semibold text-gray-900">{term}</dt>
+                <dd className="mt-1 text-sm leading-relaxed text-gray-600">{detail}</dd>
               </div>
             ))}
-          </div>
+            <div className="sm:col-span-2">
+              <dt className="font-semibold text-gray-900">Dışa aktarma</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-gray-600">
+                Grafikli PDF rapor ve madde, öğrenci, seçenek ve test analizleri için Excel tabloları.
+              </dd>
+            </div>
+          </dl>
         </section>
 
         <InstallSection />
 
-        <section className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-[#0f1b3d] p-8 text-white dark:bg-[#0a1228] sm:flex-row sm:items-center sm:p-10">
+        <section className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-gray-200 bg-surface p-8 sm:flex-row sm:items-center sm:p-10">
           <div>
-            <h2 className="text-2xl font-semibold">Sınavlarınızı kaydetmek için hesap açın</h2>
-            <p className="mt-2 max-w-xl text-white/70">
-              E-posta ile ya da Google hesabınızla kaydolun. Sınavlar klasörlerde saklanır, sonradan düzenlenip yeniden raporlanabilir.
+            <h2 className="font-display text-2xl font-semibold text-gray-900">Sınavlarınızı saklamak için hesap açın</h2>
+            <p className="mt-2 max-w-xl text-gray-600">
+              E-posta ile ya da Google hesabınızla giriş yapın. Sınavlar klasörlerde saklanır, sonradan düzenlenip yeniden
+              raporlanabilir.
             </p>
           </div>
           <Link href={sessionUser ? "/folders" : "/register"}>
-            <Button className="h-11 bg-amber-400 px-6 text-[#0f1b3d] hover:bg-amber-300">
+            <Button className="h-11 bg-blue-600 px-6 text-white hover:bg-blue-700">
               {sessionUser ? "Panele git" : "Ücretsiz kaydol"}
             </Button>
           </Link>
@@ -192,7 +275,7 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
-        TestMetrix — test ve madde analizi platformu
+        TestMetrix · test ve madde analizi
       </footer>
     </div>
   );

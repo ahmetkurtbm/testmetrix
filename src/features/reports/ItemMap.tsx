@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import {
   CartesianGrid,
   Cell,
@@ -29,6 +29,13 @@ import { THRESHOLDS, type ItemQuality } from "./quality";
  * deuteranopide ayırt edilemediği için kullanılmadı; dikkat isteyen maddeler
  * turuncu ve ayrıca "M7" gibi doğrudan etiketli.
  */
+const WIDE_QUERY = "(min-width: 640px)";
+const subscribeWide = (onChange: () => void) => {
+  const media = window.matchMedia(WIDE_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+};
+
 export function ItemMap({
   items,
   selected,
@@ -38,9 +45,21 @@ export function ItemMap({
   selected: number | null;
   onSelect: (questionNo: number | null) => void;
 }) {
-  const data = useMemo(
-    () =>
-      items.map((item) => ({
+  const data = useMemo(() => {
+    // Aynı noktaya düşen maddeler tek etiket paylaşır ("M9, M10"); yoksa
+    // etiketler üst üste biner.
+    const groups = new Map<string, number[]>();
+    for (const item of items) {
+      if (!item.needsAttention) continue;
+      const key = `${item.difficulty.toFixed(3)}|${item.discrimination.toFixed(3)}`;
+      groups.set(key, [...(groups.get(key) ?? []), item.questionNo]);
+    }
+    const tagOf = (item: ItemQuality) => {
+      if (!item.needsAttention) return "";
+      const group = groups.get(`${item.difficulty.toFixed(3)}|${item.discrimination.toFixed(3)}`) ?? [];
+      return group[0] === item.questionNo ? group.map((n) => `M${n}`).join(", ") : "";
+    };
+    return items.map((item) => ({
         x: item.difficulty,
         y: item.discrimination,
         questionNo: item.questionNo,
@@ -49,11 +68,13 @@ export function ItemMap({
         needsAttention: item.needsAttention,
         // Etiket yalnızca sorunlu maddelerde; her noktaya yazı koymak
         // 50 maddelik sınavda okunmaz hale geliyor.
-        tag: item.needsAttention ? `M${item.questionNo}` : "",
-      })),
-    [items]
-  );
+        tag: tagOf(item),
+      }));
+  }, [items]);
 
+  // Dar ekranda "M31M10M19" gibi üst üste binen etiketler okunmuyor; orada
+  // etiket yerine daha büyük, dokunulabilir noktalar ve dikkat listesi var.
+  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE_QUERY).matches, () => true);
   const attention = items.filter((i) => i.needsAttention).length;
   const yMin = Math.min(-0.2, ...items.map((i) => i.discrimination));
 
@@ -61,8 +82,8 @@ export function ItemMap({
     <div>
       <h3 className="text-lg font-semibold text-gray-900">Madde haritası</h3>
       <p className="mt-1 mb-3 text-sm text-gray-500">
-        Yukarıda ve ortada kalan maddeler iyi. Bir noktaya tıklayarak seçenek
-        dağılımını görebilirsiniz.
+        Yukarıda ve ortada kalan maddeler iyi. Bir noktaya dokunarak seçenek
+        dağılımını açabilirsiniz.
       </p>
 
       {/* İki görsel sınıf var → efsane şart; renk tek başına kimlik taşımıyor */}
@@ -92,6 +113,7 @@ export function ItemMap({
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
             tick={{ fontSize: 12, fill: CHART.muted }}
+            tickFormatter={(value: number) => (Number.isInteger(value) ? String(value) : fmt(value))}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
             label={{
@@ -104,8 +126,10 @@ export function ItemMap({
           <YAxis
             type="number"
             dataKey="y"
-            domain={[yMin, "auto"]}
+            // Ayırt edicilik en fazla 1; "auto" üst sınır 1.05 gibi tuhaf bir değer üretiyordu.
+            domain={[yMin, 1]}
             tick={{ fontSize: 12, fill: CHART.muted }}
+            tickFormatter={(value: number) => (Number.isInteger(value) ? String(value) : fmt(value))}
             tickLine={false}
             axisLine={false}
             label={{
@@ -115,7 +139,7 @@ export function ItemMap({
               style: { fontSize: 12, fill: CHART.muted },
             }}
           />
-          <ZAxis range={[70, 70]} />
+          <ZAxis range={wide ? [70, 70] : [160, 160]} />
 
           {/* Eşik çizgileri */}
           <ReferenceLine x={THRESHOLDS.hardBelow} stroke={CHART.grid} />
@@ -166,12 +190,14 @@ export function ItemMap({
                 strokeWidth={selected === point.questionNo ? 3 : 1.5}
               />
             ))}
-            <LabelList
-              dataKey="tag"
-              position="right"
-              offset={8}
-              style={{ fontSize: 12, fill: CHART.secondary }}
-            />
+            {wide ? (
+              <LabelList
+                dataKey="tag"
+                position="right"
+                offset={8}
+                style={{ fontSize: 12, fill: CHART.secondary }}
+              />
+            ) : null}
           </Scatter>
         </ScatterChart>
       </ResponsiveContainer>

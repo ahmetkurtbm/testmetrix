@@ -69,6 +69,7 @@ export function ItemDifficultyArea({ items }: { items: ItemQuality[] }) {
           <XAxis
             dataKey="label"
             tick={{ fontSize: 12, fill: CHART.muted }}
+            tickFormatter={(value: number) => (Number.isInteger(value) ? String(value) : fmt(value))}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
             interval={data.length > 20 ? Math.ceil(data.length / 20) - 1 : 0}
@@ -77,6 +78,7 @@ export function ItemDifficultyArea({ items }: { items: ItemQuality[] }) {
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
             tick={{ fontSize: 12, fill: CHART.muted }}
+            tickFormatter={(value: number) => (Number.isInteger(value) ? String(value) : fmt(value))}
             tickLine={false}
             axisLine={false}
           />

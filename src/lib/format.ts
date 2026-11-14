@@ -6,7 +6,18 @@
  */
 export function fmt(value: number | null | undefined, digits = 2): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return "—";
-  return value.toFixed(digits);
+  return numberFormat(digits).format(value);
+}
+
+// Türkçe ondalık ayırıcı virgüldür ("0,84"); ekranda her sayı aynı biçimde görünsün.
+const formats = new Map<number, Intl.NumberFormat>();
+function numberFormat(digits: number) {
+  let format = formats.get(digits);
+  if (!format) {
+    format = new Intl.NumberFormat("tr-TR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    formats.set(digits, format);
+  }
+  return format;
 }
 
 /** Tarihi kısa Türkçe biçimde verir. */

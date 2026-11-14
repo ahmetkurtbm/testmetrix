@@ -53,7 +53,7 @@ export default function FolderAdder({ onCreated }: { onCreated?: () => void }) {
     <div className="flex gap-1 rounded">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>
+          <Button variant="outline">
             <FolderPlus className="w-4 h-4 mr-2" />
             Klasör ekle
           </Button>

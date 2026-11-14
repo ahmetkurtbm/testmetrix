@@ -70,6 +70,7 @@ export default function ExcelReports() {
       responses={detail.responses}
       title={exam.name}
       examDate={exam.createdAt}
+      editHref={`/excel-update?exam=${exam.id}`}
       meta={`${exam.studentCount} öğrenci · ${exam.questionCount} madde · ${new Date(exam.createdAt).toLocaleDateString("tr")}`}
       actions={
         <Link href={`/excel-update?exam=${exam.id}`}>
