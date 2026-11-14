@@ -182,7 +182,7 @@ export default function Folders() {
         }
         actions={
           <>
-            <Button onClick={() => router.push("/excel-upload")} className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button variant="outline" onClick={() => router.push("/excel-upload")}>
               <Upload aria-hidden="true" />
               Sınav yükle
             </Button>

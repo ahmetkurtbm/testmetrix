@@ -24,8 +24,7 @@ export function DistractorPanel({
   analysis: ExamAnalysis;
   answerKey: AnswerOption[];
   questionNo: number;
-  /** Panel kendi başına gösterildiğinde kapatma düğmesi; sheet içinde gerekmez. */
-  onClose?: () => void;
+  onClose: () => void;
 }) {
   const option = analysis.options[questionNo - 1];
   const correct = answerKey[questionNo - 1];
@@ -46,14 +45,12 @@ export function DistractorPanel({
             {option.groupSize > 0 ? ` (${option.groupSize}'şer öğrenci)` : ""}.
           </p>
         </div>
-        {onClose ? (
-          <button
-            onClick={onClose}
-            className="text-sm text-gray-500 hover:text-gray-900 shrink-0"
-          >
-            Kapat
-          </button>
-        ) : null}
+        <button
+          onClick={onClose}
+          className="text-sm text-gray-500 hover:text-gray-900 shrink-0"
+        >
+          Kapat
+        </button>
       </div>
 
       <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200">

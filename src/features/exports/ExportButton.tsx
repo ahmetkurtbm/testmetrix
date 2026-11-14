@@ -1,8 +1,6 @@
 "use client";
 
-import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 
 /**
@@ -25,8 +23,7 @@ export function ExportButton({
 
   return (
     <Button
-      variant="outline"
-      className="w-full flex justify-between items-center gap-2 text-sm"
+      className="w-full flex justify-between items-center group"
       disabled={busy}
       onClick={async () => {
         setBusy(true);
@@ -42,9 +39,13 @@ export function ExportButton({
       }}
     >
       <span className="truncate text-left">
-        {busy ? "Hazırlanıyor…" : failed ? `${label} oluşturulamadı, tekrar deneyin` : label}
+        {busy ? "Hazırlanıyor..." : failed ? `${label} — hata` : label}
       </span>
-      <FileSpreadsheet aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" />
+      <img
+        src="/download-icon.svg"
+        alt=""
+        className="w-4 h-4 ml-2 shrink-0 group-hover:scale-110 transition-transform"
+      />
     </Button>
   );
 }

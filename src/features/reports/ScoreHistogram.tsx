@@ -25,17 +25,11 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
   const { frequency, descriptive } = analysis;
   if (frequency.length === 0) return null;
 
-  // Hiç öğrencinin almadığı puanlar da eksende yer almalı; yoksa sütunlar eşit
-  // aralıkla dizilir ve dağılımın şekli bozulur (5…13, 15, 19 gibi boşluklar kaybolur).
-  const k = descriptive.questionCount;
-  const byScore = new Map(frequency.map((row) => [row.score, row]));
-  const data = Array.from({ length: k + 1 }, (_, score) => ({
-    score,
-    count: byScore.get(score)?.count ?? 0,
-    percentage: byScore.get(score)?.percentage ?? 0,
+  const data = frequency.map((row) => ({
+    score: row.score,
+    count: row.count,
+    percentage: row.percentage,
   }));
-  const step = k <= 12 ? 1 : k <= 30 ? 2 : 5;
-  const ticks = Array.from({ length: Math.floor(k / step) + 1 }, (_, i) => i * step);
 
   return (
     <div>
@@ -54,11 +48,7 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
           </defs>
           <CartesianGrid stroke={CHART.grid} vertical={false} />
           <XAxis
-            type="number"
             dataKey="score"
-            domain={[-0.5, k + 0.5]}
-            ticks={ticks}
-            tickFormatter={(value: number) => String(value)}
             tick={{ fontSize: 12, fill: CHART.muted }}
             tickLine={false}
             axisLine={{ stroke: CHART.axis }}
@@ -87,7 +77,7 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
           />
           {Number.isFinite(descriptive.mean) && descriptive.mean > 0 && (
             <ReferenceLine
-              x={descriptive.mean}
+              x={Math.round(descriptive.mean)}
               stroke={CHART.accent}
               strokeWidth={2}
               strokeDasharray="4 3"
@@ -103,7 +93,6 @@ export function ScoreHistogram({ analysis }: { analysis: ExamAnalysis }) {
             fill="url(#histogramFill)"
             radius={[6, 6, 0, 0]}
             maxBarSize={44}
-            minPointSize={0}
           />
         </BarChart>
       </ResponsiveContainer>
